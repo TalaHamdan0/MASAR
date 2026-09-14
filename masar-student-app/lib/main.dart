@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:masar_student_app/screens/career/my_cv_screen.dart';
 import 'theme/masar_theme.dart';
 import 'screens/career/skill_mirror_screen.dart';
 
