@@ -267,4 +267,115 @@ class MasarMockData {
       return null;
     }
   }
+    // ============================================================
+  // TRAINING
+  // ============================================================
+
+  static const String trainingCompany = 'Microsoft';
+
+  static const String trainingPosition = 'IT Support Intern';
+
+  static const String trainingLocation = 'عمان';
+
+  static const String trainingStartDate = '12/09/2026';
+
+  static const String trainingEndDate = '12/12/2026';
+
+  static const int trainingHours = 120;
+
+  static const double trainingProgress = 0.0;
+
+  // ============================================================
+  // ATTENDANCE
+  // ============================================================
+
+  static const List<Map<String, String>> attendance = [
+    {
+      'date': '23/09/2026',
+      'day': 'الأربعاء',
+      'status': 'حاضر',
+    },
+    {
+      'date': '22/09/2026',
+      'day': 'الثلاثاء',
+      'status': 'حاضر',
+    },
+    {
+      'date': '21/09/2026',
+      'day': 'الاثنين',
+      'status': 'غائب',
+    },
+    {
+      'date': '20/09/2026',
+      'day': 'الأحد',
+      'status': 'حاضر',
+    },
+  ];
+
+  // ============================================================
+  // WEEKLY REPORTS
+  // ============================================================
+
+  static const List<Map<String, dynamic>> weeklyReports = [
+    {
+      'week': 1,
+      'startDate': '12/09/2026',
+      'endDate': '18/09/2026',
+      'status': 'completed',
+    },
+    {
+      'week': 2,
+      'startDate': '19/09/2026',
+      'endDate': '25/09/2026',
+      'status': 'completed',
+    },
+    {
+      'week': 3,
+      'startDate': '26/09/2026',
+      'endDate': '02/10/2026',
+      'status': 'current',
+    },
+    {
+      'week': 4,
+      'startDate': '03/10/2026',
+      'endDate': '09/10/2026',
+      'status': 'locked',
+    },
+    {
+      'week': 5,
+      'startDate': '10/10/2026',
+      'endDate': '16/10/2026',
+      'status': 'locked',
+    },
+    {
+      'week': 6,
+      'startDate': '17/10/2026',
+      'endDate': '23/10/2026',
+      'status': 'locked',
+    },
+  ];
+
+  // ============================================================
+  // EVALUATION
+  // ============================================================
+
+  // هل مشرف الشركة قام بالتقييم؟
+  static const bool hasCompanyEvaluation = false;
+
+  // تقييم الشركة
+  static const Map<String, double> companyEvaluation = {
+    'الالتزام والانضباط': 4.5,
+    'جودة العمل': 4.0,
+    'التواصل': 4.5,
+    'العمل ضمن الفريق': 4.0,
+    'المبادرة والتعلم': 4.5,
+  };
+
+  // ملاحظات مشرف الشركة
+  static const String companyEvaluationNotes =
+      'أداء ممتاز والتزام واضح خلال فترة التدريب.';
+
+  // التقييم السري
+  // الطالب لا يستطيع الاطلاع عليه.
+  static const bool hasSecretEvaluation = false;
 }
