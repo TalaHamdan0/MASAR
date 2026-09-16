@@ -9,9 +9,7 @@ class ReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('تقاريري'),
-      ),
+      appBar: AppBar(title: const Text('تقاريري')),
 
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -81,9 +79,7 @@ class ReportsScreen extends StatelessWidget {
         ],
       ),
 
-      bottomNavigationBar: const AppBottomNavBar(
-  selectedIndex: 2,
-),
+      bottomNavigationBar: const AppBottomNavBar(selectedIndex: 2),
     );
   }
 
@@ -104,19 +100,19 @@ class ReportsScreen extends StatelessWidget {
           backgroundColor: completed
               ? MasarColors.lightGreen
               : current
-                  ? MasarColors.lightBlue
-                  : MasarColors.background,
+              ? MasarColors.lightBlue
+              : MasarColors.background,
           child: Icon(
             completed
                 ? Icons.check
                 : current
-                    ? Icons.edit_outlined
-                    : Icons.lock_outline,
+                ? Icons.edit_outlined
+                : Icons.lock_outline,
             color: completed
                 ? MasarColors.primaryGreen
                 : current
-                    ? MasarColors.primaryBlue
-                    : MasarColors.textSecondary,
+                ? MasarColors.primaryBlue
+                : MasarColors.textSecondary,
           ),
         ),
 
@@ -131,10 +127,7 @@ class ReportsScreen extends StatelessWidget {
         ),
 
         trailing: current
-            ? const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-              )
+            ? const Icon(Icons.arrow_forward_ios, size: 16)
             : null,
 
         onTap: current

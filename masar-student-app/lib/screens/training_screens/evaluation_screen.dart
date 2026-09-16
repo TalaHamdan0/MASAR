@@ -18,16 +18,12 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('التقييمات'),
-      ),
+      appBar: AppBar(title: const Text('التقييمات')),
 
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 430,
-            ),
+            constraints: const BoxConstraints(maxWidth: 430),
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -47,9 +43,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
         ),
       ),
 
-      bottomNavigationBar: const AppBottomNavBar(
-  selectedIndex: 1,
-),
+      bottomNavigationBar: const AppBottomNavBar(selectedIndex: 1),
     );
   }
 
@@ -59,8 +53,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
       child: InkWell(
         onTap: () {
           setState(() {
-            isCompanyEvaluationExpanded =
-                !isCompanyEvaluationExpanded;
+            isCompanyEvaluationExpanded = !isCompanyEvaluationExpanded;
           });
         },
         borderRadius: BorderRadius.circular(18),
@@ -86,23 +79,18 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'تقييم الشركة',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
 
                     const SizedBox(height: 4),
 
                     Text(
                       'تقييم المشرف في الشركة',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -146,33 +134,24 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'التقييم السري',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
 
                   const SizedBox(height: 4),
 
                   Text(
                     'تقييم سري من مشرف الشركة',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
             ),
 
-            const Icon(
-              Icons.lock,
-              color: MasarColors.textSecondary,
-              size: 20,
-            ),
+            const Icon(Icons.lock, color: MasarColors.textSecondary, size: 20),
           ],
         ),
       ),
@@ -199,9 +178,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
               Text(
                 'لسا ما تم التقييم من قبل المشرف.',
                 textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
           ),
@@ -214,42 +191,24 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'تفاصيل تقييم الشركة',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 18),
 
-            _ratingRow(
-              'الالتزام والانضباط',
-              4.5,
-            ),
+            _ratingRow('الالتزام والانضباط', 4.5),
 
-            _ratingRow(
-              'جودة العمل',
-              4.0,
-            ),
+            _ratingRow('جودة العمل', 4.0),
 
-            _ratingRow(
-              'التواصل',
-              4.5,
-            ),
+            _ratingRow('التواصل', 4.5),
 
-            _ratingRow(
-              'العمل ضمن الفريق',
-              4.0,
-            ),
+            _ratingRow('العمل ضمن الفريق', 4.0),
 
-            _ratingRow(
-              'المبادرة والتعلم',
-              4.5,
-            ),
+            _ratingRow('المبادرة والتعلم', 4.5),
 
             const SizedBox(height: 12),
 
@@ -258,27 +217,21 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: MasarColors.background,
-                borderRadius:
-                    BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'ملاحظات المشرف',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
 
                   const SizedBox(height: 8),
 
                   Text(
                     'ملاحظات المشرف ستظهر هنا.',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -289,10 +242,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
     );
   }
 
-  Widget _ratingRow(
-    String title,
-    double rating,
-  ) {
+  Widget _ratingRow(String title, double rating) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
@@ -312,15 +262,12 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
 
           Expanded(
             child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
                 value: rating / 5,
                 minHeight: 8,
-                backgroundColor:
-                    MasarColors.border,
-                color:
-                    MasarColors.primaryBlue,
+                backgroundColor: MasarColors.border,
+                color: MasarColors.primaryBlue,
               ),
             ),
           ),
@@ -333,8 +280,7 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
               textAlign: TextAlign.right,
               style: const TextStyle(
                 fontSize: 13,
-                color:
-                    MasarColors.textSecondary,
+                color: MasarColors.textSecondary,
               ),
             ),
           ),

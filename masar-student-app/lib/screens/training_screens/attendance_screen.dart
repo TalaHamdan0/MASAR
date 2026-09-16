@@ -32,11 +32,8 @@ class AttendanceScreen extends StatelessWidget {
           _attendanceList(context),
         ],
       ),
-       bottomNavigationBar: const AppBottomNavBar(
-    selectedIndex: 1,
-  ),
-);
-    
+      bottomNavigationBar: const AppBottomNavBar(selectedIndex: 1),
+    );
   }
 
   // =========================
@@ -147,11 +144,7 @@ class AttendanceScreen extends StatelessWidget {
           const CircleAvatar(
             radius: 18,
             backgroundColor: MasarColors.primaryGreen,
-            child: Icon(
-              Icons.check,
-              color: Colors.white,
-              size: 20,
-            ),
+            child: Icon(Icons.check, color: Colors.white, size: 20),
           ),
 
           const SizedBox(width: 10),
@@ -163,9 +156,9 @@ class AttendanceScreen extends StatelessWidget {
                 Text(
                   'تم تسجيل حضورك اليوم',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: MasarColors.darkGreen,
-                        fontSize: 14,
-                      ),
+                    color: MasarColors.darkGreen,
+                    fontSize: 14,
+                  ),
                 ),
                 Text(
                   'الأربعاء، 23 سبتمبر 2026',
@@ -186,15 +179,9 @@ class AttendanceScreen extends StatelessWidget {
   Widget _sectionTitle(BuildContext context, String title) {
     return Row(
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
         const Spacer(),
-        TextButton(
-          onPressed: () {},
-          child: const Text('عرض الكل'),
-        ),
+        TextButton(onPressed: () {}, child: const Text('عرض الكل')),
       ],
     );
   }
@@ -213,10 +200,7 @@ class AttendanceScreen extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 4,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         child: Column(
           children: attendance.map((day) {
             final isPresent = day.$3;
@@ -238,9 +222,9 @@ class AttendanceScreen extends StatelessWidget {
               title: Text(
                 day.$1,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: MasarColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: MasarColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
 
               subtitle: Text(

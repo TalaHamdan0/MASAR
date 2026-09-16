@@ -4,10 +4,7 @@ import '../../../theme/masar_theme.dart';
 class WeeklyReportScreen extends StatefulWidget {
   final int week;
 
-  const WeeklyReportScreen({
-    super.key,
-    required this.week,
-  });
+  const WeeklyReportScreen({super.key, required this.week});
 
   @override
   State<WeeklyReportScreen> createState() => _WeeklyReportScreenState();
@@ -28,9 +25,7 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
     if (tasksController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'يرجى كتابة المهام التي أنجزتها هذا الأسبوع',
-          ),
+          content: Text('يرجى كتابة المهام التي أنجزتها هذا الأسبوع'),
         ),
       );
       return;
@@ -38,9 +33,7 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'تم إرسال التقرير بنجاح ✓',
-        ),
+        content: Text('تم إرسال التقرير بنجاح ✓'),
         backgroundColor: MasarColors.success,
       ),
     );
@@ -51,18 +44,12 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'تقرير الأسبوع ${widget.week}',
-        ),
-      ),
+      appBar: AppBar(title: Text('تقرير الأسبوع ${widget.week}')),
 
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 430,
-            ),
+            constraints: const BoxConstraints(maxWidth: 430),
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -147,18 +134,14 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
                 children: [
                   Text(
                     'تقرير الأسبوع ${widget.week}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
 
                   const SizedBox(height: 4),
 
                   Text(
                     'قم بتسجيل المهام التي أنجزتها خلال هذا الأسبوع',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
@@ -178,18 +161,14 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
           children: [
             Text(
               'المهام الأسبوعية',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
 
             const SizedBox(height: 6),
 
             Text(
               'اكتب المهام التي أنجزتها خلال هذا الأسبوع',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
 
             const SizedBox(height: 12),
@@ -223,18 +202,14 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
           children: [
             Text(
               'ملاحظات إضافية',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
 
             const SizedBox(height: 6),
 
             Text(
               'هذا الحقل اختياري',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
 
             const SizedBox(height: 12),
@@ -244,8 +219,7 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
               maxLines: 5,
               textDirection: TextDirection.rtl,
               decoration: const InputDecoration(
-                hintText:
-                    'اكتب أي ملاحظات أو صعوبات واجهتك...',
+                hintText: 'اكتب أي ملاحظات أو صعوبات واجهتك...',
                 alignLabelWithHint: true,
               ),
             ),
@@ -258,12 +232,8 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
   Widget _submitButton() {
     return FilledButton.icon(
       onPressed: _submitReport,
-      icon: const Icon(
-        Icons.send_outlined,
-      ),
-      label: const Text(
-        'إرسال التقرير',
-      ),
+      icon: const Icon(Icons.send_outlined),
+      label: const Text('إرسال التقرير'),
     );
   }
 }
