@@ -3,6 +3,8 @@ import 'package:masar_student_app/core/models/skill_model.dart';
 import 'package:masar_student_app/core/models/career_path_model.dart';
 import 'package:masar_student_app/core/models/soft_skill_model.dart';
 import 'package:masar_student_app/core/models/certificate_model.dart';
+import 'package:masar_student_app/core/models/intenrship_opportunity_model.dart';
+
 
 class MasarMockData {
   // ============================================================
@@ -378,4 +380,98 @@ class MasarMockData {
   // التقييم السري
   // الطالب لا يستطيع الاطلاع عليه.
   static const bool hasSecretEvaluation = false;
+
+
+  // ============================================================
+  // CREATE ACCOUNT
+  // ============================================================
+
+  static final List<String> universities = [
+    'University of Jordan',
+    'Jordan University of Science and Technology',
+    'Hashemite University',
+  ];
+
+  static final List<String> majors = [
+    'Computer Science',
+    'Software Engineering',
+    'Computer Information Systems',
+    'Information Technology',
+  ];
+
+  static final List<String> academicYears = [
+    '1st Year',
+    '2nd Year',
+    '3rd Year',
+    '4th Year',
+  ];
+
+  static final List<InternshipOpportunity> internshipOpportunities = [
+    InternshipOpportunity(
+      id: 'intern_01',
+      title: 'Data Analyst',
+      companyName: 'ABC Company',
+      matchPercentage: 91,
+    ),
+  ];
+
+  static const String aboutMe =
+    'Passionate data analyst with a strong background in data visualization, problem solving and continous learning.';
+
+static final List<Map<String, String>> projects = [
+  {
+    'title': 'Sales Dashboard',
+    'description':
+        'Interactive dashboard for analyzing sales data and generating useful insights.',
+  },
+  {
+    'title': 'Customer Prediction',
+    'description':
+        'A data analysis project focused on predicting customer behavior.',
+  },
+];
+
+// =========================
+// Notifications
+// =========================
+
+static final List<Map<String, dynamic>> notifications = [
+  {
+    'title': 'فرصة تدريب جديدة',
+    'message':
+        'لديك فرصة تدريب مناسبة لمسارك المهني بنسبة تطابق 87%.',
+    'time': 'منذ ساعتين',
+    'type': 'opportunity',
+  },
+  {
+    'title': 'تحديث الطلب',
+    'message':
+        'تم تحديث حالة طلب التدريب الخاص بك.',
+    'time': 'منذ 5 ساعات',
+    'type': 'application',
+  },
+  {
+    'title': 'تحديث المسار',
+    'message':
+        'تم تحديث خطتك التطويرية بناءً على مهاراتك الحالية.',
+    'time': 'منذ يوم',
+    'type': 'roadmap',
+  },
+  {
+    'title': 'تذكير بالتدريب',
+    'message':
+        'لا تنسَ إرسال تقرير التدريب الأسبوعي غدًا.',
+    'time': 'منذ يومين',
+    'type': 'training',
+  },
+];
+
+static const String universityName =
+    'جامعة العلوم الإسلامية العالمية';
+
+  // =========================
+  // Current Student
+  // =========================
+
+  static Student? currentStudent;
 }

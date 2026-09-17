@@ -6,6 +6,7 @@ import 'package:masar_student_app/core/models/soft_skill_model.dart';
 import 'package:masar_student_app/core/models/career_path_model.dart';
 import 'career_readiness_screen.dart';
 import 'my_cv_screen.dart';
+import 'package:masar_student_app/core/widgets/app_bottom_nav_bar.dart';
 
 class SkillMirrorScreen extends StatefulWidget {
   // نتيجة الاختبار
@@ -312,81 +313,9 @@ class _SkillMirrorScreenState
         // =========================
         // BOTTOM NAVIGATION
         // =========================
-        bottomNavigationBar:
-            BottomNavigationBar(
-          currentIndex: 1,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor:
-              MasarColors.primaryBlue,
-          unselectedItemColor:
-              MasarColors.textSecondary,
-
-          onTap: (index) {
-            if (index == 0) {
-              return;
-            }
-
-            if (index == 1) {
-              return;
-            }
-
-            if (index == 2) {
-              return;
-            }
-
-            if (index == 3) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const MyCvScreen(),
-                ),
-              );
-              return;
-            }
-
-            if (index == 4) {
-              return;
-            }
-          },
-
-          items: const [
-            BottomNavigationBarItem(
-              icon:
-                  Icon(Icons.home_outlined),
-              activeIcon:
-                  Icon(Icons.home),
-              label: 'الرئيسية',
-            ),
-            BottomNavigationBarItem(
-              icon:
-                  Icon(Icons.map_outlined),
-              activeIcon:
-                  Icon(Icons.map),
-              label: 'خارطة الطريق',
-            ),
-            BottomNavigationBarItem(
-              icon:
-                  Icon(Icons.work_outline),
-              activeIcon:
-                  Icon(Icons.work),
-              label: 'الفرص',
-            ),
-            BottomNavigationBarItem(
-              icon:
-                  Icon(Icons.badge_outlined),
-              activeIcon:
-                  Icon(Icons.badge),
-              label: 'الملف المهني',
-            ),
-            BottomNavigationBarItem(
-              icon:
-                  Icon(Icons.person_outline),
-              activeIcon:
-                  Icon(Icons.person),
-              label: 'الملف الشخصي',
-            ),
-          ],
+        
+        bottomNavigationBar: const AppBottomNavBar(
+          selectedIndex: 1,
         ),
       ),
     );

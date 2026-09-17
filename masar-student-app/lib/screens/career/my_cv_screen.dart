@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 
 import 'package:masar_student_app/theme/masar_theme.dart';
 import 'package:masar_student_app/data/masar_mock_data.dart';
+import 'package:masar_student_app/core/widgets/app_bottom_nav_bar.dart';
 
 class MyCvScreen extends StatelessWidget {
   const MyCvScreen({super.key});
@@ -995,6 +996,15 @@ class MyCvScreen extends StatelessWidget {
           ],
         ),
       ),
+
+      // =========================
+      // BOTTOM NAVIGATION
+      // =========================      
+
+      bottomNavigationBar: const AppBottomNavBar(
+        selectedIndex: 3,
+
+),
     );
   }
 
