@@ -4,6 +4,7 @@ import '../../theme/masar_theme.dart';
 import '../../screens/profile/home_screen.dart';
 import '../../screens/career/skill_mirror_screen.dart';
 import '../../screens/career/my_cv_screen.dart';
+import '../../screens/profile/profile_screen.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   final int selectedIndex;
@@ -135,7 +136,14 @@ class AppBottomNavBar extends StatelessWidget {
 
             case 4:
               // الملف الشخصي
-              // لاحقًا: نضيف شاشة ProfileScreen
+              if (selectedIndex != 4) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              }
               break;
           }
         },

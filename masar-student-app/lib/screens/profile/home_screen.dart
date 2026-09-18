@@ -3,24 +3,20 @@ import 'package:masar_student_app/data/masar_mock_data.dart';
 import 'package:masar_student_app/theme/masar_theme.dart';
 import 'package:masar_student_app/core/widgets/app_bottom_nav_bar.dart';
 import 'package:masar_student_app/screens/profile/notifications_screen.dart';
-//import 'package:masar_student_app/screens/career/skill_mirror_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final student =
-        MasarMockData.currentStudent;
+    final profile = MasarMockData.profileMockData;
 
-    final internship =
-        MasarMockData
-            .internshipOpportunities
-            .first;
 
-    final careerPath = MasarMockData.careerPaths.where(
-      (path) => path.id == student?.careerPathId,
-    ).firstOrNull;
+
+final internship =
+    MasarMockData
+        .internshipOpportunities
+        .first;
 
     return Scaffold(
       backgroundColor:
@@ -58,10 +54,10 @@ class HomeScreen extends StatelessWidget {
                         children: [
 
                           Text(
-                            'مرحبًا بك في مسار، ${student?.name ?? ''}',
+                            'مرحبًا بك في مسار، ${profile['name']}',
                             style:
                                 const TextStyle(
-                              fontSize: 27,
+                              fontSize: 24,
                               fontWeight:
                                   FontWeight.bold,
                               color:
@@ -74,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                           ),
 
                           Text(
-                            'مسارك المهني: ${careerPath?.title ?? 'غير محدد'}',
+                            'مسارك المهني: ${profile['careerPath']}',
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

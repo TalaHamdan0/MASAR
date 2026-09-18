@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:masar_student_app/theme/masar_theme.dart';
 import 'create_account_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -258,22 +259,15 @@ void _login() {
 
                       TextButton(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'استرجاع كلمة المرور سيتم ربطه لاحقًا.',
-                              ),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ForgotPasswordScreen(),
                             ),
                           );
                         },
-
                         child: const Text(
-                          'هل نسيت كلمة المرور؟',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: MasarColors.primaryBlue,
-                          ),
+                          'نسيت كلمة المرور؟',
                         ),
                       ),
                     ],

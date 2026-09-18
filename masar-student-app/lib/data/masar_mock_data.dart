@@ -469,6 +469,19 @@ static final List<Map<String, dynamic>> notifications = [
 static const String universityName =
     'جامعة العلوم الإسلامية العالمية';
 
+static final Map<String, dynamic> profileMockData = {
+  'name': 'ليان أحمد',
+  'universityId': '20221001',
+  'email': 'layan.ahmad@masar-demo.com',
+  'university': 'جامعة العلوم الإسلامية العالمية',
+  'major': 'Computer Science',
+  'academicYear': '4th Year',
+  'gpa': '3.2',
+  'careerPath': 'data_analyst',
+};
+
+static bool profileVisibleToCompanies = true;
+
   // =========================
   // Current Student
   // =========================
