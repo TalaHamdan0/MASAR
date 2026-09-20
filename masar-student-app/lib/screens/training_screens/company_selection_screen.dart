@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'saved_training_screen.dart';
 import '../../../theme/masar_theme.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import 'company_details_screen.dart';
@@ -7,200 +8,482 @@ class SelectCompanyScreen extends StatefulWidget {
   const SelectCompanyScreen({super.key});
 
   @override
-  State<SelectCompanyScreen> createState() => _SelectCompanyScreenState();
+  State<SelectCompanyScreen> createState() =>
+      _SelectCompanyScreenState();
 }
 
-class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
-  final TextEditingController _searchController = TextEditingController();
+class _SelectCompanyScreenState
+    extends State<SelectCompanyScreen> {
+  final TextEditingController _searchController =
+      TextEditingController();
 
-  // الألوان الخاصة بهوية تطبيق مسار
-  static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color lightPurpleBg = Color(0xFFF3F0FF);
-  static const Color borderColor = Color(0xFFE2E8F0);
-  static const Color textDark = Color(0xFF1E293B);
-  static const Color textMuted = Color(0xFF64748B);
+  // ============================================================
+  // SEARCH STATE
+  // ============================================================
 
-  // قائمة الشركات المطبقة في التصميم
+  bool _isSearching = false;
+
+  // ============================================================
+  // FILTER VALUES
+  // ============================================================
+
+  String? _selectedSpecialization;
+  String? _selectedTrainingTrack;
+  String? _selectedLocation;
+
+  // ============================================================
+  // FILTER OPTIONS
+  // ============================================================
+
+  final List<String> _specializations = const [
+    'علم الحاسوب',
+    'هندسة البرمجيات',
+    'علم البيانات',
+    'نظم المعلومات',
+    'هندسة الحاسوب',
+    'الأمن السيبراني',
+  ];
+
+  final List<String> _trainingTracks = const [
+    'Database',
+    'Data Analysis',
+    'Artificial Intelligence',
+    'Machine Learning',
+    'Web Development',
+    'Software Development',
+    'Cybersecurity',
+    'Mobile Development',
+  ];
+
+  final List<String> _locations = const [
+    'عمّان',
+    'إربد',
+    'الزرقاء',
+    'البلقاء',
+    'مادبا',
+    'الكرك',
+    'الطفيلة',
+    'معان',
+    'العقبة',
+    'جرش',
+    'عجلون',
+    'المفرق',
+  ];
+
+  // ============================================================
+  // COMPANIES MOCK DATA
+  // ============================================================
+
   final List<Map<String, dynamic>> _companies = const [
     {
       'name': 'Meta',
       'slogan': 'شريك في بناء المستقبل',
       'interns': '+50 متدرب',
       'category': 'تقنية',
-      'location': 'عمان',
+      'location': 'عمّان',
       'icon': Icons.all_inclusive,
       'iconColor': Color(0xFF0081FB),
       'bgColor': Colors.white,
+      'specializations': [
+        'علم الحاسوب',
+        'هندسة البرمجيات',
+        'علم البيانات',
+        'هندسة الحاسوب',
+      ],
+      'trainingTracks': [
+        'Data Analysis',
+        'Artificial Intelligence',
+        'Machine Learning',
+        'Software Development',
+        'Web Development',
+      ],
     },
     {
       'name': 'Orange',
       'slogan': 'فرص أكبر لغد أذكى',
       'interns': '+30 متدرب',
       'category': 'اتصالات',
-      'location': 'عمان',
+      'location': 'عمّان',
       'icon': Icons.square,
       'iconColor': Color(0xFFFF6600),
       'bgColor': Color(0xFFFF6600),
+      'specializations': [
+        'علم الحاسوب',
+        'هندسة البرمجيات',
+        'هندسة الحاسوب',
+        'نظم المعلومات',
+      ],
+      'trainingTracks': [
+        'Database',
+        'Software Development',
+        'Web Development',
+        'Cybersecurity',
+        'Mobile Development',
+      ],
     },
     {
       'name': 'Microsoft',
       'slogan': 'تمكين كل شخص وكل مؤسسة',
       'interns': '+40 متدرب',
       'category': 'تقنية',
-      'location': 'عمان',
+      'location': 'عمّان',
       'isMicrosoft': true,
       'bgColor': Colors.white,
+      'specializations': [
+        'علم الحاسوب',
+        'هندسة البرمجيات',
+        'علم البيانات',
+        'هندسة الحاسوب',
+        'نظم المعلومات',
+      ],
+      'trainingTracks': [
+        'Artificial Intelligence',
+        'Machine Learning',
+        'Data Analysis',
+        'Software Development',
+        'Web Development',
+      ],
     },
     {
       'name': 'البنك العربي',
       'slogan': 'معاً نحو مستقبل أفضل',
       'interns': '+25 متدرب',
       'category': 'بنوك وخدمات مالية',
-      'location': 'عمان',
+      'location': 'عمّان',
       'isArabBank': true,
       'bgColor': Color(0xFF003366),
+      'specializations': [
+        'علم الحاسوب',
+        'نظم المعلومات',
+        'علم البيانات',
+        'هندسة الحاسوب',
+      ],
+      'trainingTracks': [
+        'Database',
+        'Data Analysis',
+        'Cybersecurity',
+        'Software Development',
+      ],
     },
     {
       'name': 'Zain',
       'slogan': 'عالم أجمل ممكن',
       'interns': '+35 متدرب',
       'category': 'اتصالات',
-      'location': 'عمان',
+      'location': 'عمّان',
       'isZain': true,
       'bgColor': Colors.white,
+      'specializations': [
+        'علم الحاسوب',
+        'هندسة البرمجيات',
+        'هندسة الحاسوب',
+        'نظم المعلومات',
+      ],
+      'trainingTracks': [
+        'Database',
+        'Software Development',
+        'Web Development',
+        'Mobile Development',
+        'Cybersecurity',
+      ],
     },
     {
       'name': 'amazon',
       'slogan': 'ابتكار اليوم من أجل غد أفضل',
       'interns': '+40 متدرب',
       'category': 'تقنية',
-      'location': 'عمان / عن بعد',
+      'location': 'عمّان / عن بعد',
       'isAmazon': true,
       'bgColor': Colors.white,
+      'specializations': [
+        'علم الحاسوب',
+        'هندسة البرمجيات',
+        'علم البيانات',
+        'هندسة الحاسوب',
+      ],
+      'trainingTracks': [
+        'Database',
+        'Data Analysis',
+        'Artificial Intelligence',
+        'Machine Learning',
+        'Software Development',
+        'Web Development',
+      ],
     },
   ];
 
+  // ============================================================
+  // INIT
+  // ============================================================
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(() {
+      if (!mounted) return;
+
+      setState(() {});
+    });
+  }
+
+  // ============================================================
+  // DISPOSE
+  // ============================================================
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // ============================================================
+  // FILTERED COMPANIES
+  // ============================================================
+
+  List<Map<String, dynamic>> get _filteredCompanies {
+    if (_isSearching &&
+        _searchController.text.trim().isEmpty) {
+      return [];
+    }
+
+    final String searchText =
+        _searchController.text.trim().toLowerCase();
+
+    return _companies.where((company) {
+      // --------------------------------------------------------
+      // SEARCH
+      // --------------------------------------------------------
+
+      final String companyName =
+          company['name'].toString().toLowerCase();
+
+      final String slogan =
+          company['slogan'].toString().toLowerCase();
+
+      final bool matchesSearch =
+          !_isSearching ||
+          searchText.isEmpty ||
+          companyName.contains(searchText) ||
+          slogan.contains(searchText);
+
+      // --------------------------------------------------------
+      // SPECIALIZATION
+      // --------------------------------------------------------
+
+      final List<dynamic> specializations =
+          company['specializations'] ?? [];
+
+      final bool matchesSpecialization =
+          _selectedSpecialization == null ||
+          specializations.contains(
+            _selectedSpecialization,
+          );
+
+      // --------------------------------------------------------
+      // TRAINING TRACK
+      // --------------------------------------------------------
+
+      final List<dynamic> trainingTracks =
+          company['trainingTracks'] ?? [];
+
+      final bool matchesTrainingTrack =
+          _selectedTrainingTrack == null ||
+          trainingTracks.contains(
+            _selectedTrainingTrack,
+          );
+
+      // --------------------------------------------------------
+      // LOCATION
+      // --------------------------------------------------------
+
+      final String companyLocation =
+          company['location'].toString();
+
+      final bool matchesLocation =
+          _selectedLocation == null ||
+          companyLocation.contains(
+            _selectedLocation!,
+          );
+
+      return matchesSearch &&
+          matchesSpecialization &&
+          matchesTrainingTrack &&
+          matchesLocation;
+    }).toList();
+  }
+
+  // ============================================================
+  // ACTIVE FILTERS
+  // ============================================================
+
+  bool get _hasActiveFilters {
+    return _selectedSpecialization != null ||
+        _selectedTrainingTrack != null ||
+        _selectedLocation != null;
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFC),
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // الهيدر الأعلى
-                    _buildHeader(),
-                    const SizedBox(height: 20),
+    final companies = _filteredCompanies;
 
-                    // العنوان والوصف
-                    _buildTitleSection(),
-                    const SizedBox(height: 16),
+    return Scaffold(
+      backgroundColor: MasarColors.background,
 
-                    // حقل البحث
-                    _buildSearchBar(),
-                    const SizedBox(height: 14),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 480,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                20,
+                16,
+                20,
+              ),
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  _buildTitleSection(),
 
-                    // أزرار الفلترة
-                    _buildFilterSection(),
-                    const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
-                    // قائمة الشركات
+                  // ==================================================
+                  // SAVED TRAINING BUTTON
+                  // ==================================================
+
+                  _buildSavedTrainingButton(),
+
+                  const SizedBox(height: 16),
+
+                  _buildSearchBar(),
+
+                  const SizedBox(height: 14),
+
+                  _buildFilterSection(),
+
+                  if (_hasActiveFilters) ...[
+                    const SizedBox(height: 8),
+                    _buildClearFiltersButton(),
+                  ],
+
+                  const SizedBox(height: 16),
+
+                  if (companies.isEmpty)
+                    _buildEmptyState()
+                  else
                     Column(
-                      children: _companies
-                          .map((company) => _buildCompanyCard(company))
+                      children: companies
+                          .map(
+                            (company) =>
+                                _buildCompanyCard(company),
+                          )
                           .toList(),
                     ),
-                  ],
-                ),
+
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ),
         ),
-        bottomNavigationBar: _buildBottomNavigationBar(),
+      ),
+
+      bottomNavigationBar: const AppBottomNavBar(
+        selectedIndex: 2,
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
+  // ============================================================
+  // TITLE
+  // ============================================================
+
+  Widget _buildTitleSection() {
+    return const Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 26,
-              height: 26,
-              child: CustomPaint(painter: _MasarLogoPainter()),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'MASAR',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
-                color: primaryPurple,
-              ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            Icons.notifications_none_rounded,
-            color: textDark,
-            size: 24,
+        Text(
+          'التدريب الميداني',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: MasarColors.textPrimary,
           ),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
         ),
-        const SizedBox(width: 14),
-        const CircleAvatar(
-          radius: 17,
-          backgroundColor: lightPurpleBg,
-          child: Text(
-            'S',
-            style: TextStyle(
-              color: primaryPurple,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+
+        SizedBox(height: 4),
+
+        Text(
+          'اكتشف الشركات المتاحة للتدريب في مجال تخصصك',
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.5,
+            color: MasarColors.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTitleSection() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'اختر الشركة',
+  // ============================================================
+  // SAVED TRAINING BUTTON
+  // ============================================================
+
+  Widget _buildSavedTrainingButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const SavedTrainingScreen(),
+            ),
+          );
+        },
+        icon: const Icon(
+          Icons.bookmark_rounded,
+          size: 20,
+          color: MasarColors.primaryBlue,
+        ),
+        label: const Text(
+          'المحفوظات',
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: textDark,
+            color: MasarColors.primaryBlue,
           ),
         ),
-        SizedBox(height: 4),
-        Text(
-          'اكتشف الشركات المتاحة للتدريب في مجال تخصصك',
-          style: TextStyle(fontSize: 13, color: textMuted),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: MasarColors.lightBlue,
+          foregroundColor: MasarColors.primaryBlue,
+          padding: const EdgeInsets.symmetric(
+            vertical: 12,
+          ),
+          side: const BorderSide(
+            color: MasarColors.primaryBlue,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      ],
+      ),
     );
   }
+
+  // ============================================================
+  // SEARCH BAR
+  // ============================================================
 
   Widget _buildSearchBar() {
     return Container(
@@ -208,145 +491,481 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: TextField(
         controller: _searchController,
-        decoration: const InputDecoration(
+        textDirection: TextDirection.rtl,
+
+        onChanged: (value) {
+          setState(() {
+            _isSearching = true;
+          });
+        },
+
+        decoration: InputDecoration(
           hintText: 'ابحث عن شركة ...',
-          hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-          prefixIcon: Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+          hintStyle: const TextStyle(
+            color: MasarColors.textSecondary,
+            fontSize: 13,
+          ),
+
+          prefixIcon: const Icon(
+            Icons.search,
+            color: MasarColors.textSecondary,
+            size: 20,
+          ),
+
+          suffixIcon:
+              _searchController.text.isNotEmpty
+                  ? IconButton(
+                      onPressed: () {
+                        _searchController.clear();
+
+                        setState(() {
+                          _isSearching = true;
+                        });
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                        size: 18,
+                        color:
+                            MasarColors.textSecondary,
+                      ),
+                    )
+                  : null,
+
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 10),
+
+          contentPadding:
+              const EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: 10,
+          ),
         ),
       ),
     );
   }
 
+  // ============================================================
+  // FILTER SECTION
+  // ============================================================
+
   Widget _buildFilterSection() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: primaryPurple,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.grid_view_rounded, size: 16, color: Colors.white),
-                SizedBox(width: 6),
-                Text(
-                  'الكل',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDropdownFilter(
+            label: 'التخصص',
+            icon: Icons.school_outlined,
+            value: _selectedSpecialization,
+            items: _specializations,
+            onChanged: (value) {
+              setState(() {
+                _selectedSpecialization = value;
+              });
+            },
           ),
-          const SizedBox(width: 8),
-          _buildFilterChip('التخصص', Icons.school_outlined),
-          const SizedBox(width: 8),
-          _buildFilterChip('الموقع', Icons.location_on_outlined),
-          const SizedBox(width: 8),
-          _buildFilterChip('نوع التدريب', Icons.business_center_outlined),
-        ],
-      ),
+        ),
+
+        const SizedBox(width: 8),
+
+        Expanded(
+          child: _buildDropdownFilter(
+            label: 'المسار',
+            icon: Icons.route_outlined,
+            value: _selectedTrainingTrack,
+            items: _trainingTracks,
+            onChanged: (value) {
+              setState(() {
+                _selectedTrainingTrack = value;
+              });
+            },
+          ),
+        ),
+
+        const SizedBox(width: 8),
+
+        Expanded(
+          child: _buildDropdownFilter(
+            label: 'الموقع',
+            icon: Icons.location_on_outlined,
+            value: _selectedLocation,
+            items: _locations,
+            onChanged: (value) {
+              setState(() {
+                _selectedLocation = value;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildFilterChip(String label, IconData icon) {
+  // ============================================================
+  // DROPDOWN
+  // ============================================================
+
+  Widget _buildDropdownFilter({
+    required String label,
+    required IconData icon,
+    required String? value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      height: 48,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 7,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: borderColor),
+        borderRadius:
+            BorderRadius.circular(11),
+        border: Border.all(
+          color: value != null
+              ? MasarColors.primaryBlue
+              : MasarColors.border,
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: textDark),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: textDark,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          isDense: true,
+
+          icon: const Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 16,
-            color: textMuted,
+            color:
+                MasarColors.textSecondary,
           ),
+
+          hint: Row(
+            mainAxisSize:
+                MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 15,
+                color:
+                    MasarColors.textSecondary,
+              ),
+
+              const SizedBox(width: 4),
+
+              Flexible(
+                child: Text(
+                  label,
+                  overflow:
+                      TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color:
+                        MasarColors.textPrimary,
+                    fontWeight:
+                        FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          style: const TextStyle(
+            fontSize: 10.5,
+            color:
+                MasarColors.textPrimary,
+            fontWeight:
+                FontWeight.w500,
+          ),
+
+          dropdownColor: Colors.white,
+
+          borderRadius:
+              BorderRadius.circular(12),
+
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                item,
+                overflow:
+                    TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            );
+          }).toList(),
+
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // CLEAR FILTERS
+  // ============================================================
+
+  Widget _buildClearFiltersButton() {
+    return Align(
+      alignment:
+          AlignmentDirectional.centerStart,
+      child: TextButton.icon(
+        onPressed: () {
+          setState(() {
+            _selectedSpecialization =
+                null;
+            _selectedTrainingTrack =
+                null;
+            _selectedLocation = null;
+          });
+        },
+
+        icon: const Icon(
+          Icons.close,
+          size: 15,
+        ),
+
+        label: const Text(
+          'مسح الفلاتر',
+          style: TextStyle(
+            fontSize: 12,
+          ),
+        ),
+
+        style: TextButton.styleFrom(
+          foregroundColor:
+              MasarColors.primaryBlue,
+          padding:
+              const EdgeInsets.symmetric(
+            horizontal: 4,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // EMPTY STATE
+  // ============================================================
+
+  Widget _buildEmptyState() {
+    final bool searchHasText =
+        _searchController.text
+            .trim()
+            .isNotEmpty;
+
+    return Container(
+      width: double.infinity,
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 35,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(16),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            searchHasText
+                ? Icons.search_off_rounded
+                : Icons.business_outlined,
+            size: 42,
+            color:
+                MasarColors.textSecondary,
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            searchHasText
+                ? 'لم يتم العثور على الشركة'
+                : 'لا توجد شركات مطابقة',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight:
+                  FontWeight.bold,
+              color:
+                  MasarColors.textPrimary,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            searchHasText
+                ? 'تأكد من اسم الشركة أو جرّب البحث باسم آخر.'
+                : 'جرّب تغيير التخصص أو المسار التدريبي أو الموقع.',
+            textAlign:
+                TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.5,
+              color:
+                  MasarColors.textSecondary,
+            ),
+          ),
+
+          if (searchHasText ||
+              _isSearching) ...[
+            const SizedBox(height: 16),
+
+            OutlinedButton.icon(
+              onPressed: () {
+                _searchController.clear();
+
+                setState(() {
+                  _isSearching = false;
+                });
+              },
+
+              icon: const Icon(
+                Icons.business_outlined,
+                size: 17,
+              ),
+
+              label: const Text(
+                'عرض كل الشركات',
+              ),
+
+              style:
+                  OutlinedButton.styleFrom(
+                foregroundColor:
+                    MasarColors.primaryBlue,
+                side: const BorderSide(
+                  color:
+                      MasarColors.primaryBlue,
+                ),
+                shape:
+                    RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(
+                    9,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildCompanyCard(Map<String, dynamic> company) {
+  // ============================================================
+  // COMPANY CARD
+  // ============================================================
+
+  Widget _buildCompanyCard(
+    Map<String, dynamic> company,
+  ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin:
+          const EdgeInsets.only(bottom: 12),
+      padding:
+          const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
+        borderRadius:
+            BorderRadius.circular(14),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment:
+            CrossAxisAlignment.center,
         children: [
+          // ====================================================
+          // LOGO
+          // ====================================================
+
           Container(
             width: 58,
             height: 58,
             decoration: BoxDecoration(
-              color: company['bgColor'] ?? Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              color:
+                  company['bgColor'] ??
+                      Colors.white,
+              borderRadius:
+                  BorderRadius.circular(12),
+              border: Border.all(
+                color:
+                    MasarColors.border,
+              ),
             ),
-            child: Center(child: _buildCustomCompanyLogo(company)),
+            child: Center(
+              child:
+                  _buildCustomCompanyLogo(
+                company,
+              ),
+            ),
           ),
+
           const SizedBox(width: 12),
+
+          // ====================================================
+          // INFO
+          // ====================================================
+
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   company['name'],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                  style:
+                      const TextStyle(
+                    fontWeight:
+                        FontWeight.bold,
                     fontSize: 15,
-                    color: textDark,
+                    color:
+                        MasarColors.textPrimary,
                   ),
                 ),
+
                 const SizedBox(height: 2),
+
                 Text(
                   company['slogan'],
-                  style: const TextStyle(fontSize: 11, color: textMuted),
+                  style:
+                      const TextStyle(
+                    fontSize: 11,
+                    color:
+                        MasarColors.textSecondary,
+                  ),
                 ),
+
                 const SizedBox(height: 8),
+
                 Wrap(
                   spacing: 8,
                   runSpacing: 4,
                   children: [
                     _buildInfoBadge(
-                      Icons.people_outline_rounded,
+                      Icons
+                          .people_outline_rounded,
                       company['interns'],
                     ),
+
                     _buildInfoBadge(
-                      Icons.business_outlined,
+                      Icons
+                          .business_outlined,
                       company['category'],
                     ),
+
                     _buildInfoBadge(
-                      Icons.location_on_outlined,
+                      Icons
+                          .location_on_outlined,
                       company['location'],
                     ),
                   ],
@@ -354,32 +973,60 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
               ],
             ),
           ),
+
           const SizedBox(width: 6),
+
+          // ====================================================
+          // CHOOSE COMPANY
+          // ====================================================
+
           ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CompanyDetailsScreen(company: company),
+                  builder: (_) =>
+                      CompanyDetailsScreen(
+                    company: company,
+                  ),
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: lightPurpleBg,
+
+            style:
+                ElevatedButton.styleFrom(
+              backgroundColor:
+                  MasarColors.lightBlue,
+              foregroundColor:
+                  MasarColors.primaryBlue,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+              padding:
+                  const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 8,
+              ),
+              minimumSize:
+                  Size.zero,
+              tapTargetSize:
+                  MaterialTapTargetSize
+                      .shrinkWrap,
+              shape:
+                  RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  8,
+                ),
               ),
             ),
+
             child: const Text(
               'اختر الشركة',
               style: TextStyle(
-                color: primaryPurple,
+                color:
+                    MasarColors.primaryBlue,
                 fontSize: 11,
-                fontWeight: FontWeight.bold,
+                fontWeight:
+                    FontWeight.bold,
               ),
             ),
           ),
@@ -388,36 +1035,55 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
     );
   }
 
-  // =========================
-  // Custom Company Logo Builder (شعار Zain المحدث والحديث)
-  // =========================
-  Widget _buildCustomCompanyLogo(Map<String, dynamic> company) {
-    // 1. شعار Zain الحقيقي المبتكر (الشكل الحلزوني + كلمة zain)
-    if (company['isZain'] == true || company['name'] == 'Zain') {
+  // ============================================================
+  // COMPANY LOGOS
+  // ============================================================
+
+  Widget _buildCustomCompanyLogo(
+    Map<String, dynamic> company,
+  ) {
+    // ----------------------------------------------------------
+    // ZAIN
+    // ----------------------------------------------------------
+
+    if (company['isZain'] == true ||
+        company['name'] == 'Zain') {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: [
           SizedBox(
             width: 26,
             height: 26,
-            child: CustomPaint(painter: _ZainRealLogoPainter()),
+            child: CustomPaint(
+              painter:
+                  _ZainRealLogoPainter(),
+            ),
           ),
+
           const SizedBox(height: 2),
+
           const Text(
             'zain',
             style: TextStyle(
               fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF1E293B),
+              fontWeight:
+                  FontWeight.w900,
+              color:
+                  MasarColors.textPrimary,
               letterSpacing: 0.5,
-              fontStyle: FontStyle.italic,
+              fontStyle:
+                  FontStyle.italic,
             ),
           ),
         ],
       );
     }
 
-    // 2. شعار Microsoft
+    // ----------------------------------------------------------
+    // MICROSOFT
+    // ----------------------------------------------------------
+
     if (company['isMicrosoft'] == true) {
       return SizedBox(
         width: 24,
@@ -426,56 +1092,89 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
           crossAxisCount: 2,
           mainAxisSpacing: 2,
           crossAxisSpacing: 2,
-          physics: const NeverScrollableScrollPhysics(),
+          physics:
+              const NeverScrollableScrollPhysics(),
           children: [
-            Container(color: const Color(0xFFF25022)),
-            Container(color: const Color(0xFF7FBA00)),
-            Container(color: const Color(0xFF00A4EF)),
-            Container(color: const Color(0xFFFFB900)),
+            Container(
+              color:
+                  const Color(0xFFF25022),
+            ),
+            Container(
+              color:
+                  const Color(0xFF7FBA00),
+            ),
+            Container(
+              color:
+                  const Color(0xFF00A4EF),
+            ),
+            Container(
+              color:
+                  const Color(0xFFFFB900),
+            ),
           ],
         ),
       );
     }
 
-    // 3. شعار Amazon
+    // ----------------------------------------------------------
+    // AMAZON
+    // ----------------------------------------------------------
+
     if (company['isAmazon'] == true) {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: [
           const Text(
             'a',
             style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.w900,
+              fontWeight:
+                  FontWeight.w900,
               color: Colors.black,
               height: 0.9,
             ),
           ),
+
           Container(
             width: 16,
             height: 3,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF9900),
-              borderRadius: BorderRadius.circular(2),
+            decoration:
+                BoxDecoration(
+              color:
+                  const Color(0xFFFF9900),
+              borderRadius:
+                  BorderRadius.circular(2),
             ),
           ),
         ],
       );
     }
 
-    // 4. شعار البنك العربي
+    // ----------------------------------------------------------
+    // ARAB BANK
+    // ----------------------------------------------------------
+
     if (company['isArabBank'] == true) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.account_balance_rounded, color: Colors.white, size: 24),
+      return const Column(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.account_balance_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
+
           SizedBox(height: 1),
+
           Text(
             'ARAB BANK',
             style: TextStyle(
               color: Colors.white,
               fontSize: 5.5,
-              fontWeight: FontWeight.bold,
+              fontWeight:
+                  FontWeight.bold,
               letterSpacing: 0.3,
             ),
           ),
@@ -483,118 +1182,128 @@ class _SelectCompanyScreenState extends State<SelectCompanyScreen> {
       );
     }
 
-    // باقي الشركات (Meta, Orange)
+    // ----------------------------------------------------------
+    // META / ORANGE
+    // ----------------------------------------------------------
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment:
+          MainAxisAlignment.center,
       children: [
         Icon(
-          company['icon'] as IconData? ?? Icons.business,
-          color: company['iconColor'] ?? primaryPurple,
+          company['icon'] as IconData? ??
+              Icons.business,
+          color:
+              company['iconColor'] ??
+                  MasarColors
+                      .primaryBlue,
           size: 22,
         ),
+
         const SizedBox(height: 2),
+
         Text(
           company['name'] ?? '',
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          overflow:
+              TextOverflow.ellipsis,
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight:
+                FontWeight.bold,
             fontSize: 9,
-            color: (company['bgColor'] == const Color(0xFFFF6600))
+            color: company['bgColor'] ==
+                    const Color(
+                      0xFFFF6600,
+                    )
                 ? Colors.white
-                : textDark,
+                : MasarColors
+                    .textPrimary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoBadge(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 12, color: textMuted),
-        const SizedBox(width: 2),
-        Text(text, style: const TextStyle(fontSize: 10, color: textMuted)),
-      ],
-    );
-  }
+  // ============================================================
+  // INFO BADGE
+  // ============================================================
 
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: borderColor)),
-      ),
-      child: BottomNavigationBar(
-        currentIndex: 1,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: primaryPurple,
-        unselectedItemColor: textMuted,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        elevation: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'الرئيسية',
+  Widget _buildInfoBadge(
+    IconData icon,
+    String text,
+  ) {
+    return Row(
+      mainAxisSize:
+          MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 12,
+          color:
+              MasarColors.textSecondary,
+        ),
+
+        const SizedBox(width: 2),
+
+        Text(
+          text,
+          style:
+              const TextStyle(
+            fontSize: 10,
+            color:
+                MasarColors.textSecondary,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business_center_outlined),
-            activeIcon: Icon(Icons.business_center),
-            label: 'التدريب',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map_outlined),
-            activeIcon: Icon(Icons.map),
-            label: 'التقارير',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map_outlined),
-            activeIcon: Icon(Icons.map),
-            label: 'المهارات',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'ملفي',
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-// =========================
-// الرسام المخصص لشعار زين (Zain Dynamic Ribbon Painter)
-// =========================
-class _ZainRealLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+// ================================================================
+// ZAIN LOGO PAINTER
+// ================================================================
 
-    // تدرج ألوان شعار زين الشهير (البنفسجي -> الوردي -> الفيروزي)
-    final gradient = const SweepGradient(
+class _ZainRealLogoPainter
+    extends CustomPainter {
+  @override
+  void paint(
+    Canvas canvas,
+    Size size,
+  ) {
+    final rect = Rect.fromLTWH(
+      0,
+      0,
+      size.width,
+      size.height,
+    );
+
+    final gradient =
+        const SweepGradient(
       colors: [
-        Color(0xFF8B5CF6), // بنفسجي
-        Color(0xFFEC4899), // وردي
-        Color(0xFF06B6D4), // فيروزي
-        Color(0xFF10B981), // أخضر زاهي
+        Color(0xFF8B5CF6),
+        Color(0xFFEC4899),
+        Color(0xFF06B6D4),
+        Color(0xFF10B981),
         Color(0xFF8B5CF6),
       ],
     );
 
     final paint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
+      ..shader =
+          gradient.createShader(rect)
+      ..style =
+          PaintingStyle.stroke
       ..strokeWidth = 3.5
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap =
+          StrokeCap.round;
 
     final path = Path();
-    // رسم منحنيات الشريط الملتوي المطابق لشعار زين
-    path.moveTo(size.width * 0.2, size.height * 0.8);
+
+    path.moveTo(
+      size.width * 0.2,
+      size.height * 0.8,
+    );
+
     path.cubicTo(
       size.width * 0.05,
       size.height * 0.3,
@@ -603,6 +1312,7 @@ class _ZainRealLogoPainter extends CustomPainter {
       size.width * 0.8,
       size.height * 0.35,
     );
+
     path.cubicTo(
       size.width * 0.9,
       size.height * 0.65,
@@ -612,33 +1322,16 @@ class _ZainRealLogoPainter extends CustomPainter {
       size.height * 0.5,
     );
 
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// رسم شعار مسار
-class _MasarLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF6C5CE7)
-      ..style = PaintingStyle.fill;
-
-    double radius = size.width / 4.2;
-
-    canvas.drawCircle(Offset(radius, radius), radius, paint);
-    canvas.drawCircle(Offset(size.width - radius, radius), radius, paint);
-    canvas.drawCircle(Offset(radius, size.height - radius), radius, paint);
-    canvas.drawCircle(
-      Offset(size.width - radius, size.height - radius),
-      radius,
+    canvas.drawPath(
+      path,
       paint,
     );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(
+    covariant CustomPainter oldDelegate,
+  ) {
+    return false;
+  }
 }

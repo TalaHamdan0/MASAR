@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:file_picker/file_picker.dart';
@@ -49,27 +48,18 @@ class MyCvScreen extends StatelessWidget {
             base: regularFont,
             bold: boldFont,
           ),
-
           margin: const pw.EdgeInsets.all(32),
-
           build: (context) {
             return [
-              // ====================================================
-              // RTL ONLY INSIDE PDF
-              // ====================================================
-
               pw.Directionality(
                 textDirection: pw.TextDirection.rtl,
-
                 child: pw.Column(
                   crossAxisAlignment:
                       pw.CrossAxisAlignment.stretch,
-
                   children: [
-
-                    // ==============================================
+                    // ==================================================
                     // HEADER
-                    // ==============================================
+                    // ==================================================
 
                     pw.Center(
                       child: pw.Text(
@@ -105,7 +95,6 @@ class MyCvScreen extends StatelessWidget {
                     pw.Directionality(
                       textDirection:
                           pw.TextDirection.ltr,
-
                       child: pw.Center(
                         child: pw.Text(
                           student.email,
@@ -123,9 +112,9 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 25),
 
-                    // ==============================================
+                    // ==================================================
                     // PERSONAL INFORMATION
-                    // ==============================================
+                    // ==================================================
 
                     _pdfSectionTitle(
                       'Personal Information',
@@ -156,9 +145,9 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 18),
 
-                    // ==============================================
+                    // ==================================================
                     // EDUCATION
-                    // ==============================================
+                    // ==================================================
 
                     _pdfSectionTitle(
                       'Education',
@@ -182,15 +171,12 @@ class MyCvScreen extends StatelessWidget {
                       regularFont,
                     ),
 
-                    // GPA - keep numbers natural
                     pw.Directionality(
                       textDirection:
                           pw.TextDirection.ltr,
-
                       child: pw.Align(
                         alignment:
                             pw.Alignment.centerRight,
-
                         child: pw.Text(
                           'GPA: ${student.gpa}',
                           textDirection:
@@ -205,9 +191,9 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 18),
 
-                    // ==============================================
+                    // ==================================================
                     // CAREER PATH
-                    // ==============================================
+                    // ==================================================
 
                     _pdfSectionTitle(
                       'Career Path',
@@ -228,9 +214,9 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 18),
 
-                    // ==============================================
+                    // ==================================================
                     // TECHNICAL SKILLS
-                    // ==============================================
+                    // ==================================================
 
                     _pdfSectionTitle(
                       'Technical Skills',
@@ -239,15 +225,12 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 8),
 
-                    ...MasarMockData
-                        .selectedCareerSkills
-                        .map(
+                    ...MasarMockData.selectedCareerSkills.map(
                       (skill) => pw.Padding(
                         padding:
                             const pw.EdgeInsets.only(
                           bottom: 5,
                         ),
-
                         child: pw.Text(
                           '• ${skill.name}',
                           textDirection:
@@ -264,9 +247,9 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 15),
 
-                    // ==============================================
+                    // ==================================================
                     // SOFT SKILLS
-                    // ==============================================
+                    // ==================================================
 
                     _pdfSectionTitle(
                       'Soft Skills',
@@ -281,7 +264,6 @@ class MyCvScreen extends StatelessWidget {
                             const pw.EdgeInsets.only(
                           bottom: 5,
                         ),
-
                         child: pw.Text(
                           '• ${skill.name}',
                           textDirection:
@@ -298,9 +280,9 @@ class MyCvScreen extends StatelessWidget {
 
                     pw.SizedBox(height: 15),
 
-                    // ==============================================
+                    // ==================================================
                     // CERTIFICATES
-                    // ==============================================
+                    // ==================================================
 
                     _pdfSectionTitle(
                       'Certificates',
@@ -315,13 +297,10 @@ class MyCvScreen extends StatelessWidget {
                             const pw.EdgeInsets.only(
                           bottom: 8,
                         ),
-
                         child: pw.Column(
                           crossAxisAlignment:
                               pw.CrossAxisAlignment.start,
-
                           children: [
-
                             pw.Text(
                               certificate.title,
                               textDirection:
@@ -333,14 +312,10 @@ class MyCvScreen extends StatelessWidget {
                                 fontSize: 11,
                               ),
                             ),
-
                             pw.SizedBox(height: 3),
-
-                            // Issuer + date stay LTR
                             pw.Directionality(
                               textDirection:
                                   pw.TextDirection.ltr,
-
                               child: pw.Text(
                                 '${certificate.issuer} • ${certificate.date}',
                                 textDirection:
@@ -418,7 +393,6 @@ class MyCvScreen extends StatelessWidget {
       padding: const pw.EdgeInsets.only(
         bottom: 4,
       ),
-
       child: pw.Text(
         text,
         textDirection: pw.TextDirection.rtl,
@@ -441,17 +415,13 @@ class MyCvScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
-
       builder: (sheetContext) {
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
-
             child: Column(
               mainAxisSize: MainAxisSize.min,
-
               children: [
-
                 const Text(
                   'What do you want to add?',
                   style: TextStyle(
@@ -521,12 +491,10 @@ class MyCvScreen extends StatelessWidget {
       leading: Container(
         width: 42,
         height: 42,
-
         decoration: BoxDecoration(
           color: MasarColors.lightBlue,
           borderRadius: BorderRadius.circular(12),
         ),
-
         child: Icon(
           icon,
           color: MasarColors.primaryBlue,
@@ -543,13 +511,11 @@ class MyCvScreen extends StatelessWidget {
 
       trailing: IconButton(
         tooltip: 'Add $title',
-
         icon: const Icon(
           Icons.add_circle,
           size: 30,
           color: MasarColors.primaryBlue,
         ),
-
         onPressed: () async {
           final result =
               await FilePicker.platform.pickFiles(
@@ -590,25 +556,23 @@ class MyCvScreen extends StatelessWidget {
     final careerPath =
         MasarMockData.selectedCareerPath;
 
-    // IMPORTANT:
-    // NO Directionality here.
-    // The screen keeps the same direction
-    // as the rest of the application.
-
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('My CV'),
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          110,
+        ),
         child: Column(
           crossAxisAlignment:
               CrossAxisAlignment.start,
-
           children: [
-
             // ==================================================
             // HEADER
             // ==================================================
@@ -616,16 +580,12 @@ class MyCvScreen extends StatelessWidget {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
-
                 child: Row(
                   children: [
-
                     CircleAvatar(
                       radius: 32,
-
                       backgroundColor:
                           MasarColors.lightBlue,
-
                       child: const Icon(
                         Icons.person,
                         size: 35,
@@ -640,9 +600,7 @@ class MyCvScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment:
                             CrossAxisAlignment.start,
-
                         children: [
-
                           Text(
                             student.name,
                             style:
@@ -730,13 +688,10 @@ class MyCvScreen extends StatelessWidget {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(18),
-
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
-
                   children: [
-
                     Text(
                       'Technical Skills',
                       style:
@@ -755,16 +710,15 @@ class MyCvScreen extends StatelessWidget {
                             const EdgeInsets.only(
                           bottom: 8,
                         ),
-
                         child: Row(
                           children: [
-
                             const Icon(
                               Icons
                                   .check_circle_outline,
                               size: 20,
-                              color: MasarColors
-                                  .primaryGreen,
+                              color:
+                                  MasarColors
+                                      .primaryGreen,
                             ),
 
                             const SizedBox(width: 8),
@@ -792,13 +746,10 @@ class MyCvScreen extends StatelessWidget {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(18),
-
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
-
                   children: [
-
                     Text(
                       'Soft Skills',
                       style:
@@ -815,16 +766,15 @@ class MyCvScreen extends StatelessWidget {
                             const EdgeInsets.only(
                           bottom: 8,
                         ),
-
                         child: Row(
                           children: [
-
                             const Icon(
                               Icons
                                   .check_circle_outline,
                               size: 20,
-                              color: MasarColors
-                                  .primaryGreen,
+                              color:
+                                  MasarColors
+                                      .primaryGreen,
                             ),
 
                             const SizedBox(width: 8),
@@ -852,13 +802,10 @@ class MyCvScreen extends StatelessWidget {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(18),
-
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
-
                   children: [
-
                     Text(
                       'Certificates',
                       style:
@@ -875,13 +822,10 @@ class MyCvScreen extends StatelessWidget {
                             const EdgeInsets.only(
                           bottom: 12,
                         ),
-
                         child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment.start,
-
                           children: [
-
                             Text(
                               certificate.title,
                               style:
@@ -917,7 +861,6 @@ class MyCvScreen extends StatelessWidget {
 
             Row(
               children: [
-
                 // ADD TO CV
                 Expanded(
                   child: OutlinedButton.icon(
@@ -926,20 +869,16 @@ class MyCvScreen extends StatelessWidget {
                         context,
                       );
                     },
-
                     icon: const Icon(
                       Icons.add,
                     ),
-
                     label: const Text(
                       'Add to CV',
                     ),
-
                     style:
                         OutlinedButton.styleFrom(
                       minimumSize:
                           const Size(0, 52),
-
                       shape:
                           RoundedRectangleBorder(
                         borderRadius:
@@ -959,26 +898,20 @@ class MyCvScreen extends StatelessWidget {
                     onPressed: () {
                       _saveCvAsPdf(context);
                     },
-
                     icon: const Icon(
                       Icons.picture_as_pdf,
                     ),
-
                     label: const Text(
                       'Save as PDF',
                     ),
-
                     style:
                         ElevatedButton.styleFrom(
                       minimumSize:
                           const Size(0, 52),
-
                       backgroundColor:
                           MasarColors.primaryBlue,
-
                       foregroundColor:
                           Colors.white,
-
                       shape:
                           RoundedRectangleBorder(
                         borderRadius:
@@ -997,14 +930,14 @@ class MyCvScreen extends StatelessWidget {
         ),
       ),
 
-      // =========================
-      // BOTTOM NAVIGATION
-      // =========================      
+      // ==========================================================
+      // UNIFIED BOTTOM NAVIGATION
+      // الملف المهني = index 3
+      // ==========================================================
 
       bottomNavigationBar: const AppBottomNavBar(
         selectedIndex: 3,
-
-),
+      ),
     );
   }
 
@@ -1021,17 +954,13 @@ class MyCvScreen extends StatelessWidget {
       padding: const EdgeInsets.only(
         bottom: 12,
       ),
-
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(18),
-
           child: Column(
             crossAxisAlignment:
                 CrossAxisAlignment.start,
-
             children: [
-
               Text(
                 title,
                 style:
@@ -1048,7 +977,6 @@ class MyCvScreen extends StatelessWidget {
                       const EdgeInsets.only(
                     bottom: 5,
                   ),
-
                   child: Text(item),
                 ),
               ),

@@ -21,215 +21,261 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profile = MasarMockData.profileMockData;
 
     return Scaffold(
+      backgroundColor: MasarColors.background,
+
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('الملف الشخصي'),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Column(
-          children: [
-            // الصورة الشخصية
-            CircleAvatar(
-              radius: 42,
-              backgroundColor: MasarColors.lightBlue,
-              child: const Icon(
-                Icons.person,
-                size: 48,
-                color: MasarColors.primaryBlue,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            100,
+          ),
+          child: Column(
+            children: [
+              // ==================================================
+              // PROFILE IMAGE
+              // ==================================================
+
+              CircleAvatar(
+                radius: 42,
+                backgroundColor: MasarColors.lightBlue,
+                child: const Icon(
+                  Icons.person,
+                  size: 48,
+                  color: MasarColors.primaryBlue,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            // اسم الطالب
-            Text(
-              profile['name'],
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+              // ==================================================
+              // STUDENT NAME
+              // ==================================================
 
-            const SizedBox(height: 4),
+              Text(
+                profile['name'],
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
 
-            // التخصص
-            Text(
-              profile['major'],
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+              const SizedBox(height: 4),
 
-            const SizedBox(height: 20),
+              // ==================================================
+              // MAJOR
+              // ==================================================
 
-            // تعديل الملف الشخصي
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  await Navigator.push(
+              Text(
+                profile['major'],
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+
+              const SizedBox(height: 20),
+
+              // ==================================================
+              // EDIT PROFILE
+              // ==================================================
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const EditProfileScreen(),
+                      ),
+                    );
+
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('تعديل الملف الشخصي'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(
+                      double.infinity,
+                      50,
+                    ),
+                    foregroundColor:
+                        MasarColors.primaryBlue,
+                    side: const BorderSide(
+                      color: MasarColors.primaryBlue,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    textStyle: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // ==================================================
+              // ACCOUNT
+              // ==================================================
+
+              const _SectionTitle(
+                title: 'الحساب',
+              ),
+
+              _ProfileTile(
+                icon: Icons.lock_outline,
+                title: 'تغيير كلمة المرور',
+                onTap: () {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          const EditProfileScreen(),
+                          const ChangePasswordScreen(),
                     ),
                   );
-
-                  // إعادة بناء الشاشة بعد الرجوع
-                  setState(() {});
                 },
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text('تعديل الملف الشخصي'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  foregroundColor: MasarColors.primaryBlue,
-                  side: const BorderSide(
-                    color: MasarColors.primaryBlue,
+              ),
+
+              const SizedBox(height: 20),
+
+              // ==================================================
+              // PRIVACY
+              // ==================================================
+
+              const _SectionTitle(
+                title: 'الخصوصية',
+              ),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.visibility_outlined,
+                        color: MasarColors.darkBlue,
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      const Expanded(
+                        child: Text(
+                          'إظهار الملف المهني للشركات',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: MasarColors.textPrimary,
+                          ),
+                        ),
+                      ),
+
+                      Switch(
+                        value: MasarMockData
+                            .profileVisibleToCompanies,
+                        activeTrackColor:
+                            MasarColors.primaryGreen,
+                        onChanged: (value) {
+                          setState(() {
+                            MasarMockData
+                                    .profileVisibleToCompanies =
+                                value;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  textStyle: const TextStyle(
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // ==================================================
+              // ABOUT APP
+              // ==================================================
+
+              const _SectionTitle(
+                title: 'حول التطبيق',
+              ),
+
+              _ProfileTile(
+                icon: Icons.info_outline,
+                title: 'عن مسار',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const AboutMasarScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              _ProfileTile(
+                icon: Icons.privacy_tip_outlined,
+                title: 'سياسة الخصوصية',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const PrivacyPolicyScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 30),
+
+              // ==================================================
+              // LOGOUT
+              // ==================================================
+
+              TextButton.icon(
+                onPressed: () {
+                  _showLogoutDialog(context);
+                },
+                icon: const Icon(
+                  Icons.logout,
+                  color: MasarColors.error,
+                ),
+                label: const Text(
+                  'تسجيل الخروج',
+                  style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: 15,
+                    color: MasarColors.error,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 28),
-
-            // الحساب
-            const _SectionTitle(
-              title: 'الحساب',
-            ),
-
-            _ProfileTile(
-              icon: Icons.lock_outline,
-              title: 'تغيير كلمة المرور',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const ChangePasswordScreen(),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            // الخصوصية
-            const _SectionTitle(
-              title: 'الخصوصية',
-            ),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.visibility_outlined,
-                      color: MasarColors.darkBlue,
-                    ),
-
-                    const SizedBox(width: 14),
-
-                    const Expanded(
-                      child: Text(
-                        'إظهار الملف المهني للشركات',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: MasarColors.textPrimary,
-                        ),
-                      ),
-                    ),
-
-                    Switch(
-                      value: MasarMockData.profileVisibleToCompanies,
-                      activeTrackColor:
-                          MasarColors.primaryGreen,
-                      onChanged: (value) {
-                        setState(() {
-                          MasarMockData
-                                  .profileVisibleToCompanies =
-                              value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // حول التطبيق
-            const _SectionTitle(
-              title: 'حول التطبيق',
-            ),
-
-            _ProfileTile(
-              icon: Icons.info_outline,
-              title: 'عن مسار',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const AboutMasarScreen(),
-                  ),
-                );
-              },
-            ),
-
-            _ProfileTile(
-              icon: Icons.privacy_tip_outlined,
-              title: 'سياسة الخصوصية',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const PrivacyPolicyScreen(),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 30),
-
-            // تسجيل الخروج
-            TextButton.icon(
-              onPressed: () {
-                _showLogoutDialog(context);
-              },
-              icon: const Icon(
-                Icons.logout,
-                color: MasarColors.error,
-              ),
-              label: const Text(
-                'تسجيل الخروج',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  color: MasarColors.error,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+
+      // ==========================================================
+      // BOTTOM NAVIGATION
+      // ==========================================================
 
       bottomNavigationBar: const AppBottomNavBar(
         selectedIndex: 4,
       ),
     );
   }
+
+  // ==============================================================
+  // LOGOUT DIALOG
+  // ==============================================================
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
@@ -286,6 +332,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+// ================================================================
+// SECTION TITLE
+// ================================================================
+
 class _SectionTitle extends StatelessWidget {
   final String title;
 
@@ -308,6 +358,10 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
+// ================================================================
+// PROFILE TILE
+// ================================================================
+
 class _ProfileTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -323,9 +377,9 @@ class _ProfileTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(
-          icon,
-          color: MasarColors.darkBlue,
+        leading: const Icon(
+          Icons.chevron_left,
+          color: MasarColors.textSecondary,
         ),
         title: Text(
           title,
@@ -335,9 +389,9 @@ class _ProfileTile extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        trailing: const Icon(
-          Icons.chevron_left,
-          color: MasarColors.textSecondary,
+        trailing: Icon(
+          icon,
+          color: MasarColors.darkBlue,
         ),
         onTap: onTap,
       ),

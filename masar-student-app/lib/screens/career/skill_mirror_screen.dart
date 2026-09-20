@@ -243,11 +243,20 @@ class _SkillMirrorScreenState
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
+                          final score =
+                              widget.readinessScore ??
+                              MasarMockData
+                                  .readinessScore;
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  const CareerReadinessScreen(),
+                                  CareerReadinessScreen(
+                                readinessScore: score,
+                                skillScores:
+                                    widget.skillScores,
+                              ),
                             ),
                           );
                         },
@@ -313,7 +322,7 @@ class _SkillMirrorScreenState
         // =========================
         // BOTTOM NAVIGATION
         // =========================
-        
+
         bottomNavigationBar: const AppBottomNavBar(
           selectedIndex: 1,
         ),
@@ -473,7 +482,6 @@ class _SkillMirrorScreenState
           // =========================
           Row(
             children: [
-              // Skill icon
               Container(
                 width: 46,
                 height: 46,
@@ -496,7 +504,6 @@ class _SkillMirrorScreenState
 
               const SizedBox(width: 12),
 
-              // Skill name + status
               Expanded(
                 child: Column(
                   crossAxisAlignment:
@@ -546,7 +553,6 @@ class _SkillMirrorScreenState
                 ),
               ),
 
-              // Percentage
               Text(
                 '$currentLevel%',
                 style: TextStyle(
@@ -559,9 +565,6 @@ class _SkillMirrorScreenState
 
               const SizedBox(width: 2),
 
-              // =========================
-              // ARROW BUTTON
-              // =========================
               IconButton(
                 tooltip: isSelected
                     ? 'إخفاء التفاصيل'
@@ -622,7 +625,6 @@ class _SkillMirrorScreenState
 
           // =========================
           // DETAILS
-          // يظهر فقط عند الضغط على السهم
           // =========================
           AnimatedCrossFade(
             duration:

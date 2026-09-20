@@ -1,24 +1,29 @@
-
 import 'package:flutter/material.dart';
+import 'package:masar_student_app/screens/profile/change_password_screen.dart';
 import '../../theme/masar_theme.dart';
-import 'verify_code_screen.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+
+class VerifyCodeScreen extends StatefulWidget {
+  final String email;
+
+  const VerifyCodeScreen({
+    super.key,
+    required this.email,
+  });
 
   @override
-  State<ForgotPasswordScreen> createState() =>
-      _ForgotPasswordScreenState();
+  State<VerifyCodeScreen> createState() =>
+      _VerifyCodeScreenState();
 }
 
-class _ForgotPasswordScreenState
-    extends State<ForgotPasswordScreen> {
+class _VerifyCodeScreenState
+    extends State<VerifyCodeScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _codeController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
@@ -39,9 +44,9 @@ class _ForgotPasswordScreenState
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // ==========================================
-                    // الجزء العلوي
-                    // ==========================================
+                    // =========================
+                    // Header
+                    // =========================
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(
@@ -61,7 +66,6 @@ class _ForgotPasswordScreenState
                         crossAxisAlignment:
                             CrossAxisAlignment.start,
                         children: [
-                          // زر الرجوع
                           IconButton(
                             onPressed: () {
                               Navigator.pop(context);
@@ -78,10 +82,10 @@ class _ForgotPasswordScreenState
                           const SizedBox(height: 20),
 
                           const Text(
-                            'نسيت كلمة المرور؟',
+                            'تأكيد البريد الإلكتروني',
                             style: TextStyle(
                               fontFamily: 'Cairo',
-                              fontSize: 28,
+                              fontSize: 27,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -90,7 +94,7 @@ class _ForgotPasswordScreenState
                           const SizedBox(height: 8),
 
                           const Text(
-                            'أدخل بريدك الجامعي لاستعادة الوصول إلى حسابك',
+                            'أدخل رمز التحقق المرسل إلى بريدك الإلكتروني',
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 14,
@@ -102,9 +106,9 @@ class _ForgotPasswordScreenState
                       ),
                     ),
 
-                    // ==========================================
-                    // المحتوى
-                    // ==========================================
+                    // =========================
+                    // Body
+                    // =========================
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -113,9 +117,11 @@ class _ForgotPasswordScreenState
                         key: _formKey,
                         child: Column(
                           children: [
-                            const SizedBox(height: 35),
+                            const SizedBox(height: 40),
 
-                            // أيقونة القفل
+                            // =========================
+                            // Email Icon
+                            // =========================
                             Container(
                               width: 90,
                               height: 90,
@@ -125,8 +131,8 @@ class _ForgotPasswordScreenState
                                     BorderRadius.circular(24),
                               ),
                               child: const Icon(
-                                Icons.lock_reset,
-                                size: 50,
+                                Icons.mark_email_read_outlined,
+                                size: 48,
                                 color:
                                     MasarColors.primaryBlue,
                               ),
@@ -134,8 +140,11 @@ class _ForgotPasswordScreenState
 
                             const SizedBox(height: 24),
 
+                            // =========================
+                            // Title
+                            // =========================
                             const Text(
-                              'استعادة كلمة المرور',
+                              'تحقق من الكود',
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 22,
@@ -148,95 +157,88 @@ class _ForgotPasswordScreenState
 
                             const SizedBox(height: 10),
 
-                            const Text(
-                              'سنرسل لك رمز تحقق إلى بريدك الجامعي لتتمكن من إعادة تعيين كلمة المرور.',
-                              style: TextStyle(
+                            // =========================
+                            // Email
+                            // =========================
+                            Text(
+                              'تم إرسال رمز مكوّن من 6 أرقام إلى:\n'
+                              '${widget.email}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 14,
                                 color:
                                     MasarColors.textSecondary,
                                 height: 1.7,
                               ),
-                              textAlign: TextAlign.center,
                             ),
 
                             const SizedBox(height: 30),
 
-                            // ==========================================
-                            // البريد الجامعي
-                            // ==========================================
+                            // =========================
+                            // OTP Field
+                            // =========================
                             TextFormField(
-                              controller: _emailController,
+                              controller: _codeController,
                               keyboardType:
-                                  TextInputType.emailAddress,
-                              textDirection: TextDirection.ltr,
+                                  TextInputType.number,
+                              textAlign: TextAlign.center,
+                              maxLength: 6,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 8,
+                                color:
+                                    MasarColors.textPrimary,
+                              ),
                               decoration: InputDecoration(
-                                labelText: 'البريد الجامعي',
-                                hintText:
-                                    'example@university.edu',
-
-                                prefixIcon: const Icon(
-                                  Icons.email_outlined,
-                                  color:
-                                      MasarColors.textSecondary,
-                                ),
-
-                                labelStyle: const TextStyle(
-                                  fontFamily: 'Cairo',
-                                  color:
-                                      MasarColors.textSecondary,
-                                ),
-
+                                counterText: '',
+                                hintText: '------',
                                 hintStyle: const TextStyle(
                                   fontFamily: 'Cairo',
                                   color:
                                       MasarColors.textSecondary,
-                                  fontSize: 12,
+                                  letterSpacing: 8,
                                 ),
-
                                 filled: true,
                                 fillColor:
                                     MasarColors.lightBlue,
-
                                 border: OutlineInputBorder(
                                   borderRadius:
                                       BorderRadius.circular(16),
                                   borderSide: BorderSide.none,
                                 ),
-
                                 enabledBorder:
                                     OutlineInputBorder(
                                   borderRadius:
                                       BorderRadius.circular(16),
                                   borderSide: BorderSide.none,
                                 ),
-
                                 focusedBorder:
                                     OutlineInputBorder(
                                   borderRadius:
                                       BorderRadius.circular(16),
-                                  borderSide:
-                                      const BorderSide(
+                                  borderSide: const BorderSide(
                                     color:
                                         MasarColors.primaryBlue,
                                     width: 1.2,
                                   ),
                                 ),
                               ),
-
                               validator: (value) {
                                 if (value == null ||
                                     value.trim().isEmpty) {
-                                  return 'أدخل البريد الجامعي';
+                                  return 'أدخل رمز التحقق';
                                 }
 
-                                final emailRegex = RegExp(
-                                  r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                                );
+                                if (value.trim().length != 6) {
+                                  return 'يجب أن يتكون الكود من 6 أرقام';
+                                }
 
-                                if (!emailRegex
+                                if (!RegExp(r'^\d{6}$')
                                     .hasMatch(value.trim())) {
-                                  return 'أدخل بريدًا إلكترونيًا صحيحًا';
+                                  return 'أدخل أرقامًا فقط';
                                 }
 
                                 return null;
@@ -245,19 +247,20 @@ class _ForgotPasswordScreenState
 
                             const SizedBox(height: 25),
 
-                            // ==========================================
-                            // زر إرسال البريد
-                            // ==========================================
+                            // =========================
+                            // Verify Button
+                            // =========================
                             SizedBox(
                               width: double.infinity,
                               height: 56,
                               child: ElevatedButton(
-                                onPressed: _sendEmail,
+                                onPressed: _verifyCode,
                                 style:
                                     ElevatedButton.styleFrom(
                                   backgroundColor:
                                       MasarColors.primaryBlue,
-                                  foregroundColor: Colors.white,
+                                  foregroundColor:
+                                      Colors.white,
                                   elevation: 0,
                                   shape:
                                       RoundedRectangleBorder(
@@ -270,10 +273,10 @@ class _ForgotPasswordScreenState
                                       MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'إرسال رمز التحقق',
+                                      'تأكيد الكود',
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
-                                        fontSize: 15,
+                                        fontSize: 16,
                                         fontWeight:
                                             FontWeight.bold,
                                         color: Colors.white,
@@ -290,17 +293,15 @@ class _ForgotPasswordScreenState
                               ),
                             ),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
 
-                            // ==========================================
-                            // العودة لتسجيل الدخول
-                            // ==========================================
+                            // =========================
+                            // Resend Code
+                            // =========================
                             TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
+                              onPressed: _resendCode,
                               child: const Text(
-                                'العودة إلى تسجيل الدخول',
+                                'إعادة إرسال الكود',
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   color:
@@ -326,24 +327,45 @@ class _ForgotPasswordScreenState
     );
   }
 
-  // ==========================================
-  // إرسال رمز التحقق
-  // ==========================================
-  void _sendEmail() {
+  // =========================
+  // Verify Code
+  // =========================
+  void _verifyCode() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final email = _emailController.text.trim();
-
+    // مؤقتًا للتجربة:
+    // أي كود مكوّن من 6 أرقام يعتبر صحيحًا.
+    //
     // لاحقًا عند ربط الـ Backend:
-    // سيتم إرسال رمز OTP فعليًا إلى البريد الإلكتروني.
+    // سيتم إرسال الكود للـ API والتحقق منه فعليًا.
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VerifyCodeScreen(
-          email: email,
+        builder: (context) => const ChangePasswordScreen(
+          isResetPassword: true,
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // Resend Code
+  // =========================
+  void _resendCode() {
+    // لاحقًا عند ربط الـ Backend:
+    // سيتم إرسال OTP جديد إلى البريد.
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'سيتم إرسال كود جديد عند ربط الـ Backend.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+          ),
         ),
       ),
     );

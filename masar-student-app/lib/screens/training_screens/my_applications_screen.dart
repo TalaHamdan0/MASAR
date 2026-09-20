@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../theme/masar_theme.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import 'selection_success_screen.dart';
@@ -7,16 +8,12 @@ class MyApplicationsScreen extends StatefulWidget {
   const MyApplicationsScreen({super.key});
 
   @override
-  State<MyApplicationsScreen> createState() => _MyApplicationsScreenState();
+  State<MyApplicationsScreen> createState() =>
+      _MyApplicationsScreenState();
 }
 
-class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
-  static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color lightPurpleBg = Color(0xFFF3F0FF);
-  static const Color borderColor = Color(0xFFE2E8F0);
-  static const Color textDark = Color(0xFF1E293B);
-  static const Color textMuted = Color(0xFF64748B);
-
+class _MyApplicationsScreenState
+    extends State<MyApplicationsScreen> {
   String selectedFilter = 'الكل';
 
   final List<Map<String, dynamic>> _applications = [
@@ -70,49 +67,101 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filteredList = _applications.where((app) {
-      if (selectedFilter == 'الكل') return true;
+    final List<Map<String, dynamic>> filteredList =
+        _applications.where((app) {
+      if (selectedFilter == 'الكل') {
+        return true;
+      }
+
       return app['status'] == selectedFilter;
     }).toList();
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFC),
+        backgroundColor: MasarColors.background,
+
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
+              constraints: const BoxConstraints(
+                maxWidth: 480,
+              ),
               child: Column(
                 children: [
-                  const SizedBox(height: 16),
-                  const Text(
-                    'طلباتي',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textDark,
+                  const SizedBox(height: 8),
+
+                  // =========================
+                  // الهيدر + زر الرجوع
+                  // =========================
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 20,
+                            color: MasarColors.textPrimary,
+                          ),
+                        ),
+
+                        const Expanded(
+                          child: Center(
+                            child: Text(
+                              'طلباتي',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    MasarColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // حتى يظل العنوان بالنص
+                        const SizedBox(width: 48),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
 
+                  const SizedBox(height: 8),
+
+                  // =========================
                   // شريط الفلترة
+                  // =========================
+
                   _buildFilterTabs(),
+
                   const SizedBox(height: 16),
 
+                  // =========================
                   // قائمة الطلبات
+                  // =========================
+
                   Expanded(
                     child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount:
-                          filteredList.length +
-                          1, // +1 لصندوق الإشعار المرفق بالأسفل
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      itemCount: filteredList.length + 1,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         if (index == filteredList.length) {
                           return _buildInfoNoteBox();
                         }
-                        return _buildApplicationCard(filteredList[index]);
+
+                        return _buildApplicationCard(
+                          filteredList[index],
+                        );
                       },
                     ),
                   ),
@@ -121,51 +170,87 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: _buildBottomNavigationBar(),
+
+        // =========================
+        // Navbar الموحد
+        // =========================
+
+        bottomNavigationBar: const AppBottomNavBar(
+          selectedIndex: 2,
+        ),
       ),
     );
   }
 
+  // =========================
+  // شريط الفلترة
+  // =========================
+
   Widget _buildFilterTabs() {
-    final filters = ['الكل', 'قيد المراجعة', 'المقبولة', 'المرفوضة'];
+    final filters = [
+      'الكل',
+      'قيد المراجعة',
+      'المقبولة',
+      'المرفوضة',
+    ];
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
         children: filters.map((filter) {
-          final isSelected =
+          final bool isSelected =
               (selectedFilter == filter) ||
-              (filter == 'المقبولة' && selectedFilter == 'مقبول') ||
-              (filter == 'المرفوضة' && selectedFilter == 'مرفوض');
+              (filter == 'المقبولة' &&
+                  selectedFilter == 'مقبول') ||
+              (filter == 'المرفوضة' &&
+                  selectedFilter == 'مرفوض');
 
           return InkWell(
             onTap: () {
               setState(() {
-                if (filter == 'المقبولة')
+                if (filter == 'المقبولة') {
                   selectedFilter = 'مقبول';
-                else if (filter == 'المرفوضة')
+                } else if (filter == 'المرفوضة') {
                   selectedFilter = 'مرفوض';
-                else
+                } else {
                   selectedFilter = filter;
+                }
               });
             },
             borderRadius: BorderRadius.circular(10),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              duration:
+                  const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
               decoration: BoxDecoration(
-                color: isSelected ? primaryPurple : Colors.white,
-                borderRadius: BorderRadius.circular(10),
+                color: isSelected
+                    ? MasarColors.primaryBlue
+                    : Colors.white,
+                borderRadius:
+                    BorderRadius.circular(10),
                 border: Border.all(
-                  color: isSelected ? primaryPurple : borderColor,
+                  color: isSelected
+                      ? MasarColors.primaryBlue
+                      : MasarColors.border,
                 ),
               ),
               child: Text(
                 filter,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.white : textMuted,
+                  fontWeight: isSelected
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: isSelected
+                      ? Colors.white
+                      : MasarColors.textSecondary,
                 ),
               ),
             ),
@@ -175,116 +260,194 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
     );
   }
 
-  Widget _buildApplicationCard(Map<String, dynamic> app) {
+  // =========================
+  // كرت الطلب
+  // =========================
+
+  Widget _buildApplicationCard(
+    Map<String, dynamic> app,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
+        borderRadius:
+            BorderRadius.circular(16),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
+                    // شعار الشركة
                     Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: app['bgColor'] ?? Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: borderColor),
+                        color:
+                            app['bgColor'] ??
+                                Colors.white,
+                        borderRadius:
+                            BorderRadius.circular(10),
+                        border: Border.all(
+                          color: MasarColors.border,
+                        ),
                       ),
-                      child: Center(child: _buildCustomCompanyLogo(app)),
+                      child: Center(
+                        child:
+                            _buildCustomCompanyLogo(
+                          app,
+                        ),
+                      ),
                     ),
+
                     const SizedBox(width: 12),
+
+                    // معلومات الشركة
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           Text(
                             app['name'] ?? '',
-                            style: const TextStyle(
+                            style:
+                                const TextStyle(
                               fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: textDark,
+                              fontWeight:
+                                  FontWeight.bold,
+                              color: MasarColors
+                                  .textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             app['role'] ?? '',
-                            style: const TextStyle(
+                            style:
+                                const TextStyle(
                               fontSize: 12,
-                              color: textMuted,
+                              color: MasarColors
+                                  .textSecondary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    _buildStatusBadge(app['status']),
+
+                    // حالة الطلب
+                    _buildStatusBadge(
+                      app['status'],
+                    ),
                   ],
                 ),
+
                 const SizedBox(height: 12),
+
+                // تفاصيل التدريب
                 Row(
                   children: [
                     const Icon(
                       Icons.location_on_outlined,
                       size: 12,
-                      color: textMuted,
+                      color:
+                          MasarColors.textSecondary,
                     ),
                     const SizedBox(width: 2),
                     Text(
                       '${app['location']}  ',
-                      style: const TextStyle(fontSize: 11, color: textMuted),
+                      style:
+                          const TextStyle(
+                        fontSize: 11,
+                        color: MasarColors
+                            .textSecondary,
+                      ),
                     ),
+
                     const Icon(
                       Icons.calendar_month_outlined,
                       size: 12,
-                      color: textMuted,
+                      color:
+                          MasarColors.textSecondary,
                     ),
                     const SizedBox(width: 2),
                     Text(
                       '${app['duration']}  ',
-                      style: const TextStyle(fontSize: 11, color: textMuted),
+                      style:
+                          const TextStyle(
+                        fontSize: 11,
+                        color: MasarColors
+                            .textSecondary,
+                      ),
                     ),
+
                     const Icon(
                       Icons.access_time_rounded,
                       size: 12,
-                      color: textMuted,
+                      color:
+                          MasarColors.textSecondary,
                     ),
                     const SizedBox(width: 2),
                     Text(
                       '${app['hours']}',
-                      style: const TextStyle(fontSize: 11, color: textMuted),
+                      style:
+                          const TextStyle(
+                        fontSize: 11,
+                        color: MasarColors
+                            .textSecondary,
+                      ),
                     ),
+
                     const Spacer(),
+
                     const Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 12,
-                      color: textMuted,
+                      color:
+                          MasarColors.textSecondary,
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 8),
+
                 Text(
                   'تم التقديم في ${app['date']}',
-                  style: const TextStyle(fontSize: 10, color: textMuted),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color:
+                        MasarColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
 
-          // تم ربط زر "اختيار هذا التدريب" لينتقل إلى شاشة SelectionSuccessScreen
+          // =========================
+          // طلب مقبول
+          // =========================
+
           if (app['status'] == 'مقبول')
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: borderColor)),
+              padding:
+                  const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration:
+                  const BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: MasarColors.border,
+                  ),
+                ),
               ),
               child: OutlinedButton(
                 onPressed: () {
@@ -292,38 +455,57 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          SelectionSuccessScreen(selectedCompany: app),
+                          SelectionSuccessScreen(
+                        selectedCompany: app,
+                      ),
                     ),
                   );
                 },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: primaryPurple),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                style:
+                    OutlinedButton.styleFrom(
+                  side: const BorderSide(
+                    color:
+                        MasarColors.primaryBlue,
                   ),
-                  backgroundColor: lightPurpleBg.withOpacity(0.3),
+                  shape:
+                      RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(10),
+                  ),
+                  backgroundColor:
+                      MasarColors.lightBlue,
                 ),
                 child: const Text(
                   'اختيار هذا التدريب',
                   style: TextStyle(
-                    color: primaryPurple,
+                    color:
+                        MasarColors.primaryBlue,
                     fontSize: 13,
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                   ),
                 ),
               ),
             ),
 
-          // صندوق تنبيه في حال الرفض
+          // =========================
+          // طلب مرفوض
+          // =========================
+
           if (app['status'] == 'مرفوض')
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
+              padding:
+                  const EdgeInsets.all(10),
+              decoration:
+                  const BoxDecoration(
                 color: Color(0xFFFFF0F0),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
+                borderRadius:
+                    BorderRadius.only(
+                  bottomLeft:
+                      Radius.circular(16),
+                  bottomRight:
+                      Radius.circular(16),
                 ),
               ),
               child: const Column(
@@ -331,15 +513,21 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
                   Text(
                     'تم رفض طلبك.',
                     style: TextStyle(
-                      color: Color(0xFFE53E3E),
+                      color:
+                          Color(0xFFE53E3E),
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                          FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 2),
                   Text(
                     'يمكنك التقديم على فرص أخرى.',
-                    style: TextStyle(color: Color(0xFFE53E3E), fontSize: 11),
+                    style: TextStyle(
+                      color:
+                          Color(0xFFE53E3E),
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -349,10 +537,17 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  // =========================
+  // Badge حالة الطلب
+  // =========================
+
+  Widget _buildStatusBadge(
+    String status,
+  ) {
     Color bg = const Color(0xFFFFF9E6);
     Color text = const Color(0xFFD97706);
-    IconData icon = Icons.access_time_rounded;
+    IconData icon =
+        Icons.access_time_rounded;
 
     if (status == 'مقبول') {
       bg = const Color(0xFFE6F4EA);
@@ -365,57 +560,81 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius:
+            BorderRadius.circular(20),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize:
+            MainAxisSize.min,
         children: [
           Text(
             status,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.bold,
+              fontWeight:
+                  FontWeight.bold,
               color: text,
             ),
           ),
           const SizedBox(width: 4),
-          Icon(icon, size: 14, color: text),
+          Icon(
+            icon,
+            size: 14,
+            color: text,
+          ),
         ],
       ),
     );
   }
 
   // =========================
-  // دالة رسم الشعارات المخصصة لكل الشركات
+  // شعارات الشركات
   // =========================
-  Widget _buildCustomCompanyLogo(Map<String, dynamic> company) {
-    if (company['isZain'] == true || company['name'] == 'Zain') {
+
+  Widget _buildCustomCompanyLogo(
+    Map<String, dynamic> company,
+  ) {
+    // Zain
+    if (company['isZain'] == true ||
+        company['name'] == 'Zain') {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: [
           SizedBox(
             width: 24,
             height: 24,
-            child: CustomPaint(painter: _ZainRealLogoPainter()),
+            child: CustomPaint(
+              painter:
+                  _ZainRealLogoPainter(),
+            ),
           ),
           const SizedBox(height: 1),
           const Text(
             'zain',
             style: TextStyle(
               fontSize: 8.5,
-              fontWeight: FontWeight.w900,
-              color: textDark,
+              fontWeight:
+                  FontWeight.w900,
+              color:
+                  MasarColors.textPrimary,
               letterSpacing: 0.5,
-              fontStyle: FontStyle.italic,
+              fontStyle:
+                  FontStyle.italic,
             ),
           ),
         ],
       );
     }
 
+    // Microsoft
     if (company['isMicrosoft'] == true) {
       return SizedBox(
         width: 24,
@@ -424,26 +643,42 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
           crossAxisCount: 2,
           mainAxisSpacing: 2,
           crossAxisSpacing: 2,
-          physics: const NeverScrollableScrollPhysics(),
+          physics:
+              const NeverScrollableScrollPhysics(),
           children: [
-            Container(color: const Color(0xFFF25022)),
-            Container(color: const Color(0xFF7FBA00)),
-            Container(color: const Color(0xFF00A4EF)),
-            Container(color: const Color(0xFFFFB900)),
+            Container(
+              color:
+                  const Color(0xFFF25022),
+            ),
+            Container(
+              color:
+                  const Color(0xFF7FBA00),
+            ),
+            Container(
+              color:
+                  const Color(0xFF00A4EF),
+            ),
+            Container(
+              color:
+                  const Color(0xFFFFB900),
+            ),
           ],
         ),
       );
     }
 
+    // Amazon
     if (company['isAmazon'] == true) {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: [
           const Text(
             'a',
             style: TextStyle(
               fontSize: 22,
-              fontWeight: FontWeight.w900,
+              fontWeight:
+                  FontWeight.w900,
               color: Colors.black,
               height: 0.9,
             ),
@@ -451,122 +686,119 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
           Container(
             width: 14,
             height: 3,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF9900),
-              borderRadius: BorderRadius.circular(2),
+            decoration:
+                BoxDecoration(
+              color:
+                  const Color(0xFFFF9900),
+              borderRadius:
+                  BorderRadius.circular(2),
             ),
           ),
         ],
       );
     }
 
+    // Arab Bank
     if (company['isArabBank'] == true) {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: const [
-          Icon(Icons.account_balance_rounded, color: Colors.white, size: 20),
+          Icon(
+            Icons.account_balance_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
           SizedBox(height: 1),
           Text(
             'ARAB BANK',
             style: TextStyle(
               color: Colors.white,
               fontSize: 5,
-              fontWeight: FontWeight.bold,
+              fontWeight:
+                  FontWeight.bold,
             ),
           ),
         ],
       );
     }
 
+    // الشركات الأخرى
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment:
+          MainAxisAlignment.center,
       children: [
         Icon(
-          company['icon'] as IconData? ?? Icons.business,
-          color: company['bgColor'] == const Color(0xFFFF6600)
+          company['icon'] as IconData? ??
+              Icons.business,
+          color: company['bgColor'] ==
+                  const Color(0xFFFF6600)
               ? Colors.white
-              : (company['iconColor'] ?? primaryPurple),
+              : (company['iconColor'] ??
+                  MasarColors
+                      .primaryBlue),
           size: 22,
         ),
         const SizedBox(height: 2),
         Text(
           company['name'] ?? '',
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          overflow:
+              TextOverflow.ellipsis,
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight:
+                FontWeight.bold,
             fontSize: 9,
-            color: (company['bgColor'] == const Color(0xFFFF6600))
+            color: company['bgColor'] ==
+                    const Color(
+                      0xFFFF6600,
+                    )
                 ? Colors.white
-                : textDark,
+                : MasarColors
+                    .textPrimary,
           ),
         ),
       ],
     );
   }
 
+  // =========================
+  // صندوق التنبيه
+  // =========================
+
   Widget _buildInfoNoteBox() {
     return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(
+        top: 8,
+        bottom: 16,
+      ),
+      padding:
+          const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: lightPurpleBg,
-        borderRadius: BorderRadius.circular(12),
+        color: MasarColors.lightBlue,
+        borderRadius:
+            BorderRadius.circular(12),
       ),
       child: const Row(
         children: [
-          Icon(Icons.info_rounded, color: primaryPurple, size: 20),
+          Icon(
+            Icons.info_rounded,
+            color:
+                MasarColors.primaryBlue,
+            size: 20,
+          ),
           SizedBox(width: 8),
           Expanded(
             child: Text(
               'سيتم إشعارك عند وجود أي تحديث على طلباتك.',
               style: TextStyle(
                 fontSize: 12,
-                color: primaryPurple,
-                fontWeight: FontWeight.w500,
+                color:
+                    MasarColors.primaryBlue,
+                fontWeight:
+                    FontWeight.w500,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: borderColor)),
-      ),
-      child: BottomNavigationBar(
-        currentIndex: 2,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: primaryPurple,
-        unselectedItemColor: textMuted,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        elevation: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'الرئيسية',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business_center_outlined),
-            label: 'فرص التدريب',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description_outlined),
-            label: 'طلباتي',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none_rounded),
-            label: 'الإشعارات',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'ملفي',
           ),
         ],
       ),
@@ -575,14 +807,25 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
 }
 
 // =========================
-// الرسام المخصص لشعار زين المتدرج (Zain Ribbon Painter)
+// شعار زين
 // =========================
-class _ZainRealLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
-    final gradient = const SweepGradient(
+class _ZainRealLogoPainter
+    extends CustomPainter {
+  @override
+  void paint(
+    Canvas canvas,
+    Size size,
+  ) {
+    final rect = Rect.fromLTWH(
+      0,
+      0,
+      size.width,
+      size.height,
+    );
+
+    final gradient =
+        const SweepGradient(
       colors: [
         Color(0xFF8B5CF6),
         Color(0xFFEC4899),
@@ -593,13 +836,21 @@ class _ZainRealLogoPainter extends CustomPainter {
     );
 
     final paint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
+      ..shader =
+          gradient.createShader(rect)
+      ..style =
+          PaintingStyle.stroke
       ..strokeWidth = 3.5
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap =
+          StrokeCap.round;
 
     final path = Path();
-    path.moveTo(size.width * 0.2, size.height * 0.8);
+
+    path.moveTo(
+      size.width * 0.2,
+      size.height * 0.8,
+    );
+
     path.cubicTo(
       size.width * 0.05,
       size.height * 0.3,
@@ -608,6 +859,7 @@ class _ZainRealLogoPainter extends CustomPainter {
       size.width * 0.8,
       size.height * 0.35,
     );
+
     path.cubicTo(
       size.width * 0.9,
       size.height * 0.65,
@@ -617,9 +869,16 @@ class _ZainRealLogoPainter extends CustomPainter {
       size.height * 0.5,
     );
 
-    canvas.drawPath(path, paint);
+    canvas.drawPath(
+      path,
+      paint,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(
+    covariant CustomPainter oldDelegate,
+  ) {
+    return false;
+  }
 }

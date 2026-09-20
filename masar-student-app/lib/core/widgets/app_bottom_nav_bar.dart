@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../theme/masar_theme.dart';
-
 import '../../screens/profile/home_screen.dart';
-import '../../screens/career/skill_mirror_screen.dart';
+import '../../screens/career/roadmap_screen.dart';
+import '../../screens/training_screens/company_selection_screen.dart';
 import '../../screens/career/my_cv_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 
@@ -14,169 +14,91 @@ class AppBottomNavBar extends StatelessWidget {
     required this.selectedIndex,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 68,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: MasarColors.border,
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 68,
-          child: Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              _navItem(
-                context: context,
-                index: 0,
-                icon: Icons.home_outlined,
-                selectedIcon: Icons.home,
-                label: 'الرئيسية',
-              ),
+  void _onItemTapped(BuildContext context, int index) {
+    if (index == selectedIndex) return;
 
-              _navItem(
-                context: context,
-                index: 1,
-                icon: Icons.map_outlined,
-                selectedIcon: Icons.map,
-                label: 'خارطة الطريق',
-              ),
+    Widget screen;
 
-              _navItem(
-                context: context,
-                index: 2,
-                icon: Icons.business_center_outlined,
-                selectedIcon: Icons.business_center,
-                label: 'الفرص',
-              ),
+    switch (index) {
+      // الرئيسية
+      case 0:
+        screen = const HomeScreen();
+        break;
 
-              _navItem(
-                context: context,
-                index: 3,
-                icon: Icons.badge_outlined,
-                selectedIcon: Icons.badge,
-                label: 'الملف المهني',
-              ),
+      // خارطة الطريق
+      case 1:
+        screen = const RoadmapScreen();
+        break;
 
-              _navItem(
-                context: context,
-                index: 4,
-                icon: Icons.person_outline,
-                selectedIcon: Icons.person,
-                label: 'الملف الشخصي',
-              ),
-            ],
-          ),
-        ),
+      // التدريب الميداني
+      case 2:
+        screen = const SelectCompanyScreen();
+        break;
+
+      // الملف المهني
+      case 3:
+        screen = const MyCvScreen();
+        break;
+
+      // الملف الشخصي
+      case 4:
+        screen = const ProfileScreen();
+        break;
+
+      default:
+        screen = const HomeScreen();
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => screen,
       ),
     );
   }
 
-  Widget _navItem({
-    required BuildContext context,
-    required int index,
-    required IconData icon,
-    required IconData selectedIcon,
-    required String label,
-  }) {
-    final bool isSelected = selectedIndex == index;
+  @override
+  Widget build(BuildContext context) {
+    return NavigationBar(
+      selectedIndex: selectedIndex,
+      onDestinationSelected: (index) {
+        _onItemTapped(context, index);
+      },
+      backgroundColor: Colors.white,
+      indicatorColor: MasarColors.lightBlue,
+      elevation: 0,
 
-    return Expanded(
-      child: InkWell(
-        onTap: () {
-          switch (index) {
-            case 0:
-              // الرئيسية
-              if (selectedIndex != 0) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HomeScreen(),
-                  ),
-                );
-              }
-              break;
-
-            case 1:
-              // خارطة الطريق
-              if (selectedIndex != 1) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SkillMirrorScreen(),
-                  ),
-                );
-              }
-              break;
-
-            case 2:
-              // الفرص
-              // لاحقًا: نضيف شاشة OpportunitiesScreen
-              break;
-
-            case 3:
-              // الملف المهني
-              if (selectedIndex != 3) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MyCvScreen(),
-                  ),
-                );
-              }
-              break;
-
-            case 4:
-              // الملف الشخصي
-              if (selectedIndex != 4) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
-                  ),
-                );
-              }
-              break;
-          }
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              size: 23,
-              color: isSelected
-                  ? MasarColors.primaryBlue
-                  : MasarColors.textSecondary,
-            ),
-
-            const SizedBox(height: 3),
-
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 10,
-                fontWeight: isSelected
-                    ? FontWeight.w600
-                    : FontWeight.normal,
-                color: isSelected
-                    ? MasarColors.primaryBlue
-                    : MasarColors.textSecondary,
-              ),
-            ),
-          ],
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'الرئيسية',
         ),
-      ),
+
+        NavigationDestination(
+          icon: Icon(Icons.map_outlined),
+          selectedIcon: Icon(Icons.map),
+          label: 'خارطة الطريق',
+        ),
+
+        NavigationDestination(
+          icon: Icon(Icons.business_center_outlined),
+          selectedIcon: Icon(Icons.business_center),
+          label: 'التدريب الميداني',
+        ),
+
+        NavigationDestination(
+          icon: Icon(Icons.badge_outlined),
+          selectedIcon: Icon(Icons.badge),
+          label: 'الملف المهني',
+        ),
+
+        NavigationDestination(
+          icon: Icon(Icons.person_outline),
+          selectedIcon: Icon(Icons.person),
+          label: 'الملف الشخصي',
+        ),
+      ],
     );
   }
 }

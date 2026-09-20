@@ -4,7 +4,10 @@ import '../../../theme/masar_theme.dart';
 class WeeklyReportScreen extends StatefulWidget {
   final int week;
 
-  const WeeklyReportScreen({super.key, required this.week});
+  const WeeklyReportScreen({
+    super.key,
+    required this.week,
+  });
 
   @override
   State<WeeklyReportScreen> createState() => _WeeklyReportScreenState();
@@ -44,7 +47,9 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('تقرير الأسبوع ${widget.week}')),
+      appBar: AppBar(
+        title: Text('تقرير الأسبوع ${widget.week}'),
+      ),
 
       body: SafeArea(
         child: Center(
@@ -70,38 +75,6 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
             ),
           ),
         ),
-      ),
-
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 2,
-        onDestinationSelected: (index) {},
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'الرئيسية',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.business_center_outlined),
-            selectedIcon: Icon(Icons.business_center),
-            label: 'فرص التدريب',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.description_outlined),
-            selectedIcon: Icon(Icons.description),
-            label: 'تقاريري',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_none),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'الإشعارات',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'ملفي',
-          ),
-        ],
       ),
     );
   }

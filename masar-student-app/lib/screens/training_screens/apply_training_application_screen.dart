@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../theme/masar_theme.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import 'application_success_screen.dart';
@@ -6,24 +7,23 @@ import 'application_success_screen.dart';
 class ApplyTrainingApplicationScreen extends StatelessWidget {
   final Map<String, dynamic> company;
 
-  const ApplyTrainingApplicationScreen({super.key, required this.company});
-
-  static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color lightPurpleBg = Color(0xFFF3F0FF);
-  static const Color borderColor = Color(0xFFE2E8F0);
-  static const Color textDark = Color(0xFF1E293B);
-  static const Color textMuted = Color(0xFF64748B);
+  const ApplyTrainingApplicationScreen({
+    super.key,
+    required this.company,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFC),
+        backgroundColor: MasarColors.background,
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
+              constraints: const BoxConstraints(
+                maxWidth: 480,
+              ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -34,14 +34,17 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
                   children: [
                     // الهيدر العلوي
                     _buildTopHeader(context),
+
                     const SizedBox(height: 16),
 
                     // مؤشر الخطوات
                     _buildStepIndicator(),
+
                     const SizedBox(height: 16),
 
-                    // بطاقة الشركة المحددة بتصميم متناسق وتفاعلي
+                    // الشركة المختارة
                     _buildSelectedCompanyCard(),
+
                     const SizedBox(height: 20),
 
                     // معلومات الطالب
@@ -49,36 +52,47 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
                       'معلومات الطالب',
                       'سيتم استخدام هذه المعلومات في طلبك.',
                     ),
+
                     const SizedBox(height: 12),
+
                     _buildTextField(
                       'الإسم الكامل',
                       'شهد أحمد',
                       Icons.person_outline_rounded,
                     ),
+
                     const SizedBox(height: 12),
+
                     _buildTextField(
                       'الجامعة',
                       'جامعة العلوم والتكنولوجيا الأردنية',
                       Icons.school_outlined,
                     ),
+
                     const SizedBox(height: 12),
+
                     _buildTextField(
                       'التخصص',
                       'علوم الحاسوب',
                       Icons.menu_book_rounded,
                     ),
+
                     const SizedBox(height: 12),
+
                     _buildTextField(
                       'البريد الإلكتروني',
                       'shahd@example.com',
                       Icons.email_outlined,
                     ),
+
                     const SizedBox(height: 12),
+
                     _buildTextField(
                       'رقم الهاتف',
                       '+962 7 9123 4567',
                       Icons.phone_outlined,
                     ),
+
                     const SizedBox(height: 24),
 
                     // المرفقات
@@ -86,20 +100,38 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
                       'المرفقات المطلوبة',
                       'يرجى رفع الملفات بصيغة PDF.',
                     ),
+
                     const SizedBox(height: 12),
-                    _buildUploadBox('السيرة الذاتية (CV)', 'ارفع ملف PDF'),
+
+                    _buildUploadBox(
+                      'السيرة الذاتية (CV)',
+                      'ارفع ملف PDF',
+                    ),
+
                     const SizedBox(height: 10),
-                    _buildUploadBox('السجل الأكاديمي', 'ارفع ملف PDF'),
+
+                    _buildUploadBox(
+                      'السجل الأكاديمي',
+                      'ارفع ملف PDF',
+                    ),
+
                     const SizedBox(height: 10),
-                    _buildUploadBox('أي مستند إضافي (اختياري)', 'ارفع ملف PDF'),
+
+                    _buildUploadBox(
+                      'أي مستند إضافي (اختياري)',
+                      'ارفع ملف PDF',
+                    ),
+
                     const SizedBox(height: 20),
 
                     // الملاحظة
                     _buildNoteBox(),
+
                     const SizedBox(height: 24),
 
-                    // زر الإرسال مع ربطه بـ BuildContext
+                    // زر الإرسال
                     _buildSubmitButton(context),
+
                     const SizedBox(height: 12),
                   ],
                 ),
@@ -107,10 +139,18 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: _buildBottomNavigationBar(),
+
+        // Navbar الموحد
+        bottomNavigationBar: const AppBottomNavBar(
+          selectedIndex: 2,
+        ),
       ),
     );
   }
+
+  // =====================================================
+  // Header
+  // =====================================================
 
   Widget _buildTopHeader(BuildContext context) {
     return Row(
@@ -122,36 +162,47 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
-              color: lightPurpleBg,
+              color: MasarColors.lightBlue,
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 18,
-              color: primaryPurple,
+              color: MasarColors.primaryBlue,
             ),
           ),
         ),
+
         const Text(
           'تقديم طلب التدريب',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: textDark,
+            color: MasarColors.textPrimary,
           ),
         ),
+
         const SizedBox(width: 34),
       ],
     );
   }
 
+  // =====================================================
+  // Step Indicator
+  // =====================================================
+
   Widget _buildStepIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(
+        vertical: 12,
+        horizontal: 16,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: Column(
         children: [
@@ -165,7 +216,9 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
               _buildStepCircle('3', false),
             ],
           ),
+
           const SizedBox(height: 8),
+
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -174,16 +227,22 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: primaryPurple,
+                  color: MasarColors.primaryBlue,
                 ),
               ),
               Text(
                 'المراجعة',
-                style: TextStyle(fontSize: 12, color: textMuted),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: MasarColors.textSecondary,
+                ),
               ),
               Text(
                 'تم الإرسال',
-                style: TextStyle(fontSize: 12, color: textMuted),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: MasarColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -192,19 +251,26 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStepCircle(String number, bool isActive) {
+  Widget _buildStepCircle(
+    String number,
+    bool isActive,
+  ) {
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isActive ? primaryPurple : const Color(0xFFE2E8F0),
+        color: isActive
+            ? MasarColors.primaryBlue
+            : MasarColors.border,
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Text(
           number,
           style: TextStyle(
-            color: isActive ? Colors.white : textMuted,
+            color: isActive
+                ? Colors.white
+                : MasarColors.textSecondary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -213,24 +279,30 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
   }
 
   Widget _buildStepLine() {
-    return Container(width: 60, height: 2, color: const Color(0xFFE2E8F0));
+    return Container(
+      width: 60,
+      height: 2,
+      color: MasarColors.border,
+    );
   }
 
-  /// بطاقة الشركة بتصميم عصري
+  // =====================================================
+  // Selected Company
+  // =====================================================
+
   Widget _buildSelectedCompanyCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.white, Color(0xFFFBFBFE)],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryPurple.withOpacity(0.3), width: 1.5),
+        border: Border.all(
+          color: MasarColors.primaryBlue.withOpacity(0.3),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withOpacity(0.05),
+            color: MasarColors.primaryBlue.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -244,85 +316,124 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: company['bgColor'] ?? Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
+              border: Border.all(
+                color: MasarColors.border,
+              ),
             ),
-            child: Center(child: _buildCustomCompanyLogo(company)),
+            child: Center(
+              child: _buildCustomCompanyLogo(company),
+            ),
           ),
+
           const SizedBox(width: 14),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      company['name'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: textDark,
+                    Expanded(
+                      child: Text(
+                        company['name'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: MasarColors.textPrimary,
+                        ),
                       ),
                     ),
+
+                    const SizedBox(width: 8),
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: lightPurpleBg,
-                        borderRadius: BorderRadius.circular(6),
+                        color: MasarColors.lightBlue,
+                        borderRadius:
+                            BorderRadius.circular(6),
                       ),
                       child: const Text(
                         'الشركة المختارة',
                         style: TextStyle(
                           fontSize: 10,
-                          color: primaryPurple,
+                          color: MasarColors.primaryBlue,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 4),
+
                 const Text(
                   'Data Analyst Intern',
-                  style: TextStyle(fontSize: 13, color: textMuted),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: MasarColors.textSecondary,
+                  ),
                 ),
+
                 const SizedBox(height: 8),
+
                 Row(
                   children: [
                     const Icon(
                       Icons.location_on_outlined,
                       size: 12,
-                      color: textMuted,
+                      color: MasarColors.textSecondary,
                     ),
+
                     const SizedBox(width: 2),
+
                     Text(
                       '${company['location'] ?? 'عمان'}، الأردن',
-                      style: const TextStyle(fontSize: 11, color: textMuted),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: MasarColors.textSecondary,
+                      ),
                     ),
+
                     const SizedBox(width: 10),
+
                     const Icon(
                       Icons.calendar_month_outlined,
                       size: 12,
-                      color: textMuted,
+                      color: MasarColors.textSecondary,
                     ),
+
                     const SizedBox(width: 2),
+
                     const Text(
                       '3 أشهر',
-                      style: TextStyle(fontSize: 11, color: textMuted),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: MasarColors.textSecondary,
+                      ),
                     ),
+
                     const SizedBox(width: 10),
+
                     const Icon(
                       Icons.access_time_rounded,
                       size: 12,
-                      color: textMuted,
+                      color: MasarColors.textSecondary,
                     ),
+
                     const SizedBox(width: 2),
+
                     const Text(
                       '120 ساعة',
-                      style: TextStyle(fontSize: 11, color: textMuted),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: MasarColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -334,15 +445,24 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomCompanyLogo(Map<String, dynamic> company) {
-    if (company['isZain'] == true || company['name'] == 'Zain') {
+  // =====================================================
+  // Company Logo
+  // =====================================================
+
+  Widget _buildCustomCompanyLogo(
+    Map<String, dynamic> company,
+  ) {
+    if (company['isZain'] == true ||
+        company['name'] == 'Zain') {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
             width: 26,
             height: 26,
-            child: CustomPaint(painter: _ZainRealLogoPainter()),
+            child: CustomPaint(
+              painter: _ZainRealLogoPainter(),
+            ),
           ),
           const SizedBox(height: 1),
           const Text(
@@ -350,7 +470,7 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 8.5,
               fontWeight: FontWeight.w900,
-              color: textDark,
+              color: MasarColors.textPrimary,
               letterSpacing: 0.5,
               fontStyle: FontStyle.italic,
             ),
@@ -367,12 +487,21 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 2,
           crossAxisSpacing: 2,
-          physics: const NeverScrollableScrollPhysics(),
+          physics:
+              const NeverScrollableScrollPhysics(),
           children: [
-            Container(color: const Color(0xFFF25022)),
-            Container(color: const Color(0xFF7FBA00)),
-            Container(color: const Color(0xFF00A4EF)),
-            Container(color: const Color(0xFFFFB900)),
+            Container(
+              color: const Color(0xFFF25022),
+            ),
+            Container(
+              color: const Color(0xFF7FBA00),
+            ),
+            Container(
+              color: const Color(0xFF00A4EF),
+            ),
+            Container(
+              color: const Color(0xFFFFB900),
+            ),
           ],
         ),
       );
@@ -404,10 +533,14 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
     }
 
     if (company['isArabBank'] == true) {
-      return Column(
+      return const Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.account_balance_rounded, color: Colors.white, size: 20),
+        children: [
+          Icon(
+            Icons.account_balance_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
           SizedBox(height: 1),
           Text(
             'ARAB BANK',
@@ -425,13 +558,18 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          company['icon'] as IconData? ?? Icons.business,
-          color: company['bgColor'] == const Color(0xFFFF6600)
+          company['icon'] as IconData? ??
+              Icons.business,
+          color: company['bgColor'] ==
+                  const Color(0xFFFF6600)
               ? Colors.white
-              : (company['iconColor'] ?? primaryPurple),
+              : (company['iconColor'] ??
+                  MasarColors.primaryBlue),
           size: 22,
         ),
+
         const SizedBox(height: 2),
+
         Text(
           company['name'] ?? '',
           maxLines: 1,
@@ -439,16 +577,24 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 9,
-            color: (company['bgColor'] == const Color(0xFFFF6600))
+            color: company['bgColor'] ==
+                    const Color(0xFFFF6600)
                 ? Colors.white
-                : textDark,
+                : MasarColors.textPrimary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSectionTitle(String title, String subtitle) {
+  // =====================================================
+  // Section Title
+  // =====================================================
+
+  Widget _buildSectionTitle(
+    String title,
+    String subtitle,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,31 +603,61 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: textDark,
+            color: MasarColors.textPrimary,
           ),
         ),
+
         const SizedBox(height: 2),
-        Text(subtitle, style: const TextStyle(fontSize: 12, color: textMuted)),
+
+        Text(
+          subtitle,
+          style: const TextStyle(
+            fontSize: 12,
+            color: MasarColors.textSecondary,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildTextField(String label, String initialValue, IconData icon) {
+  // =====================================================
+  // Text Field
+  // =====================================================
+
+  Widget _buildTextField(
+    String label,
+    String initialValue,
+    IconData icon,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: TextField(
-        controller: TextEditingController(text: initialValue),
-        style: const TextStyle(fontSize: 14, color: textDark),
+        controller:
+            TextEditingController(text: initialValue),
+        style: const TextStyle(
+          fontSize: 14,
+          color: MasarColors.textPrimary,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 12, color: textMuted),
-          prefixIcon: Icon(icon, color: textMuted, size: 20),
+          labelStyle: const TextStyle(
+            fontSize: 12,
+            color: MasarColors.textSecondary,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: MasarColors.textSecondary,
+            size: 20,
+          ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding:
+              const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 12,
           ),
@@ -490,55 +666,78 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUploadBox(String title, String subtitle) {
+  // =====================================================
+  // Upload Box
+  // =====================================================
+
+  Widget _buildUploadBox(
+    String title,
+    String subtitle,
+  ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: lightPurpleBg,
-                  borderRadius: BorderRadius.circular(8),
+                  color: MasarColors.lightBlue,
+                  borderRadius:
+                      BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.upload_rounded,
-                  color: primaryPurple,
+                  color: MasarColors.primaryBlue,
                   size: 20,
                 ),
               ),
+
               const SizedBox(width: 12),
+
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: textDark,
+                      color: MasarColors.textPrimary,
                     ),
                   ),
+
                   const SizedBox(height: 2),
+
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 11, color: textMuted),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: MasarColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
+
           const Icon(
             Icons.picture_as_pdf_rounded,
-            color: primaryPurple,
+            color: MasarColors.primaryBlue,
             size: 24,
           ),
         ],
@@ -546,28 +745,36 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
     );
   }
 
+  // =====================================================
+  // Note Box
+  // =====================================================
+
   Widget _buildNoteBox() {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F0FE),
+        color: MasarColors.lightBlue,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2DEFF)),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const Icon(
+          Icon(
             Icons.info_outline_rounded,
-            color: primaryPurple,
+            color: MasarColors.primaryBlue,
             size: 20,
           ),
-          const SizedBox(width: 10),
-          const Expanded(
+
+          SizedBox(width: 10),
+
+          Expanded(
             child: Text(
               'تأكد من أن جميع المعلومات والمرفقات صحيحة قبل إرسال الطلب.',
               style: TextStyle(
                 fontSize: 12,
-                color: primaryPurple,
+                color: MasarColors.primaryBlue,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -577,7 +784,13 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context) {
+  // =====================================================
+  // Submit Button
+  // =====================================================
+
+  Widget _buildSubmitButton(
+    BuildContext context,
+  ) {
     return SizedBox(
       width: double.infinity,
       height: 52,
@@ -586,19 +799,26 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ApplicationSuccessScreen(company: company),
+              builder: (context) =>
+                  ApplicationSuccessScreen(
+                company: company,
+              ),
             ),
           );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryPurple,
+          backgroundColor:
+              MasarColors.primaryBlue,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius:
+                BorderRadius.circular(14),
           ),
           elevation: 0,
         ),
         child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment:
+              MainAxisAlignment.center,
           children: [
             Text(
               'إرسال طلب التدريب',
@@ -608,63 +828,38 @@ class ApplyTrainingApplicationScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             SizedBox(width: 10),
-            Icon(Icons.send_rounded, color: Colors.white, size: 18),
+
+            Icon(
+              Icons.send_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: borderColor)),
-      ),
-      child: BottomNavigationBar(
-        currentIndex: 3,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: primaryPurple,
-        unselectedItemColor: textMuted,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        elevation: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'الرئيسية',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none_rounded),
-            label: 'الإشعارات',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description_outlined),
-            label: 'طلباتي',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business_center_outlined),
-            label: 'الفرص',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'ملفي',
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-// =========================
-// الرسام المخصص لشعار زين المتدرج (Zain Ribbon Painter)
-// =========================
-class _ZainRealLogoPainter extends CustomPainter {
+// =====================================================
+// Zain Logo Painter
+// =====================================================
+
+class _ZainRealLogoPainter
+    extends CustomPainter {
   @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+  void paint(
+    Canvas canvas,
+    Size size,
+  ) {
+    final rect = Rect.fromLTWH(
+      0,
+      0,
+      size.width,
+      size.height,
+    );
 
     final gradient = const SweepGradient(
       colors: [
@@ -683,7 +878,12 @@ class _ZainRealLogoPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
-    path.moveTo(size.width * 0.2, size.height * 0.8);
+
+    path.moveTo(
+      size.width * 0.2,
+      size.height * 0.8,
+    );
+
     path.cubicTo(
       size.width * 0.05,
       size.height * 0.3,
@@ -692,6 +892,7 @@ class _ZainRealLogoPainter extends CustomPainter {
       size.width * 0.8,
       size.height * 0.35,
     );
+
     path.cubicTo(
       size.width * 0.9,
       size.height * 0.65,
@@ -705,5 +906,9 @@ class _ZainRealLogoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(
+    covariant CustomPainter oldDelegate,
+  ) {
+    return false;
+  }
 }

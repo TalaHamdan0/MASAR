@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
+
 import 'package:masar_student_app/theme/masar_theme.dart';
-import 'skill_mirror_screen.dart';
+import 'package:masar_student_app/screens/career/career_readiness_screen.dart';
 
 class CareerAssessmentScreen extends StatefulWidget {
   const CareerAssessmentScreen({super.key});
@@ -12,368 +14,423 @@ class CareerAssessmentScreen extends StatefulWidget {
 
 class _CareerAssessmentScreenState
     extends State<CareerAssessmentScreen> {
-
   int currentQuestion = 0;
 
-  // -1 يعني لم يتم اختيار إجابة
-  final List<int> answers = List.filled(10, -1);
+  final List<int?> answers = List.filled(10, null);
 
   final List<Map<String, dynamic>> questions = [
     {
-      'question': 'ما مدى معرفتك بلغة Python؟',
       'skill': 'Python',
+      'question': 'أي مكتبة تستخدم بشكل شائع لتحليل البيانات في Python؟',
       'options': [
-        'مبتدئ جداً',
-        'مبتدئ',
-        'جيد',
-        'متقدم',
+        'Pandas',
+        'Flutter',
+        'Django',
+        'Firebase',
       ],
+      'correct': 0,
     },
     {
-      'question': 'ما مدى قدرتك على كتابة SQL Queries؟',
+      'skill': 'Python',
+      'question': 'ما وظيفة الدالة len() في Python؟',
+      'options': [
+        'حذف البيانات',
+        'حساب طول العنصر',
+        'تدريب النموذج',
+        'إنشاء ملف',
+      ],
+      'correct': 1,
+    },
+    {
       'skill': 'SQL',
+      'question': 'أي أمر يستخدم لجلب البيانات من قاعدة البيانات؟',
       'options': [
-        'لا أعرف SQL',
-        'أعرف الأساسيات',
-        'جيد',
-        'متقدم',
+        'INSERT',
+        'DELETE',
+        'SELECT',
+        'UPDATE',
       ],
+      'correct': 2,
     },
     {
-      'question': 'ما مدى استخدامك لـ Excel في تحليل البيانات؟',
+      'skill': 'SQL',
+      'question': 'أي جزء من SQL يستخدم لتصفية النتائج؟',
+      'options': [
+        'WHERE',
+        'ORDER BY',
+        'GROUP BY',
+        'JOIN',
+      ],
+      'correct': 0,
+    },
+    {
       'skill': 'Excel',
+      'question': 'أي دالة تستخدم لحساب متوسط القيم؟',
       'options': [
-        'لم أستخدمه',
-        'استخدام بسيط',
-        'جيد',
-        'متقدم',
+        'SUM',
+        'COUNT',
+        'AVERAGE',
+        'MAX',
       ],
+      'correct': 2,
     },
     {
-      'question': 'ما مدى معرفتك بـ Power BI؟',
+      'skill': 'Excel',
+      'question': 'ما الأداة المناسبة لتلخيص البيانات في Excel؟',
+      'options': [
+        'Pivot Table',
+        'WordArt',
+        'Header',
+        'Page Break',
+      ],
+      'correct': 0,
+    },
+    {
       'skill': 'Power BI',
+      'question': 'ما الاستخدام الأساسي لـ Power BI؟',
       'options': [
-        'لا أعرفه',
-        'أعرف الأساسيات',
-        'جيد',
-        'متقدم',
+        'إنشاء تطبيقات',
+        'تحليل البيانات وإنشاء التقارير',
+        'كتابة كود Python',
+        'إرسال البريد',
       ],
+      'correct': 1,
     },
     {
-      'question': 'ما مدى فهمك لمفاهيم الإحصاء؟',
+      'skill': 'Power BI',
+      'question': 'أي عنصر يستخدم لعرض البيانات بصريًا في Power BI؟',
+      'options': [
+        'Visual',
+        'Class',
+        'Function',
+        'Package',
+      ],
+      'correct': 0,
+    },
+    {
       'skill': 'الإحصاء',
+      'question': 'كيف نحسب المتوسط الحسابي؟',
       'options': [
-        'ضعيف',
-        'أعرف الأساسيات',
-        'جيد',
-        'متقدم',
+        'أكبر قيمة',
+        'أصغر قيمة',
+        'مجموع القيم ÷ عددها',
+        'القيمة الأكثر تكرارًا',
       ],
+      'correct': 2,
     },
     {
-      'question': 'ما مدى معرفتك بمفاهيم Machine Learning؟',
-      'skill': 'Machine Learning',
+      'skill': 'الإحصاء',
+      'question': 'أي مقياس يتأثر بالقيم المتطرفة بشكل أكبر؟',
       'options': [
-        'لا أعرفها',
-        'أعرف الأساسيات',
-        'جيد',
-        'متقدم',
+        'Mean',
+        'Median',
+        'Mode',
+        'Range',
       ],
-    },
-    {
-      'question': 'ما مدى قدرتك على عرض البيانات بصرياً؟',
-      'skill': 'Data Visualization',
-      'options': [
-        'ضعيف',
-        'مبتدئ',
-        'جيد',
-        'متقدم',
-      ],
-    },
-    {
-      'question': 'ما مدى قدرتك على حل المشاكل وتحليلها؟',
-      'skill': 'Problem Solving',
-      'options': [
-        'أحتاج لتطويرها',
-        'مقبول',
-        'جيد',
-        'ممتاز',
-      ],
-    },
-    {
-      'question': 'ما مدى قدرتك على العمل ضمن فريق؟',
-      'skill': 'Teamwork',
-      'options': [
-        'أحتاج لتطويرها',
-        'مقبول',
-        'جيد',
-        'ممتاز',
-      ],
-    },
-    {
-      'question': 'ما مدى ثقتك في تنفيذ مشروع Data Analysis كامل؟',
-      'skill': 'Data Analysis',
-      'options': [
-        'لا أستطيع حالياً',
-        'أستطيع بمساعدة',
-        'أستطيع بشكل جيد',
-        'أستطيع بشكل مستقل',
-      ],
+      'correct': 0,
     },
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    final question = questions[currentQuestion];
-    final selectedAnswer = answers[currentQuestion];
+  void nextQuestion() {
+    if (answers[currentQuestion] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('اختاري إجابة أولاً'),
+        ),
+      );
+      return;
+    }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Career Assessment'),
-      ),
+    if (currentQuestion < questions.length - 1) {
+      setState(() {
+        currentQuestion++;
+      });
+    } else {
+      finishAssessment();
+    }
+  }
 
-      body: SafeArea(
-        child: Column(
-          children: [
+  void previousQuestion() {
+    if (currentQuestion > 0) {
+      setState(() {
+        currentQuestion--;
+      });
+    }
+  }
 
-            // Progress
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+  void finishAssessment() {
+    int correctAnswers = 0;
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Question ${currentQuestion + 1} of 10',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: MasarColors.textPrimary,
-                        ),
-                      ),
+    for (int i = 0; i < questions.length; i++) {
+      if (answers[i] == questions[i]['correct']) {
+        correctAnswers++;
+      }
+    }
 
-                      Text(
-                        '${((currentQuestion + 1) / 10 * 100).round()}%',
-                        style: const TextStyle(
-                          color: MasarColors.primaryBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+    final int score =
+        ((correctAnswers / questions.length) * 100).round();
 
-                  const SizedBox(height: 10),
-
-                  LinearProgressIndicator(
-                    value: (currentQuestion + 1) / 10,
-                    minHeight: 7,
-                    borderRadius: BorderRadius.circular(10),
-                    backgroundColor: MasarColors.lightBlue,
-                    color: MasarColors.primaryBlue,
-                  ),
-                ],
-              ),
-            ),
-
-            // Question + Answers
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-
-                    const SizedBox(height: 20),
-
-                    // Question number
-                    Container(
-                      width: 55,
-                      height: 55,
-                      decoration: BoxDecoration(
-                        color: MasarColors.lightBlue,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${currentQuestion + 1}',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: MasarColors.primaryBlue,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Text(
-                      question['question'],
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: MasarColors.textPrimary,
-                        height: 1.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    ...List.generate(
-                      question['options'].length,
-                      (index) {
-                        final isSelected = selectedAnswer == index;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 14),
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                answers[currentQuestion] = index;
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 18,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? MasarColors.lightBlue
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? MasarColors.primaryBlue
-                                      : MasarColors.border,
-                                  width: isSelected ? 2 : 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-
-                                  Container(
-                                    width: 25,
-                                    height: 25,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? MasarColors.primaryBlue
-                                            : MasarColors.textSecondary,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: isSelected
-                                        ? Center(
-                                            child: Container(
-                                              width: 13,
-                                              height: 13,
-                                              decoration:
-                                                  const BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: MasarColors
-                                                    .primaryBlue,
-                                              ),
-                                            ),
-                                          )
-                                        : null,
-                                  ),
-
-                                  const SizedBox(width: 14),
-
-                                  Expanded(
-                                    child: Text(
-                                      question['options'][index],
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                        color: MasarColors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed:
-                      selectedAnswer == -1 ? null : _nextQuestion,
-                  child: Text(
-                    currentQuestion == 9
-                        ? 'Finish Assessment'
-                        : 'Next',
-                  ),
-                ),
-              ),
-            ),
-          ],
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CareerReadinessScreen(
+          readinessScore: score,
         ),
       ),
     );
   }
 
-  void _nextQuestion() {
-    if (currentQuestion < 9) {
-      setState(() {
-        currentQuestion++;
-      });
-    } else {
-      _finishAssessment();
-    }
-  }
+  @override
+  Widget build(BuildContext context) {
+    final question = questions[currentQuestion];
 
-  void _finishAssessment() {
+    final double progress =
+        (currentQuestion + 1) / questions.length;
 
-    // تحويل الإجابات إلى نسب مئوية
-    final Map<String, int> skillScores = {};
+    return Scaffold(
+      backgroundColor: MasarColors.background,
 
-    for (int i = 0; i < questions.length; i++) {
-      final skill = questions[i]['skill'];
+      appBar: AppBar(
+        title: const Text('تقييم الجاهزية المهنية'),
+        centerTitle: true,
+      ),
 
-      // الإجابة من 0 إلى 3
-      // نحولها إلى 0 - 100
-      final score = ((answers[i] + 1) / 4 * 100).round();
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 430,
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'السؤال ${currentQuestion + 1} من ${questions.length}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${(progress * 100).round()}%',
+                            style: const TextStyle(
+                              color: MasarColors.primaryBlue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
 
-      skillScores[skill] = score;
-    }
+                      const SizedBox(height: 10),
 
-    // حساب readiness
-    int total = 0;
+                      ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 8,
+                          backgroundColor:
+                              MasarColors.lightBlue,
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(
+                            MasarColors.primaryBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-    for (final answer in answers) {
-      total += answer + 1;
-    }
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: MasarColors.lightGreen,
+                            borderRadius:
+                                BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            question['skill'],
+                            style: const TextStyle(
+                              color: MasarColors.darkGreen,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
 
-    final int readinessScore =
-        ((total / (answers.length * 4)) * 100).round();
+                        const SizedBox(height: 20),
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SkillMirrorScreen(
-          readinessScore: readinessScore,
-          skillScores: skillScores,
+                        Text(
+                          question['question'],
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                height: 1.5,
+                              ),
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        ...List.generate(
+                          question['options'].length,
+                          (index) {
+                            final bool selected =
+                                answers[currentQuestion] ==
+                                    index;
+
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.only(
+                                bottom: 12,
+                              ),
+                              child: InkWell(
+                                borderRadius:
+                                    BorderRadius.circular(15),
+                                onTap: () {
+                                  setState(() {
+                                    answers[currentQuestion] =
+                                        index;
+                                  });
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding:
+                                      const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? MasarColors.lightBlue
+                                        : Colors.white,
+                                    borderRadius:
+                                        BorderRadius.circular(15),
+                                    border: Border.all(
+                                      color: selected
+                                          ? MasarColors
+                                              .primaryBlue
+                                          : MasarColors.border,
+                                      width: selected ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 26,
+                                        height: 26,
+                                        decoration: BoxDecoration(
+                                          shape:
+                                              BoxShape.circle,
+                                          color: selected
+                                              ? MasarColors
+                                                  .primaryBlue
+                                              : Colors.transparent,
+                                          border: Border.all(
+                                            color: selected
+                                                ? MasarColors
+                                                    .primaryBlue
+                                                : MasarColors
+                                                    .border,
+                                          ),
+                                        ),
+                                        child: selected
+                                            ? const Icon(
+                                                Icons.check,
+                                                size: 16,
+                                                color: Colors.white,
+                                              )
+                                            : null,
+                                      ),
+
+                                      const SizedBox(width: 12),
+
+                                      Expanded(
+                                        child: Text(
+                                          question['options']
+                                              [index],
+                                          style:
+                                              const TextStyle(
+                                            fontSize: 14,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                Container(
+                  padding: const EdgeInsets.fromLTRB(
+                    20,
+                    12,
+                    20,
+                    20,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      top: BorderSide(
+                        color: MasarColors.border,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      if (currentQuestion > 0) ...[
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: previousQuestion,
+                            child: const Text('السابق'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                      ],
+
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: nextQuestion,
+                          child: Text(
+                            currentQuestion ==
+                                    questions.length - 1
+                                ? 'إنهاء التقييم'
+                                : 'التالي',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
+

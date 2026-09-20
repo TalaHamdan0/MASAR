@@ -1,22 +1,22 @@
-import 'package:masar_student_app/core/models/student_model.dart';
-import 'package:masar_student_app/core/models/skill_model.dart';
-import 'package:masar_student_app/core/models/career_path_model.dart';
-import 'package:masar_student_app/core/models/soft_skill_model.dart';
-import 'package:masar_student_app/core/models/certificate_model.dart';
-import 'package:masar_student_app/core/models/intenrship_opportunity_model.dart';
 
+import 'package:masar_student_app/core/models/career_path_model.dart';
+import 'package:masar_student_app/core/models/certificate_model.dart';
+import 'package:masar_student_app/core/models/project_model.dart';
+import 'package:masar_student_app/core/models/skill_model.dart';
+import 'package:masar_student_app/core/models/soft_skill_model.dart';
+import 'package:masar_student_app/core/models/student_model.dart';
 
 class MasarMockData {
   // ============================================================
-  // CAREER PATHS
+  // Career Paths
   // ============================================================
 
-  static const List<CareerPath> careerPaths = [
-    CareerPath(
+  static final List<CareerPath> careerPaths = [
+    const CareerPath(
       id: 'data_analyst',
-      title: 'Data Analyst',
+      title: 'محللة بيانات',
       description:
-          'تحليل البيانات واستخراج المعلومات التي تساعد في اتخاذ القرارات.',
+          'تحليل البيانات واستخراج المعلومات والنتائج التي تساعد في اتخاذ القرارات.',
       requiredSkills: [
         'Python',
         'SQL',
@@ -26,11 +26,11 @@ class MasarMockData {
       ],
     ),
 
-    CareerPath(
+    const CareerPath(
       id: 'data_scientist',
-      title: 'Data Scientist',
+      title: 'عالمة بيانات',
       description:
-          'استخدام البيانات والإحصاء والتعلم الآلي لحل المشكلات والتنبؤ بالنتائج.',
+          'استخدام البيانات والإحصاء والتعلم الآلي لبناء نماذج وتحليلات متقدمة.',
       requiredSkills: [
         'Python',
         'SQL',
@@ -40,11 +40,11 @@ class MasarMockData {
       ],
     ),
 
-    CareerPath(
+    const CareerPath(
       id: 'ml_engineer',
-      title: 'ML Engineer',
+      title: 'مهندسة تعلم آلي',
       description:
-          'تطوير وتطبيق نماذج التعلم الآلي ودمجها داخل الأنظمة.',
+          'تطوير ونشر حلول الذكاء الاصطناعي والتعلم الآلي وربطها بالتطبيقات والأنظمة.',
       requiredSkills: [
         'Python',
         'Machine Learning',
@@ -56,199 +56,245 @@ class MasarMockData {
   ];
 
   // ============================================================
-  // TECHNICAL SKILLS
+  // Technical Skills
   // ============================================================
 
-  static const List<Skill> skills = [
-    Skill(
+  static final List<Skill> skills = [
+    const Skill(
       id: 'python',
       name: 'Python',
       level: 80,
-      status: 'Strong',
+      status: 'قوي',
     ),
 
-    Skill(
+    const Skill(
       id: 'excel',
       name: 'Excel',
       level: 90,
-      status: 'Strong',
+      status: 'قوي',
     ),
 
-    Skill(
+    const Skill(
       id: 'sql',
       name: 'SQL',
       level: 30,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'power_bi',
       name: 'Power BI',
       level: 20,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'statistics',
       name: 'الإحصاء',
       level: 40,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'machine_learning',
       name: 'Machine Learning',
       level: 25,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'data_visualization',
       name: 'Data Visualization',
       level: 45,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'deep_learning',
       name: 'Deep Learning',
       level: 10,
-      status: 'Beginner',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'git',
       name: 'Git',
       level: 35,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
 
-    Skill(
+    const Skill(
       id: 'apis',
       name: 'APIs',
       level: 20,
-      status: 'Needs Improvement',
+      status: 'بحاجة إلى تطوير',
     ),
   ];
 
   // ============================================================
-  // SOFT SKILLS
+  // Soft Skills
   // ============================================================
 
-  static const List<SoftSkill> softSkills = [
-    SoftSkill(
+  static final List<SoftSkill> softSkills = [
+    const SoftSkill(
       id: 'communication',
-      name: 'Communication',
+      name: 'التواصل',
       level: 80,
     ),
-
-    SoftSkill(
+    const SoftSkill(
       id: 'teamwork',
-      name: 'Teamwork',
+      name: 'العمل الجماعي',
       level: 85,
     ),
-
-    SoftSkill(
+    const SoftSkill(
       id: 'problem_solving',
-      name: 'Problem Solving',
+      name: 'حل المشكلات',
       level: 75,
     ),
-
-    SoftSkill(
+    const SoftSkill(
       id: 'time_management',
-      name: 'Time Management',
+      name: 'إدارة الوقت',
       level: 70,
     ),
-
-    SoftSkill(
+    const SoftSkill(
       id: 'leadership',
-      name: 'Leadership',
+      name: 'القيادة',
       level: 60,
     ),
   ];
 
   // ============================================================
-  // CERTIFICATES
+  // Certificates
   // ============================================================
 
-  static const List<Certificate> certificates = [
-    Certificate(
-      id: 'cert_001',
+  static final List<Certificate> certificates = [
+    const Certificate(
+      id: 'cert_1',
       title: 'IBM Data Science Professional Certificate',
-      issuer: 'IBM',
-      date: '2026-09-12',
+      issuer: 'IBM / Coursera',
+      date: '',
     ),
 
-    Certificate(
-      id: 'cert_002',
+    const Certificate(
+      id: 'cert_2',
       title: 'Python for Data Science',
       issuer: 'IBM',
-      date: '2026-08-20',
+      date: '',
     ),
   ];
 
   // ============================================================
-  // STUDENT
+  // Projects
   // ============================================================
 
-  static const Student student = Student(
+  static final List<Project> projects = [
+    const Project(
+      id: 'project_1',
+      name: 'تحليل بيانات العملاء',
+      description:
+          'مشروع لتحليل بيانات العملاء واستخراج الأنماط والمؤشرات المهمة.',
+      technologies: [
+        'Python',
+        'Pandas',
+        'Matplotlib',
+      ],
+      githubUrl: null,
+    ),
+
+    const Project(
+      id: 'project_2',
+      name: 'Customer Churn Prediction',
+      description:
+          'مشروع لتوقع احتمالية مغادرة العملاء باستخدام Machine Learning.',
+      technologies: [
+        'Python',
+        'Scikit-learn',
+        'Pandas',
+      ],
+      githubUrl: null,
+    ),
+  ];
+
+  // ============================================================
+  // Student
+  // ============================================================
+
+  static Student student = Student(
     id: 'student_001',
     name: 'ليان أحمد',
     major: 'علم البيانات',
     university: 'جامعة الأردن',
     academicYear: 'السنة الثالثة',
     email: 'layan.ahmad@masar-demo.com',
-    careerPathId: 'data_analyst',
+
+    // المسار لا يتم اختياره في Complete Profile.
+    // يتم اختياره من Home.
+    careerPathId: null,
+
     gpa: '3.2',
+
     skills: skills,
+
     softSkills: softSkills,
+
     certificates: certificates,
+
+    projects: projects,
   );
 
   // ============================================================
-  // READINESS SCORE
+  // Current Student
   // ============================================================
 
-  static const int readinessScore = 72;
-
-  static const int skillsScore = 70;
-
-  static const int projectsScore = 60;
-
-  static const int certificationsScore = 80;
-
-  static const int eligibilityScore = 100;
+  static Student? currentStudent = student;
 
   // ============================================================
-  // SELECTED CAREER PATH
+  // First Login
+  // ============================================================
+
+  static bool isFirstLogin = true;
+
+  // ============================================================
+  // Selected Career Path
   // ============================================================
 
   static CareerPath get selectedCareerPath {
-    return careerPaths.firstWhere(
-      (path) => path.id == student.careerPathId,
-    );
+    final careerPathId = currentStudent?.careerPathId;
+
+    if (careerPathId != null) {
+      final matchingPath = getCareerPathById(careerPathId);
+
+      if (matchingPath != null) {
+        return matchingPath;
+      }
+    }
+
+    return careerPaths.first;
   }
 
   // ============================================================
-  // SKILLS FOR SELECTED CAREER PATH
+  // Career Path Helpers
   // ============================================================
 
-  static List<Skill> get selectedCareerSkills {
-    return skills
-        .where(
-          (skill) =>
-              selectedCareerPath.requiredSkills.contains(skill.name),
-        )
-        .toList();
+  static CareerPath? getCareerPathById(String id) {
+    try {
+      return careerPaths.firstWhere(
+        (careerPath) => careerPath.id == id,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   // ============================================================
-  // FIND SKILL BY ID
+  // Skill Helpers
   // ============================================================
 
   static Skill? getSkillById(String id) {
+    final studentSkills = currentStudent?.skills ?? skills;
+
     try {
-      return skills.firstWhere(
+      return studentSkills.firstWhere(
         (skill) => skill.id == id,
       );
     } catch (_) {
@@ -256,235 +302,264 @@ class MasarMockData {
     }
   }
 
-  // ============================================================
-  // FIND CAREER PATH BY ID
-  // ============================================================
+  static Skill? getSkillByName(String name) {
+    final studentSkills = currentStudent?.skills ?? skills;
 
-  static CareerPath? getCareerPathById(String id) {
     try {
-      return careerPaths.firstWhere(
-        (path) => path.id == id,
+      return studentSkills.firstWhere(
+        (skill) => skill.name == name,
       );
     } catch (_) {
       return null;
     }
   }
-    // ============================================================
-  // TRAINING
-  // ============================================================
-
-  static const String trainingCompany = 'Microsoft';
-
-  static const String trainingPosition = 'IT Support Intern';
-
-  static const String trainingLocation = 'عمان';
-
-  static const String trainingStartDate = '12/09/2026';
-
-  static const String trainingEndDate = '12/12/2026';
-
-  static const int trainingHours = 120;
-
-  static const double trainingProgress = 0.0;
 
   // ============================================================
-  // ATTENDANCE
+  // Skills Required For Selected Career
   // ============================================================
 
-  static const List<Map<String, String>> attendance = [
-    {
-      'date': '23/09/2026',
-      'day': 'الأربعاء',
-      'status': 'حاضر',
-    },
-    {
-      'date': '22/09/2026',
-      'day': 'الثلاثاء',
-      'status': 'حاضر',
-    },
-    {
-      'date': '21/09/2026',
-      'day': 'الاثنين',
-      'status': 'غائب',
-    },
-    {
-      'date': '20/09/2026',
-      'day': 'الأحد',
-      'status': 'حاضر',
-    },
-  ];
+  static List<Skill> get selectedCareerSkills {
+    final career = selectedCareerPath;
+
+    final studentSkills = currentStudent?.skills ?? skills;
+
+    return studentSkills
+        .where(
+          (skill) => career.requiredSkills.contains(skill.name),
+        )
+        .toList();
+  }
 
   // ============================================================
-  // WEEKLY REPORTS
+  // Readiness Mock Data
   // ============================================================
 
-  static const List<Map<String, dynamic>> weeklyReports = [
-    {
-      'week': 1,
-      'startDate': '12/09/2026',
-      'endDate': '18/09/2026',
-      'status': 'completed',
-    },
-    {
-      'week': 2,
-      'startDate': '19/09/2026',
-      'endDate': '25/09/2026',
-      'status': 'completed',
-    },
-    {
-      'week': 3,
-      'startDate': '26/09/2026',
-      'endDate': '02/10/2026',
-      'status': 'current',
-    },
-    {
-      'week': 4,
-      'startDate': '03/10/2026',
-      'endDate': '09/10/2026',
-      'status': 'locked',
-    },
-    {
-      'week': 5,
-      'startDate': '10/10/2026',
-      'endDate': '16/10/2026',
-      'status': 'locked',
-    },
-    {
-      'week': 6,
-      'startDate': '17/10/2026',
-      'endDate': '23/10/2026',
-      'status': 'locked',
-    },
-  ];
+  static int readinessScore = 72;
+
+  static int skillsScore = 70;
+
+  static int projectsScore = 60;
+
+  static int certificationsScore = 80;
+
+  static int eligibilityScore = 100;
 
   // ============================================================
-  // EVALUATION
+  // About Me
   // ============================================================
 
-  // هل مشرف الشركة قام بالتقييم؟
-  static const bool hasCompanyEvaluation = false;
+  static String aboutMe =
+      'طالبة علم بيانات مهتمة بتحليل البيانات والذكاء الاصطناعي '
+      'وتطوير المهارات العملية والاستعداد لسوق العمل.';
 
-  // تقييم الشركة
-  static const Map<String, double> companyEvaluation = {
-    'الالتزام والانضباط': 4.5,
-    'جودة العمل': 4.0,
-    'التواصل': 4.5,
-    'العمل ضمن الفريق': 4.0,
-    'المبادرة والتعلم': 4.5,
+  // ============================================================
+  // Profile Visibility
+  // ============================================================
+
+  static bool profileVisibleToCompanies = true;
+
+  // ============================================================
+  // Profile Mock Data
+  // ============================================================
+
+  static Map<String, dynamic> profileMockData = {
+    'name': 'ليان أحمد',
+    'major': 'علم البيانات',
+    'university': 'جامعة الأردن',
+    'academicYear': 'السنة الثالثة',
+    'email': 'layan.ahmad@masar-demo.com',
+    'gpa': '3.2',
+    'careerPath': null,
   };
 
-  // ملاحظات مشرف الشركة
-  static const String companyEvaluationNotes =
-      'أداء ممتاز والتزام واضح خلال فترة التدريب.';
-
-  // التقييم السري
-  // الطالب لا يستطيع الاطلاع عليه.
-  static const bool hasSecretEvaluation = false;
-
-
   // ============================================================
-  // CREATE ACCOUNT
+  // University / Academic Data
   // ============================================================
 
-  static final List<String> universities = [
-    'University of Jordan',
-    'Jordan University of Science and Technology',
-    'Hashemite University',
+  // هذا المتغير مستخدم في CreateAccountScreen
+  static const String universityName = 'جامعة الأردن';
+
+  static const List<String> universities = [
+    'جامعة الأردن',
+    'الجامعة الهاشمية',
+    'جامعة اليرموك',
+    'جامعة العلوم والتكنولوجيا الأردنية',
+    'جامعة الأميرة سمية للتكنولوجيا',
+    'جامعة مؤتة',
+    'جامعة البلقاء التطبيقية',
   ];
 
-  static final List<String> majors = [
-    'Computer Science',
-    'Software Engineering',
-    'Computer Information Systems',
-    'Information Technology',
+  static const List<String> majors = [
+    'علم البيانات',
+    'علوم الحاسوب',
+    'هندسة البرمجيات',
+    'نظم المعلومات',
+    'الذكاء الاصطناعي',
+    'هندسة الحاسوب',
+    'الأمن السيبراني',
   ];
 
-  static final List<String> academicYears = [
-    '1st Year',
-    '2nd Year',
-    '3rd Year',
-    '4th Year',
+  static const List<String> academicYears = [
+    'السنة الأولى',
+    'السنة الثانية',
+    'السنة الثالثة',
+    'السنة الرابعة',
+    'خريجة',
   ];
 
-  static final List<InternshipOpportunity> internshipOpportunities = [
-    InternshipOpportunity(
-      id: 'intern_01',
-      title: 'Data Analyst',
-      companyName: 'ABC Company',
-      matchPercentage: 91,
-    ),
+  // ============================================================
+  // Training Mock Data
+  // ============================================================
+
+  static const Map<String, dynamic> trainingOpportunity = {
+    'company': 'Microsoft',
+    'title': 'IT Support Intern',
+    'location': 'عمّان',
+    'startDate': '12/09/2026',
+    'endDate': '12/12/2026',
+    'hours': 120,
+    'progress': 0,
+  };
+
+  // ============================================================
+  // Internship Opportunities
+  // ============================================================
+
+  static final List<Map<String, dynamic>> internshipOpportunities = [
+    {
+      'id': 'internship_1',
+      'company': 'Microsoft',
+      'title': 'Data Analyst Intern',
+      'location': 'عمّان',
+      'type': 'Internship',
+      'duration': '3 أشهر',
+      'requiredSkills': [
+        'Python',
+        'SQL',
+        'Excel',
+        'Power BI',
+      ],
+    },
+    {
+      'id': 'internship_2',
+      'company': 'Orange Jordan',
+      'title': 'Data Science Intern',
+      'location': 'عمّان',
+      'type': 'Internship',
+      'duration': '3 أشهر',
+      'requiredSkills': [
+        'Python',
+        'SQL',
+        'Machine Learning',
+      ],
+    },
+    {
+      'id': 'internship_3',
+      'company': 'Amazon',
+      'title': 'Machine Learning Intern',
+      'location': 'Remote',
+      'type': 'Internship',
+      'duration': '3 أشهر',
+      'requiredSkills': [
+        'Python',
+        'Machine Learning',
+        'Git',
+        'APIs',
+      ],
+    },
   ];
 
-  static const String aboutMe =
-    'Passionate data analyst with a strong background in data visualization, problem solving and continous learning.';
+  // ============================================================
+  // Notifications
+  // ============================================================
 
-static final List<Map<String, String>> projects = [
-  {
-    'title': 'Sales Dashboard',
-    'description':
-        'Interactive dashboard for analyzing sales data and generating useful insights.',
-  },
-  {
-    'title': 'Customer Prediction',
-    'description':
-        'A data analysis project focused on predicting customer behavior.',
-  },
-];
+  static final List<Map<String, dynamic>> notifications = [
+    {
+      'id': 'notification_1',
+      'title': 'أكمل تقييم الجاهزية',
+      'message':
+          'ابدأ تقييمك المهني لمعرفة مستوى مهاراتك والمسار المناسب لك.',
+      'type': 'career',
+      'isRead': false,
+    },
+    {
+      'id': 'notification_2',
+      'title': 'فرصة تدريب جديدة',
+      'message':
+          'تم العثور على فرصة تدريب قد تتناسب مع مهاراتك الحالية.',
+      'type': 'training',
+      'isRead': false,
+    },
+  ];
 
-// =========================
-// Notifications
-// =========================
+  // ============================================================
+  // Update Career Path
+  // ============================================================
 
-static final List<Map<String, dynamic>> notifications = [
-  {
-    'title': 'فرصة تدريب جديدة',
-    'message':
-        'لديك فرصة تدريب مناسبة لمسارك المهني بنسبة تطابق 87%.',
-    'time': 'منذ ساعتين',
-    'type': 'opportunity',
-  },
-  {
-    'title': 'تحديث الطلب',
-    'message':
-        'تم تحديث حالة طلب التدريب الخاص بك.',
-    'time': 'منذ 5 ساعات',
-    'type': 'application',
-  },
-  {
-    'title': 'تحديث المسار',
-    'message':
-        'تم تحديث خطتك التطويرية بناءً على مهاراتك الحالية.',
-    'time': 'منذ يوم',
-    'type': 'roadmap',
-  },
-  {
-    'title': 'تذكير بالتدريب',
-    'message':
-        'لا تنسَ إرسال تقرير التدريب الأسبوعي غدًا.',
-    'time': 'منذ يومين',
-    'type': 'training',
-  },
-];
+  static void updateCareerPath(String careerPathId) {
+    if (currentStudent == null) return;
 
-static const String universityName =
-    'جامعة العلوم الإسلامية العالمية';
+    currentStudent = currentStudent!.copyWith(
+      careerPathId: careerPathId,
+    );
 
-static final Map<String, dynamic> profileMockData = {
-  'name': 'ليان أحمد',
-  'universityId': '20221001',
-  'email': 'layan.ahmad@masar-demo.com',
-  'university': 'جامعة العلوم الإسلامية العالمية',
-  'major': 'Computer Science',
-  'academicYear': '4th Year',
-  'gpa': '3.2',
-  'careerPath': 'data_analyst',
-};
+    profileMockData['careerPath'] = careerPathId;
+  }
 
-static bool profileVisibleToCompanies = true;
+  // ============================================================
+  // Update Student
+  // ============================================================
 
-  // =========================
-  // Current Student
-  // =========================
+  static void updateStudent(Student updatedStudent) {
+    currentStudent = updatedStudent;
 
-  static Student? currentStudent;
+    profileMockData = {
+      'name': updatedStudent.name,
+      'major': updatedStudent.major,
+      'university': updatedStudent.university,
+      'academicYear': updatedStudent.academicYear,
+      'email': updatedStudent.email,
+      'gpa': updatedStudent.gpa,
+      'careerPath': updatedStudent.careerPathId,
+    };
+  }
+
+  // ============================================================
+  // Update Skills After Assessment
+  // ============================================================
+
+  static void updateSkillLevels(
+    Map<String, int> skillScores,
+  ) {
+    if (currentStudent == null) return;
+
+    final updatedSkills = currentStudent!.skills.map((skill) {
+      final newLevel = skillScores[skill.id];
+
+      if (newLevel == null) {
+        return skill;
+      }
+
+      String status;
+
+      if (newLevel >= 70) {
+        status = 'قوي';
+      } else if (newLevel >= 50) {
+        status = 'جيد';
+      } else {
+        status = 'بحاجة إلى تطوير';
+      }
+
+      return Skill(
+        id: skill.id,
+        name: skill.name,
+        level: newLevel,
+        status: status,
+      );
+    }).toList();
+
+    currentStudent = currentStudent!.copyWith(
+      skills: updatedSkills,
+    );
+  }
 }

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
 import '../../core/models/student_model.dart';
 import '../../data/masar_mock_data.dart';
 import '../../theme/masar_theme.dart';
@@ -12,8 +12,7 @@ class CreateAccountScreen extends StatefulWidget {
       _CreateAccountScreenState();
 }
 
-class _CreateAccountScreenState
-    extends State<CreateAccountScreen> {
+class _CreateAccountScreenState extends State<CreateAccountScreen> {
   // =========================
   // Controllers
   // =========================
@@ -63,15 +62,12 @@ class _CreateAccountScreenState
   // =========================
 
   void _createAccount() {
-    // Check required fields.
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Create a Student object.
     final Student student = Student(
       id: _universityIdController.text.trim(),
-
       name: _nameController.text.trim(),
 
       // University is fixed for the current version.
@@ -85,7 +81,7 @@ class _CreateAccountScreenState
 
       email: _emailController.text.trim(),
 
-      // Career path is optional.
+      // Career path is selected later from Home.
       careerPathId: null,
 
       // GPA will be added later.
@@ -99,6 +95,9 @@ class _CreateAccountScreenState
 
       // Certificates are added later.
       certificates: const [],
+
+      // Projects are added later.
+      projects: const [],
     );
 
     // Save the current student in Mock Data.
@@ -115,35 +114,48 @@ class _CreateAccountScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MasarColors.background,
-
       body: SafeArea(
         child: Directionality(
           textDirection: TextDirection.rtl,
-
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: 28,
-              vertical: 32,
+              vertical: 20,
             ),
-
             child: Form(
               key: _formKey,
-
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // =========================
+                  // Back Button
+                  // =========================
+
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: MasarColors.darkBlue,
+                        size: 22,
+                      ),
+                    ),
+                  ),
 
                   // =========================
                   // Title
                   // =========================
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
 
                   const Text(
                     'أنشئ حسابك في MASAR',
                     textAlign: TextAlign.right,
                     style: TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: MasarColors.darkBlue,
@@ -156,6 +168,7 @@ class _CreateAccountScreenState
                     'لنبدأ بإعداد حسابك',
                     textAlign: TextAlign.right,
                     style: TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: MasarColors.textSecondary,
@@ -176,26 +189,19 @@ class _CreateAccountScreenState
 
                   TextFormField(
                     controller: _nameController,
-
-                    textDirection:
-                        TextDirection.rtl,
-
+                    textDirection: TextDirection.rtl,
                     style: const TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 15,
                       color: MasarColors.textPrimary,
                     ),
-
                     decoration: const InputDecoration(
-                      hintText:
-                          'أدخل اسمك الكامل',
-
+                      hintText: 'أدخل اسمك الكامل',
                       prefixIcon: Icon(
                         Icons.person_outline,
-                        color:
-                            MasarColors.primaryBlue,
+                        color: MasarColors.primaryBlue,
                       ),
                     ),
-
                     validator: (value) {
                       if (value == null ||
                           value.trim().isEmpty) {
@@ -219,31 +225,21 @@ class _CreateAccountScreenState
                   const SizedBox(height: 8),
 
                   TextFormField(
-                    controller:
-                        _universityIdController,
-
-                    keyboardType:
-                        TextInputType.number,
-
-                    textDirection:
-                        TextDirection.rtl,
-
+                    controller: _universityIdController,
+                    keyboardType: TextInputType.number,
+                    textDirection: TextDirection.rtl,
                     style: const TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 15,
                       color: MasarColors.textPrimary,
                     ),
-
                     decoration: const InputDecoration(
-                      hintText:
-                          'أدخل الرقم الجامعي',
-
+                      hintText: 'أدخل الرقم الجامعي',
                       prefixIcon: Icon(
                         Icons.badge_outlined,
-                        color:
-                            MasarColors.primaryBlue,
+                        color: MasarColors.primaryBlue,
                       ),
                     ),
-
                     validator: (value) {
                       if (value == null ||
                           value.trim().isEmpty) {
@@ -262,58 +258,39 @@ class _CreateAccountScreenState
 
                   Card(
                     color: MasarColors.lightBlue,
-
+                    elevation: 0,
                     child: Padding(
-                      padding:
-                          const EdgeInsets.all(14),
-
+                      padding: const EdgeInsets.all(14),
                       child: Row(
                         children: [
-
                           const Icon(
-                            Icons
-                                .account_balance_outlined,
-                            color:
-                                MasarColors.primaryBlue,
+                            Icons.account_balance_outlined,
+                            color: MasarColors.primaryBlue,
                           ),
-
                           const SizedBox(width: 10),
-
                           Expanded(
                             child: Column(
                               crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
+                                  CrossAxisAlignment.start,
                               children: [
-
                                 const Text(
                                   'الجامعة',
-                                  style:
-                                      TextStyle(
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
                                     fontSize: 13,
-                                    fontWeight:
-                                        FontWeight.bold,
+                                    fontWeight: FontWeight.bold,
                                     color:
-                                        MasarColors
-                                            .textSecondary,
+                                        MasarColors.textSecondary,
                                   ),
                                 ),
-
-                                const SizedBox(
-                                  height: 3,
-                                ),
-
+                                const SizedBox(height: 3),
                                 Text(
-                                  MasarMockData
-                                      .universityName,
-                                  style:
-                                      const TextStyle(
+                                  MasarMockData.universityName,
+                                  style: const TextStyle(
+                                    fontFamily: 'Cairo',
                                     fontSize: 15,
-                                    fontWeight:
-                                        FontWeight.w600,
-                                    color:
-                                        MasarColors
-                                            .darkBlue,
+                                    fontWeight: FontWeight.w600,
+                                    color: MasarColors.darkBlue,
                                   ),
                                 ),
                               ],
@@ -338,29 +315,21 @@ class _CreateAccountScreenState
 
                   TextFormField(
                     controller: _emailController,
-
-                    keyboardType:
-                        TextInputType.emailAddress,
-
-                    textDirection:
-                        TextDirection.rtl,
-
+                    keyboardType: TextInputType.emailAddress,
+                    textDirection: TextDirection.ltr,
                     style: const TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 15,
                       color: MasarColors.textPrimary,
                     ),
-
                     decoration: const InputDecoration(
                       hintText:
                           'أدخل بريدك الإلكتروني الجامعي',
-
                       prefixIcon: Icon(
                         Icons.email_outlined,
-                        color:
-                            MasarColors.primaryBlue,
+                        color: MasarColors.primaryBlue,
                       ),
                     ),
-
                     validator: (value) {
                       if (value == null ||
                           value.trim().isEmpty) {
@@ -384,58 +353,37 @@ class _CreateAccountScreenState
                   const SizedBox(height: 8),
 
                   TextFormField(
-                    controller:
-                        _passwordController,
-
-                    obscureText:
-                        _obscurePassword,
-
-                    textDirection:
-                        TextDirection.rtl,
-
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    textDirection: TextDirection.ltr,
                     style: const TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 15,
                       color: MasarColors.textPrimary,
                     ),
-
-                    decoration:
-                        InputDecoration(
-                      hintText:
-                          'أنشئ كلمة مرور',
-
-                      prefixIcon:
-                          const Icon(
+                    decoration: InputDecoration(
+                      hintText: 'أنشئ كلمة مرور',
+                      prefixIcon: const Icon(
                         Icons.lock_outline,
-                        color:
-                            MasarColors.primaryBlue,
+                        color: MasarColors.primaryBlue,
                       ),
-
-                      suffixIcon:
-                          IconButton(
+                      suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
                             _obscurePassword =
                                 !_obscurePassword;
                           });
                         },
-
                         icon: Icon(
                           _obscurePassword
-                              ? Icons
-                                  .visibility_off_outlined
-                              : Icons
-                                  .visibility_outlined,
-
-                          color:
-                              MasarColors
-                                  .primaryGreen,
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: MasarColors.primaryGreen,
                         ),
                       ),
                     ),
-
                     validator: (value) {
-                      if (value == null ||
-                          value.isEmpty) {
+                      if (value == null || value.isEmpty) {
                         return 'يرجى إدخال كلمة المرور';
                       }
 
@@ -460,63 +408,41 @@ class _CreateAccountScreenState
                   const SizedBox(height: 8),
 
                   TextFormField(
-                    controller:
-                        _confirmPasswordController,
-
-                    obscureText:
-                        _obscureConfirmPassword,
-
-                    textDirection:
-                        TextDirection.rtl,
-
+                    controller: _confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
+                    textDirection: TextDirection.ltr,
                     style: const TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 15,
                       color: MasarColors.textPrimary,
                     ),
-
-                    decoration:
-                        InputDecoration(
-                      hintText:
-                          'أعد إدخال كلمة المرور',
-
-                      prefixIcon:
-                          const Icon(
+                    decoration: InputDecoration(
+                      hintText: 'أعد إدخال كلمة المرور',
+                      prefixIcon: const Icon(
                         Icons.lock_reset_outlined,
-                        color:
-                            MasarColors.primaryBlue,
+                        color: MasarColors.primaryBlue,
                       ),
-
-                      suffixIcon:
-                          IconButton(
+                      suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
                             _obscureConfirmPassword =
                                 !_obscureConfirmPassword;
                           });
                         },
-
                         icon: Icon(
                           _obscureConfirmPassword
-                              ? Icons
-                                  .visibility_off_outlined
-                              : Icons
-                                  .visibility_outlined,
-
-                          color:
-                              MasarColors
-                                  .primaryGreen,
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: MasarColors.primaryGreen,
                         ),
                       ),
                     ),
-
                     validator: (value) {
-                      if (value == null ||
-                          value.isEmpty) {
+                      if (value == null || value.isEmpty) {
                         return 'يرجى تأكيد كلمة المرور';
                       }
 
-                      if (value !=
-                          _passwordController.text) {
+                      if (value != _passwordController.text) {
                         return 'كلمتا المرور غير متطابقتين';
                       }
 
@@ -532,17 +458,23 @@ class _CreateAccountScreenState
 
                   SizedBox(
                     height: 54,
-
                     child: FilledButton(
-                      onPressed:
-                          _createAccount,
-
+                      onPressed: _createAccount,
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            MasarColors.primaryBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(16),
+                        ),
+                      ),
                       child: const Text(
                         'إنشاء الحساب',
                         style: TextStyle(
+                          fontFamily: 'Cairo',
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight.bold,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -555,33 +487,27 @@ class _CreateAccountScreenState
                   // =========================
 
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-
                       const Text(
                         'لديك حساب بالفعل؟',
                         style: TextStyle(
+                          fontFamily: 'Cairo',
                           fontSize: 14,
-                          color:
-                              MasarColors.textSecondary,
+                          color: MasarColors.textSecondary,
                         ),
                       ),
-
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-
                         child: const Text(
                           'تسجيل الدخول',
                           style: TextStyle(
+                            fontFamily: 'Cairo',
                             fontSize: 15,
-                            fontWeight:
-                                FontWeight.bold,
-                            color:
-                                MasarColors.primaryBlue,
+                            fontWeight: FontWeight.bold,
+                            color: MasarColors.primaryBlue,
                           ),
                         ),
                       ),
@@ -599,7 +525,6 @@ class _CreateAccountScreenState
   }
 }
 
-
 // ======================================================
 // Required Field Label
 // ======================================================
@@ -615,22 +540,21 @@ class _RequiredLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       textAlign: TextAlign.right,
-
       text: TextSpan(
         children: [
           TextSpan(
             text: text,
-
             style: const TextStyle(
+              fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: MasarColors.darkBlue,
             ),
           ),
-
           const TextSpan(
             text: ' *',
             style: TextStyle(
+              fontFamily: 'Cairo',
               color: MasarColors.error,
               fontSize: 16,
               fontWeight: FontWeight.bold,

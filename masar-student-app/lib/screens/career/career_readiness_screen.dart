@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
+
 import 'package:masar_student_app/theme/masar_theme.dart';
 import 'package:masar_student_app/data/masar_mock_data.dart';
 import 'package:masar_student_app/core/models/skill_model.dart';
+
 import 'roadmap_screen.dart';
 
 class CareerReadinessScreen extends StatelessWidget {
-  const CareerReadinessScreen({super.key});
+  final int readinessScore;
+  final Map<String, int>? skillScores;
+
+  const CareerReadinessScreen({
+    super.key,
+    required this.readinessScore,
+    this.skillScores,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final int overallScore = MasarMockData.readinessScore;
-    final selectedCareerPath = MasarMockData.selectedCareerPath;
+    final selectedCareerPath =
+        MasarMockData.selectedCareerPath;
 
     final List<Skill> skills = MasarMockData.skills
         .where(
-          (skill) => selectedCareerPath.requiredSkills.contains(skill.name),
+          (skill) => selectedCareerPath.requiredSkills
+              .contains(skill.name),
         )
         .toList();
 
@@ -22,6 +32,7 @@ class CareerReadinessScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: MasarColors.background,
+
         appBar: AppBar(
           backgroundColor: MasarColors.background,
           elevation: 0,
@@ -33,18 +44,20 @@ class CareerReadinessScreen extends StatelessWidget {
             ),
           ),
         ),
+
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _buildOverallProgress(overallScore),
+              _buildOverallProgress(readinessScore),
 
               const SizedBox(height: 24),
 
               Align(
                 alignment: Alignment.centerRight,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'فجوة المهارات',
@@ -56,7 +69,7 @@ class CareerReadinessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'مقارنة مهاراتك الحالية بمتطلبات ${selectedCareerPath.title}',
+                      'مقارنة نتائج التقييم بمتطلبات ${selectedCareerPath.title}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: MasarColors.textSecondary,
@@ -85,20 +98,28 @@ class CareerReadinessScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const RoadmapScreen(),
+                        builder: (_) =>
+                            const RoadmapScreen(),
                       ),
                     );
                   },
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                  ),
                   label: const Text(
                     'عرض خارطة الطريق',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: MasarColors.primaryBlue,
+                    backgroundColor:
+                        MasarColors.primaryBlue,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding:
+                        const EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -109,11 +130,14 @@ class CareerReadinessScreen extends StatelessWidget {
           ),
         ),
 
-        bottomNavigationBar: BottomNavigationBar(
+        bottomNavigationBar:
+            BottomNavigationBar(
           currentIndex: 1,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: MasarColors.primaryBlue,
-          unselectedItemColor: MasarColors.textSecondary,
+          selectedItemColor:
+              MasarColors.primaryBlue,
+          unselectedItemColor:
+              MasarColors.textSecondary,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
@@ -162,7 +186,8 @@ class CareerReadinessScreen extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius:
+            BorderRadius.circular(24),
         border: Border.all(
           color: MasarColors.border,
         ),
@@ -192,40 +217,51 @@ class CareerReadinessScreen extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: 1,
                     strokeWidth: 12,
-                    backgroundColor: MasarColors.background,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    backgroundColor:
+                        MasarColors.background,
+                    valueColor:
+                        const AlwaysStoppedAnimation<
+                            Color>(
                       MasarColors.background,
                     ),
                   ),
                 ),
+
                 SizedBox(
                   width: 150,
                   height: 150,
                   child: CircularProgressIndicator(
                     value: score / 100,
                     strokeWidth: 12,
-                    backgroundColor: Colors.transparent,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    backgroundColor:
+                        Colors.transparent,
+                    valueColor:
+                        const AlwaysStoppedAnimation<
+                            Color>(
                       MasarColors.primaryBlue,
                     ),
                   ),
                 ),
+
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
                   children: [
                     Text(
                       '$score%',
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: MasarColors.textPrimary,
+                        color:
+                            MasarColors.textPrimary,
                       ),
                     ),
                     const Text(
                       'الجاهزية',
                       style: TextStyle(
                         fontSize: 12,
-                        color: MasarColors.textSecondary,
+                        color:
+                            MasarColors.textSecondary,
                       ),
                     ),
                   ],
@@ -241,7 +277,8 @@ class CareerReadinessScreen extends StatelessWidget {
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color: MasarColors.primaryGreen,
+              color:
+                  MasarColors.primaryGreen,
             ),
           ),
 
@@ -254,7 +291,8 @@ class CareerReadinessScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 13,
-              color: MasarColors.textSecondary,
+              color:
+                  MasarColors.textSecondary,
             ),
           ),
         ],
@@ -265,8 +303,13 @@ class CareerReadinessScreen extends StatelessWidget {
   Widget _buildSkillGapCard(Skill skill) {
     const int requiredLevel = 70;
 
-    final int currentLevel = skill.level;
-    final int gap = requiredLevel - currentLevel;
+    // إذا كانت نتيجة الاختبار موجودة نستخدمها.
+    // غير ذلك نستخدم المستوى الموجود في Mock Data.
+    final int currentLevel =
+        skillScores?[skill.id] ?? skill.level;
+
+    final int gap =
+        requiredLevel - currentLevel;
 
     late String status;
     late Color statusColor;
@@ -274,24 +317,31 @@ class CareerReadinessScreen extends StatelessWidget {
 
     if (currentLevel >= requiredLevel) {
       status = 'محقق';
-      statusColor = MasarColors.primaryGreen;
+      statusColor =
+          MasarColors.primaryGreen;
       icon = Icons.check_circle;
     } else if (currentLevel >= 50) {
       status = 'قريب';
-      statusColor = MasarColors.warning;
+      statusColor =
+          MasarColors.warning;
       icon = Icons.trending_up;
     } else {
       status = 'يحتاج تطوير';
-      statusColor = MasarColors.error;
-      icon = Icons.warning_amber_rounded;
+      statusColor =
+          MasarColors.error;
+      icon =
+          Icons.warning_amber_rounded;
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin:
+          const EdgeInsets.only(bottom: 12),
+      padding:
+          const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius:
+            BorderRadius.circular(18),
         border: Border.all(
           color: MasarColors.border,
         ),
@@ -305,8 +355,10 @@ class CareerReadinessScreen extends StatelessWidget {
                   skill.name,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: MasarColors.textPrimary,
+                    fontWeight:
+                        FontWeight.bold,
+                    color:
+                        MasarColors.textPrimary,
                   ),
                 ),
               ),
@@ -324,7 +376,8 @@ class CareerReadinessScreen extends StatelessWidget {
                 style: TextStyle(
                   color: statusColor,
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight:
+                      FontWeight.bold,
                 ),
               ),
             ],
@@ -336,13 +389,16 @@ class CareerReadinessScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'مستواك الحالي',
+                      'نتيجة التقييم',
                       style: TextStyle(
                         fontSize: 11,
-                        color: MasarColors.textSecondary,
+                        color:
+                            MasarColors
+                                .textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -350,8 +406,11 @@ class CareerReadinessScreen extends StatelessWidget {
                       '$currentLevel%',
                       style: const TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: MasarColors.textPrimary,
+                        fontWeight:
+                            FontWeight.bold,
+                        color:
+                            MasarColors
+                                .textPrimary,
                       ),
                     ),
                   ],
@@ -360,13 +419,16 @@ class CareerReadinessScreen extends StatelessWidget {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'المستوى المطلوب',
                       style: TextStyle(
                         fontSize: 11,
-                        color: MasarColors.textSecondary,
+                        color:
+                            MasarColors
+                                .textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -374,8 +436,11 @@ class CareerReadinessScreen extends StatelessWidget {
                       '70%',
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: MasarColors.textPrimary,
+                        fontWeight:
+                            FontWeight.bold,
+                        color:
+                            MasarColors
+                                .textPrimary,
                       ),
                     ),
                   ],
@@ -384,21 +449,27 @@ class CareerReadinessScreen extends StatelessWidget {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'الفجوة',
                       style: TextStyle(
                         fontSize: 11,
-                        color: MasarColors.textSecondary,
+                        color:
+                            MasarColors
+                                .textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      gap > 0 ? '$gap%' : 'مكتمل',
+                      gap > 0
+                          ? '$gap%'
+                          : 'مكتمل',
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                        fontWeight:
+                            FontWeight.bold,
                         color: statusColor,
                       ),
                     ),
@@ -411,12 +482,18 @@ class CareerReadinessScreen extends StatelessWidget {
           const SizedBox(height: 12),
 
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: currentLevel / 100,
+            borderRadius:
+                BorderRadius.circular(10),
+            child:
+                LinearProgressIndicator(
+              value:
+                  currentLevel / 100,
               minHeight: 7,
-              backgroundColor: MasarColors.background,
-              valueColor: AlwaysStoppedAnimation<Color>(
+              backgroundColor:
+                  MasarColors.background,
+              valueColor:
+                  AlwaysStoppedAnimation<
+                      Color>(
                 statusColor,
               ),
             ),
@@ -426,32 +503,44 @@ class CareerReadinessScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImprovementSummary(List<Skill> skills) {
+  Widget _buildImprovementSummary(
+      List<Skill> skills) {
     final skillsToImprove = skills
-        .where((skill) => skill.level < 70)
+        .where(
+          (skill) =>
+              (skillScores?[skill.id] ??
+                  skill.level) <
+              70,
+        )
         .toList();
 
     if (skillsToImprove.isEmpty) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(18),
+        padding:
+            const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: MasarColors.lightGreen,
-          borderRadius: BorderRadius.circular(18),
+          color:
+              MasarColors.lightGreen,
+          borderRadius:
+              BorderRadius.circular(18),
         ),
         child: const Row(
           children: [
             Icon(
               Icons.check_circle,
-              color: MasarColors.primaryGreen,
+              color:
+                  MasarColors.primaryGreen,
             ),
             SizedBox(width: 10),
             Expanded(
               child: Text(
                 'ممتاز! جميع المهارات الأساسية تحقق المستوى المطلوب.',
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: MasarColors.textPrimary,
+                  fontWeight:
+                      FontWeight.w600,
+                  color:
+                      MasarColors.textPrimary,
                 ),
               ),
             ),
@@ -462,20 +551,26 @@ class CareerReadinessScreen extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding:
+          const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: MasarColors.lightBlue,
-        borderRadius: BorderRadius.circular(18),
+        color:
+            MasarColors.lightBlue,
+        borderRadius:
+            BorderRadius.circular(18),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
           const Text(
             'المهارات التي تحتاج إلى تطوير',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: MasarColors.textPrimary,
+              fontWeight:
+                  FontWeight.bold,
+              color:
+                  MasarColors.textPrimary,
             ),
           ),
 
@@ -483,20 +578,28 @@ class CareerReadinessScreen extends StatelessWidget {
 
           ...skillsToImprove.map(
             (skill) => Padding(
-              padding: const EdgeInsets.only(bottom: 7),
+              padding:
+                  const EdgeInsets.only(
+                bottom: 7,
+              ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.arrow_back_ios_rounded,
                     size: 12,
-                    color: MasarColors.primaryBlue,
+                    color:
+                        MasarColors
+                            .primaryBlue,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     skill.name,
-                    style: const TextStyle(
+                    style:
+                        const TextStyle(
                       fontSize: 13,
-                      color: MasarColors.textPrimary,
+                      color:
+                          MasarColors
+                              .textPrimary,
                     ),
                   ),
                 ],

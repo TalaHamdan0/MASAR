@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/models/career_path_model.dart';
+import '../../core/models/certificate_model.dart';
+import '../../core/models/project_model.dart';
 import '../../core/models/skill_model.dart';
 import '../../core/models/student_model.dart';
 import '../../data/masar_mock_data.dart';
@@ -16,31 +17,12 @@ class CompleteProfileScreen extends StatefulWidget {
 
 class _CompleteProfileScreenState
     extends State<CompleteProfileScreen> {
-
-  // =========================
-  // Form
-  // =========================
-
-  final GlobalKey<FormState> _formKey =
-      GlobalKey<FormState>();
-
-  // =========================
-  // Selected Values
-  // =========================
-
   String? _selectedMajor;
   String? _selectedAcademicYear;
-  String? _selectedCareerPath;
-
-  // =========================
-  // Selected Skills
-  // =========================
 
   final List<String> _selectedSkills = [];
-
-  // =========================
-  // GPA
-  // =========================
+  final List<Certificate> _selectedCertificates = [];
+  final List<Project> _selectedProjects = [];
 
   final TextEditingController _gpaController =
       TextEditingController();
@@ -48,637 +30,809 @@ class _CompleteProfileScreenState
   @override
   void initState() {
     super.initState();
-
     _loadStudentData();
-  }
-
-  // =========================
-  // Load Existing Student
-  // =========================
-
-  void _loadStudentData() {
-    final Student? student =
-        MasarMockData.currentStudent;
-
-    if (student == null) {
-      return;
-    }
-
-    if (student.major.isNotEmpty) {
-      _selectedMajor = student.major;
-    }
-
-    if (student.academicYear.isNotEmpty) {
-      _selectedAcademicYear =
-          student.academicYear;
-    }
-
-    if (student.careerPathId != null) {
-      _selectedCareerPath =
-          student.careerPathId;
-    }
-
-    _gpaController.text =
-        student.gpa;
   }
 
   @override
   void dispose() {
     _gpaController.dispose();
-
     super.dispose();
   }
 
-  // =========================
-  // Save Profile
-  // =========================
+  // ============================================================
+  // LOAD CURRENT STUDENT DATA
+  // ============================================================
+
+  void _loadStudentData() {
+    final student = MasarMockData.currentStudent;
+
+    if (student == null) return;
+
+    _selectedMajor = student.major;
+    _selectedAcademicYear = student.academicYear;
+
+    _gpaController.text = student.gpa;
+
+    _selectedSkills.clear();
+
+    for (final skill in student.skills) {
+      _selectedSkills.add(skill.name);
+    }
+
+    _selectedCertificates
+      ..clear()
+      ..addAll(student.certificates);
+
+    _selectedProjects
+      ..clear()
+      ..addAll(student.projects);
+  }
+
+  // ============================================================
+  // ADD SKILL
+  // ============================================================
+
+  void _showAddSkillDialog() {
+    String? selectedSkill;
+
+    final availableSkills = MasarMockData.skills
+        .where(
+          (skill) => !_selectedSkills.contains(skill.name),
+        )
+        .toList();
+
+    if (availableSkills.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'تمت إضافة جميع المهارات المتاحة.',
+            style: TextStyle(fontFamily: 'Cairo'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: const Text(
+                  'إضافة مهارة',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
+                    color: MasarColors.textPrimary,
+                  ),
+                ),
+                content: DropdownButtonFormField<String>(
+                  value: selectedSkill,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'اختر المهارة',
+                    prefixIcon: Icon(
+                      Icons.auto_awesome_outlined,
+                    ),
+                  ),
+                  items: availableSkills.map((skill) {
+                    return DropdownMenuItem<String>(
+                      value: skill.name,
+                      child: Text(
+                        skill.name,
+                        style: const TextStyle(
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setDialogState(() {
+                      selectedSkill = value;
+                    });
+                  },
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'إلغاء',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: MasarColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: selectedSkill == null
+                        ? null
+                        : () {
+                            setState(() {
+                              _selectedSkills.add(
+                                selectedSkill!,
+                              );
+                            });
+
+                            Navigator.pop(context);
+                          },
+                    child: const Text(
+                      'إضافة',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // ADD CERTIFICATE
+  // ============================================================
+
+  void _showAddCertificateDialog() {
+    final titleController = TextEditingController();
+    final issuerController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              'إضافة شهادة',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'اسم الشهادة',
+                    hintText: 'مثال: IBM Data Science',
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: issuerController,
+                  decoration: const InputDecoration(
+                    labelText: 'الجهة المانحة',
+                    hintText: 'مثال: IBM',
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (titleController.text.trim().isEmpty ||
+                      issuerController.text.trim().isEmpty) {
+                    return;
+                  }
+
+                  setState(() {
+                    _selectedCertificates.add(
+                      Certificate(
+                        id: DateTime.now()
+                            .millisecondsSinceEpoch
+                            .toString(),
+                        title: titleController.text.trim(),
+                        issuer: issuerController.text.trim(),
+                        date: '',
+                      ),
+                    );
+                  });
+
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إضافة',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // ADD PROJECT
+  // ============================================================
+
+  void _showAddProjectDialog() {
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final technologiesController = TextEditingController();
+    final githubController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              'إضافة مشروع',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'اسم المشروع',
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'وصف المشروع',
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: technologiesController,
+                    decoration: const InputDecoration(
+                      labelText: 'التقنيات المستخدمة',
+                      hintText: 'Python, SQL, Power BI',
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: githubController,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      labelText: 'GitHub Link (اختياري)',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.trim().isEmpty ||
+                      descriptionController.text.trim().isEmpty) {
+                    return;
+                  }
+
+                  final technologies = technologiesController
+                      .text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+
+                  setState(() {
+                    _selectedProjects.add(
+                      Project(
+                        id: DateTime.now()
+                            .millisecondsSinceEpoch
+                            .toString(),
+                        name: nameController.text.trim(),
+                        description:
+                            descriptionController.text.trim(),
+                        technologies: technologies,
+                        githubUrl:
+                            githubController.text.trim().isEmpty
+                                ? null
+                                : githubController.text.trim(),
+                      ),
+                    );
+                  });
+
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إضافة',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // SAVE PROFILE
+  // ============================================================
 
   void _saveProfile() {
-    // Check required fields.
-    if (!_formKey.currentState!.validate()) {
+    if (_selectedMajor == null ||
+        _selectedAcademicYear == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'يرجى إكمال المعلومات الأكاديمية المطلوبة.',
+            style: TextStyle(fontFamily: 'Cairo'),
+          ),
+        ),
+      );
       return;
     }
 
-    final Student? oldStudent =
-        MasarMockData.currentStudent;
+    final oldStudent = MasarMockData.currentStudent;
 
-    if (oldStudent == null) {
-      return;
-    }
+    if (oldStudent == null) return;
 
-    // Convert selected skill names
-    // into Skill objects.
-    final List<Skill> selectedSkills =
-        _selectedSkills.map((skillName) {
+    final selectedSkillObjects = _selectedSkills.map((name) {
+      final originalSkill = MasarMockData.skills.firstWhere(
+        (skill) => skill.name == name,
+      );
+
       return Skill(
-        id: skillName
-            .toLowerCase()
-            .replaceAll(' ', '_'),
+        id: originalSkill.id,
+        name: originalSkill.name,
 
-        name: skillName,
-
-        // The real level will be
-        // determined by SkillMirror.
+        // المستوى لا يتم إدخاله من الطالب.
+        // سيتم تقييمه لاحقًا من الاختبار.
         level: 0,
 
         status: 'Not Assessed',
       );
     }).toList();
 
-    // Create an updated Student.
-    final Student updatedStudent = Student(
+    final updatedStudent = Student(
       id: oldStudent.id,
-
       name: oldStudent.name,
-
       major: _selectedMajor!,
-
-      university:
-          oldStudent.university,
-
-      academicYear:
-          _selectedAcademicYear!,
-
+      university: oldStudent.university,
+      academicYear: _selectedAcademicYear!,
       email: oldStudent.email,
 
-      // Optional.
-      careerPathId:
-          _selectedCareerPath,
+      // المسار يتم اختياره لاحقًا من Home.
+      careerPathId: null,
 
-      // Optional.
-      gpa:
-          _gpaController.text.trim(),
+      gpa: _gpaController.text.trim(),
 
-      // Can be empty.
-      skills:
-          selectedSkills,
+      skills: selectedSkillObjects,
 
-      // Not added yet.
-      softSkills:
-          oldStudent.softSkills,
+      softSkills: oldStudent.softSkills,
 
-      // Certificates are added later.
-      //certificates:
-      //    oldStudent.certificates,
-      certificates: MasarMockData.certificates,
+      certificates: _selectedCertificates,
+
+      projects: _selectedProjects,
     );
 
-    // Save the updated student.
-    MasarMockData.currentStudent =
-        updatedStudent;
+    MasarMockData.currentStudent = updatedStudent;
 
-    // Go to Home.
+    MasarMockData.isFirstLogin = false;
+
     Navigator.pushReplacementNamed(
       context,
       '/home',
     );
   }
 
-  // =========================
-  // Skill Selection
-  // =========================
-
-  void _toggleSkill(String skill) {
-    setState(() {
-      if (_selectedSkills.contains(skill)) {
-        _selectedSkills.remove(skill);
-      } else {
-        _selectedSkills.add(skill);
-      }
-    });
-  }
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          MasarColors.background,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade200,
 
-      body: SafeArea(
-        child: Directionality(
-          textDirection:
-              TextDirection.rtl,
-
-          child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(
-              horizontal: 28,
-              vertical: 32,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 430,
             ),
 
-            child: Form(
-              key: _formKey,
+            child: Container(
+              width: double.infinity,
+              color: MasarColors.background,
 
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
-                children: [
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    // ==================================================
+                    // APP BAR
+                    // ==================================================
 
-                  // =========================
-                  // Title
-                  // =========================
-
-                  const Text(
-                    'أكمل ملفك الشخصي',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          MasarColors.darkBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  const Text(
-                    'بعض المعلومات تساعدنا على تخصيص تجربتك في مسار',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          FontWeight.w500,
-                      color:
-                          MasarColors.textSecondary,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Required fields explanation
-                  const Text(
-                    'الحقول المعلّمة بـ * مطلوبة',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color:
-                          MasarColors.textSecondary,
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // =========================
-                  // Academic Information
-                  // =========================
-
-                  const Text(
-                    'المعلومات الأكاديمية',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          MasarColors.darkBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Major
-
-                  const _RequiredLabel(
-                    text: 'التخصص',
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  DropdownButtonFormField<String>(
-                    value: _selectedMajor,
-
-                    decoration:
-                        const InputDecoration(
-                      hintText:
-                          'اختر تخصصك',
-
-                      prefixIcon: Icon(
-                        Icons.school_outlined,
-                        color:
-                            MasarColors
-                                .primaryBlue,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
                       ),
-                    ),
-
-                    items:
-                        MasarMockData.majors
-                            .map(
-                      (major) {
-                        return DropdownMenuItem<
-                            String>(
-                          value: major,
-
-                          child: Text(
-                            major,
-                            style:
-                                const TextStyle(
-                              fontSize: 14,
-                            ),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: MasarColors.border,
                           ),
-                        );
-                      },
-                    ).toList(),
-
-                    onChanged:
-                        (value) {
-                      setState(() {
-                        _selectedMajor =
-                            value;
-                      });
-                    },
-
-                    validator:
-                        (value) {
-                      if (value ==
-                              null ||
-                          value.isEmpty) {
-                        return 'يرجى اختيار التخصص';
-                      }
-
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Academic Year
-
-                  const _RequiredLabel(
-                    text: 'السنة الدراسية',
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  DropdownButtonFormField<String>(
-                    value:
-                        _selectedAcademicYear,
-
-                    decoration:
-                        const InputDecoration(
-                      hintText:
-                          'اختر السنة الدراسية',
-
-                      prefixIcon: Icon(
-                        Icons
-                            .calendar_month_outlined,
-                        color:
-                            MasarColors
-                                .primaryBlue,
+                        ),
                       ),
-                    ),
-
-                    items:
-                        MasarMockData
-                            .academicYears
-                            .map(
-                      (year) {
-                        return DropdownMenuItem<
-                            String>(
-                          value: year,
-
-                          child:
-                              Text(
-                            year,
-                            style:
-                                const TextStyle(
-                              fontSize:
-                                  14,
-                            ),
-                          ),
-                        );
-                      },
-                    ).toList(),
-
-                    onChanged:
-                        (value) {
-                      setState(() {
-                        _selectedAcademicYear =
-                            value;
-                      });
-                    },
-
-                    validator:
-                        (value) {
-                      if (value ==
-                              null ||
-                          value.isEmpty) {
-                        return 'يرجى اختيار السنة الدراسية';
-                      }
-
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // GPA - Optional
-
-                  const Text(
-                    'المعدل التراكمي',
-                    textAlign:
-                        TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          MasarColors.darkBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  TextFormField(
-                    controller:
-                        _gpaController,
-
-                    keyboardType:
-                        const TextInputType
-                            .numberWithOptions(
-                      decimal: true,
-                    ),
-
-                    textDirection:
-                        TextDirection.rtl,
-
-                    style:
-                        const TextStyle(
-                      fontSize: 15,
-                      color:
-                          MasarColors
-                              .textPrimary,
-                    ),
-
-                    decoration:
-                        const InputDecoration(
-                      hintText:
-                          'أدخل معدلك التراكمي',
-
-                      prefixIcon:
-                          Icon(
-                        Icons
-                            .analytics_outlined,
-                        color:
-                            MasarColors
-                                .primaryBlue,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // =========================
-                  // Career Information
-                  // =========================
-
-                  const Text(
-                    'المعلومات المهنية',
-                    textAlign:
-                        TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          MasarColors.darkBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Career Path - Optional
-
-                  const Text(
-                    'المسار المهني',
-                    textAlign:
-                        TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          MasarColors.darkBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  DropdownButtonFormField<String>(
-                    value:
-                        _selectedCareerPath,
-
-                    decoration:
-                        const InputDecoration(
-                      hintText:
-                          'اختر المسار الذي تهتم به',
-
-                      prefixIcon:
-                          Icon(
-                        Icons.work_outline,
-                        color:
-                            MasarColors
-                                .primaryGreen,
-                      ),
-                    ),
-
-                    items:
-                        MasarMockData
-                            .careerPaths
-                            .map(
-                      (CareerPath path) {
-                        return DropdownMenuItem<
-                            String>(
-                          value:
-                              path.id,
-
-                          child:
-                              Text(
-                            path.title,
-                            style:
-                                const TextStyle(
-                              fontSize:
-                                  14,
-                            ),
-                          ),
-                        );
-                      },
-                    ).toList(),
-
-                    onChanged:
-                        (value) {
-                      setState(() {
-                        _selectedCareerPath =
-                            value;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Current Skills - Optional
-
-                  const Text(
-                    'مهاراتك الحالية',
-                    textAlign:
-                        TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          MasarColors.darkBlue,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  const Text(
-                    'اختر المهارات التي تمتلكها حاليًا',
-                    textAlign:
-                        TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color:
-                          MasarColors
-                              .textSecondary,
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-
-                    children:
-                        MasarMockData
-                            .skills
-                            .map(
-                      (skill) {
-                        final bool
-                            isSelected =
-                            _selectedSkills
-                                .contains(
-                          skill.name,
-                        );
-
-                        return FilterChip(
-                          label:
-                              Text(
-                            skill.name,
-                            style:
-                                TextStyle(
-                              fontSize:
-                                  13,
-                              fontWeight:
-                                  FontWeight
-                                      .w600,
-                              color: isSelected
-                                  ? Colors
-                                      .white
-                                  : MasarColors
-                                      .darkBlue,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 20,
                             ),
                           ),
 
-                          selected:
-                              isSelected,
+                          const Expanded(
+                            child: Text(
+                              'إكمال الملف الشخصي',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                                color: MasarColors.textPrimary,
+                              ),
+                            ),
+                          ),
 
-                          selectedColor:
-                              MasarColors
-                                  .primaryBlue,
+                          const SizedBox(width: 48),
+                        ],
+                      ),
+                    ),
 
-                          backgroundColor:
-                              MasarColors
-                                  .lightBlue,
+                    // ==================================================
+                    // CONTENT
+                    // ==================================================
 
-                          checkmarkColor:
-                              Colors
-                                  .white,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(
+                          20,
+                          20,
+                          20,
+                          30,
+                        ),
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'أكمل معلوماتك',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: MasarColors.textPrimary,
+                              ),
+                            ),
 
-                          onSelected:
-                              (_) {
-                            _toggleSkill(
-                              skill.name,
-                            );
-                          },
-                        );
-                      },
-                    ).toList(),
-                  ),
+                            const SizedBox(height: 6),
 
-                  const SizedBox(height: 34),
+                            const Text(
+                              'أضف معلوماتك الأساسية حتى نتمكن من تخصيص تجربتك في مسار.',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 13,
+                                color: MasarColors.textSecondary,
+                                height: 1.6,
+                              ),
+                            ),
 
-                  // =========================
-                  // Save Button
-                  // =========================
+                            const SizedBox(height: 24),
 
-                  SizedBox(
-                    height: 54,
+                            // ==================================================
+                            // ACADEMIC INFORMATION
+                            // ==================================================
 
-                    child:
-                        FilledButton(
-                      onPressed:
-                          _saveProfile,
+                            _SectionTitle(
+                              title: 'المعلومات الأكاديمية',
+                              icon: Icons.school_outlined,
+                            ),
 
-                      child:
-                          const Text(
-                        'حفظ ومتابعة',
-                        style:
-                            TextStyle(
-                          fontSize:
-                              16,
-                          fontWeight:
-                              FontWeight
-                                  .bold,
+                            const SizedBox(height: 12),
+
+                            DropdownButtonFormField<String>(
+                              value: _selectedMajor,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'التخصص',
+                                prefixIcon: Icon(
+                                  Icons.menu_book_outlined,
+                                ),
+                              ),
+                              items: MasarMockData.majors
+                                  .map(
+                                    (major) =>
+                                        DropdownMenuItem<String>(
+                                      value: major,
+                                      child: Text(
+                                        major,
+                                        style: const TextStyle(
+                                          fontFamily: 'Cairo',
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedMajor = value;
+                                });
+                              },
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            DropdownButtonFormField<String>(
+                              value: _selectedAcademicYear,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'السنة الدراسية',
+                                prefixIcon: Icon(
+                                  Icons.calendar_today_outlined,
+                                ),
+                              ),
+                              items: MasarMockData.academicYears
+                                  .map(
+                                    (year) =>
+                                        DropdownMenuItem<String>(
+                                      value: year,
+                                      child: Text(
+                                        year,
+                                        style: const TextStyle(
+                                          fontFamily: 'Cairo',
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedAcademicYear = value;
+                                });
+                              },
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            TextField(
+                              controller: _gpaController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              decoration: const InputDecoration(
+                                labelText: 'المعدل التراكمي',
+                                hintText: 'مثال: 3.2',
+                                prefixIcon: Icon(
+                                  Icons.grade_outlined,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 28),
+
+                            // ==================================================
+                            // SKILLS
+                            // ==================================================
+
+                            _SectionHeader(
+                              title: 'مهاراتك الحالية',
+                              icon: Icons.auto_awesome_outlined,
+                              buttonText: 'إضافة مهارة',
+                              onPressed: _showAddSkillDialog,
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            const Text(
+                              'أضف المهارات التي تمتلكها حاليًا. سيتم تقييم مستوى كل مهارة لاحقًا من خلال اختبار المسار المهني.',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                color: MasarColors.textSecondary,
+                                height: 1.6,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            if (_selectedSkills.isEmpty)
+                              const _EmptySection(
+                                icon: Icons.auto_awesome_outlined,
+                                text: 'لم تتم إضافة أي مهارات بعد',
+                              )
+                            else
+                              Column(
+                                children: _selectedSkills
+                                    .map(
+                                      (skill) => _SkillCard(
+                                        skillName: skill,
+                                        onDelete: () {
+                                          setState(() {
+                                            _selectedSkills
+                                                .remove(skill);
+                                          });
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+
+                            const SizedBox(height: 28),
+
+                            // ==================================================
+                            // CERTIFICATES
+                            // ==================================================
+
+                            _SectionHeader(
+                              title: 'الشهادات',
+                              icon: Icons.workspace_premium_outlined,
+                              buttonText: 'إضافة شهادة',
+                              onPressed:
+                                  _showAddCertificateDialog,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            if (_selectedCertificates.isEmpty)
+                              const _EmptySection(
+                                icon:
+                                    Icons.workspace_premium_outlined,
+                                text: 'لم تتم إضافة أي شهادات بعد',
+                              )
+                            else
+                              Column(
+                                children: _selectedCertificates
+                                    .map(
+                                      (certificate) =>
+                                          _CertificateCard(
+                                        certificate: certificate,
+                                        onDelete: () {
+                                          setState(() {
+                                            _selectedCertificates
+                                                .remove(certificate);
+                                          });
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+
+                            const SizedBox(height: 28),
+
+                            // ==================================================
+                            // PROJECTS
+                            // ==================================================
+
+                            _SectionHeader(
+                              title: 'المشاريع',
+                              icon: Icons.code_outlined,
+                              buttonText: 'إضافة مشروع',
+                              onPressed: _showAddProjectDialog,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            if (_selectedProjects.isEmpty)
+                              const _EmptySection(
+                                icon: Icons.code_outlined,
+                                text: 'لم تتم إضافة أي مشاريع بعد',
+                              )
+                            else
+                              Column(
+                                children: _selectedProjects
+                                    .map(
+                                      (project) => _ProjectCard(
+                                        project: project,
+                                        onDelete: () {
+                                          setState(() {
+                                            _selectedProjects
+                                                .remove(project);
+                                          });
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+
+                            const SizedBox(height: 32),
+
+                            // ==================================================
+                            // SAVE BUTTON
+                            // ==================================================
+
+                            SizedBox(
+                              width: double.infinity,
+                              height: 54,
+                              child: ElevatedButton(
+                                onPressed: _saveProfile,
+                                child: const Text(
+                                  'حفظ والمتابعة',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            const Center(
+                              child: Text(
+                                'يمكنك تعديل معلوماتك لاحقًا من الملف الشخصي.',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 11,
+                                  color: MasarColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 20),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -688,53 +842,426 @@ class _CompleteProfileScreenState
   }
 }
 
+// ============================================================
+// SECTION TITLE
+// ============================================================
 
-// ======================================================
-// Required Field Label
-// ======================================================
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final IconData icon;
 
-class _RequiredLabel
-    extends StatelessWidget {
+  const _SectionTitle({
+    required this.title,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 21,
+          color: MasarColors.primaryBlue,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: MasarColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================
+// SECTION HEADER WITH ADD BUTTON
+// ============================================================
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String buttonText;
+  final VoidCallback onPressed;
+
+  const _SectionHeader({
+    required this.title,
+    required this.icon,
+    required this.buttonText,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 21,
+          color: MasarColors.primaryBlue,
+        ),
+
+        const SizedBox(width: 8),
+
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: MasarColors.textPrimary,
+            ),
+          ),
+        ),
+
+        TextButton.icon(
+          onPressed: onPressed,
+          icon: const Icon(
+            Icons.add,
+            size: 18,
+          ),
+          label: Text(
+            buttonText,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================
+// SKILL CARD
+// ============================================================
+
+class _SkillCard extends StatelessWidget {
+  final String skillName;
+  final VoidCallback onDelete;
+
+  const _SkillCard({
+    required this.skillName,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: MasarColors.lightBlue,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.auto_awesome,
+              color: MasarColors.primaryBlue,
+              size: 20,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Text(
+              skillName,
+              style: const TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: MasarColors.textPrimary,
+              ),
+            ),
+          ),
+
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(
+              Icons.delete_outline,
+              color: MasarColors.error,
+              size: 21,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// CERTIFICATE CARD
+// ============================================================
+
+class _CertificateCard extends StatelessWidget {
+  final Certificate certificate;
+  final VoidCallback onDelete;
+
+  const _CertificateCard({
+    required this.certificate,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: MasarColors.lightGreen,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.workspace_premium_outlined,
+              color: MasarColors.primaryGreen,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  certificate.title,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: MasarColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  certificate.issuer,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    color: MasarColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(
+              Icons.delete_outline,
+              color: MasarColors.error,
+              size: 21,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// PROJECT CARD
+// ============================================================
+
+class _ProjectCard extends StatelessWidget {
+  final Project project;
+  final VoidCallback onDelete;
+
+  const _ProjectCard({
+    required this.project,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: MasarColors.lightBlue,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.code_outlined,
+              color: MasarColors.primaryBlue,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  project.name,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: MasarColors.textPrimary,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  project.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    color: MasarColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+
+                if (project.technologies.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+
+                  Wrap(
+                    spacing: 5,
+                    runSpacing: 5,
+                    children: project.technologies
+                        .map(
+                          (technology) => Container(
+                            padding:
+                                const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: MasarColors.lightBlue,
+                              borderRadius:
+                                  BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              technology,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 9,
+                                color:
+                                    MasarColors.primaryBlue,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(
+              Icons.delete_outline,
+              color: MasarColors.error,
+              size: 21,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// EMPTY SECTION
+// ============================================================
+
+class _EmptySection extends StatelessWidget {
+  final IconData icon;
   final String text;
 
-  const _RequiredLabel({
+  const _EmptySection({
+    required this.icon,
     required this.text,
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    return RichText(
-      textAlign:
-          TextAlign.right,
-
-      text: TextSpan(
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        vertical: 22,
+        horizontal: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: Column(
         children: [
-
-          TextSpan(
-            text: text,
-
-            style:
-                const TextStyle(
-              fontSize: 16,
-              fontWeight:
-                  FontWeight.bold,
-              color:
-                  MasarColors.darkBlue,
-            ),
+          Icon(
+            icon,
+            size: 28,
+            color: MasarColors.textSecondary,
           ),
-
-          const TextSpan(
-            text: ' *',
-
-            style:
-                TextStyle(
-              fontSize: 16,
-              fontWeight:
-                  FontWeight.bold,
-              color:
-                  MasarColors.error,
+          const SizedBox(height: 8),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              color: MasarColors.textSecondary,
             ),
           ),
         ],

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../theme/masar_theme.dart';
-import 'attendance_screen.dart';
-import 'reports_screen.dart';
-import 'evaluation_screen.dart';
-import '../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../../core/widgets/training_bottom_bar.dart';
 
 class TrainingDashboardScreen extends StatelessWidget {
   const TrainingDashboardScreen({super.key});
@@ -19,85 +17,176 @@ class TrainingDashboardScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               children: [
                 _header(context),
-                const SizedBox(height: 18),
-
-                _trainingCard(context),
-                const SizedBox(height: 12),
-
-                _progressCard(context),
-                const SizedBox(height: 12),
-
-                _statistics(context),
-                const SizedBox(height: 12),
-
-                _quickActions(context),
-                const SizedBox(height: 12),
-
+                const SizedBox(height: 16),
                 _motivationCard(context),
+                const SizedBox(height: 16),
+                _trainingCard(context),
+                const SizedBox(height: 16),
+                _progressCard(context),
+                const SizedBox(height: 16),
+                _statistics(context),
+                const SizedBox(height: 24),
               ],
             ),
           ),
         ),
       ),
-
-      bottomNavigationBar: const AppBottomNavBar(selectedIndex: 0),
+      bottomNavigationBar: const TrainingBottomBar(
+        selectedIndex: 0,
+      ),
     );
   }
 
-  // =========================
+  // =========================================================
   // Header
-  // =========================
+  // =========================================================
 
   Widget _header(BuildContext context) {
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 22,
-          backgroundColor: MasarColors.lightBlue,
-          child: Icon(Icons.person_outline, color: MasarColors.primaryBlue),
+        IconButton(
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+              (route) => false,
+            );
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 20,
+          ),
+          tooltip: 'الرئيسية',
         ),
 
-        const SizedBox(width: 10),
+        const SizedBox(width: 4),
+
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: MasarColors.lightBlue,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Icon(
+            Icons.school_outlined,
+            color: MasarColors.primaryBlue,
+            size: 26,
+          ),
+        ),
+
+        const SizedBox(width: 12),
 
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'مرحباً شهد 🌱',
-                style: Theme.of(context).textTheme.titleMedium,
+                'مرحباً بك 👋',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: MasarColors.textSecondary,
+                    ),
               ),
+              const SizedBox(height: 2),
               Text(
-                'بالتوفيق في رحلتك التدريبية!',
-                style: Theme.of(context).textTheme.bodySmall,
+                'لوحة التدريب',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
-        ),
-
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.notifications_none),
         ),
       ],
     );
   }
 
-  // =========================
-  // Current Training
-  // =========================
+  // =========================================================
+  // Motivation Card
+  // =========================================================
+
+  Widget _motivationCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: MasarColors.lightGreen,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Center(
+              child: Text(
+                '🏆',
+                style: TextStyle(
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ابدأ تدريبك بقوة 💪',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: MasarColors.darkGreen,
+                      ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  'تابع حضورك وتقاريرك وتقدمك خلال فترة التدريب.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: MasarColors.darkGreen,
+                        height: 1.4,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================
+  // Training Information
+  // =========================================================
 
   Widget _trainingCard(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'معلومات التدريب',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+
+            const SizedBox(height: 16),
+
             Row(
               children: [
                 _companyLogo(),
 
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
 
                 Expanded(
                   child: Column(
@@ -105,10 +194,16 @@ class TrainingDashboardScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Microsoft',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
+
+                      const SizedBox(height: 4),
+
                       Text(
-                        'IT Support Intern',
+                        'تدريب ميداني',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -119,40 +214,31 @@ class TrainingDashboardScreen extends StatelessWidget {
               ],
             ),
 
+            const SizedBox(height: 18),
+
+            const Divider(),
+
             const SizedBox(height: 14),
 
             Row(
               children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 17,
-                  color: MasarColors.textSecondary,
-                ),
-                const SizedBox(width: 4),
-                Text('عمان', style: Theme.of(context).textTheme.bodySmall),
-
-                const Spacer(),
-
-                const Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: MasarColors.textSecondary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '12/09/2026 - 12/12/2026',
-                  style: Theme.of(context).textTheme.bodySmall,
+                Expanded(
+                  child: _infoItem(
+                    context,
+                    icon: Icons.location_on_outlined,
+                    title: 'الموقع',
+                    value: 'عمّان',
+                  ),
                 ),
 
-                const SizedBox(width: 10),
-
-                const Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: MasarColors.textSecondary,
+                Expanded(
+                  child: _infoItem(
+                    context,
+                    icon: Icons.calendar_month_outlined,
+                    title: 'المدة',
+                    value: '6 أسابيع',
+                  ),
                 ),
-                const SizedBox(width: 3),
-                Text('120 ساعة', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ],
@@ -161,80 +247,155 @@ class TrainingDashboardScreen extends StatelessWidget {
     );
   }
 
+  // =========================================================
+  // Company Logo
+  // =========================================================
+
   Widget _companyLogo() {
     return Container(
-      width: 46,
-      height: 46,
+      width: 52,
+      height: 52,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: MasarColors.border),
+        color: MasarColors.lightBlue,
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(
-        Icons.grid_view_rounded,
-        color: MasarColors.primaryBlue,
-        size: 28,
+      child: const Center(
+        child: Text(
+          'M',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: MasarColors.primaryBlue,
+          ),
+        ),
       ),
     );
   }
 
+  // =========================================================
+  // Status Badge
+  // =========================================================
+
   Widget _statusBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 6,
+      ),
       decoration: BoxDecoration(
         color: MasarColors.lightGreen,
         borderRadius: BorderRadius.circular(20),
       ),
       child: const Text(
-        'التدريب الحالي',
+        'نشط',
         style: TextStyle(
           color: MasarColors.darkGreen,
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
-  // =========================
+  // =========================================================
+  // Info Item
+  // =========================================================
+
+  Widget _infoItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: MasarColors.primaryBlue,
+          size: 21,
+        ),
+
+        const SizedBox(width: 8),
+
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: MasarColors.textSecondary,
+                  ),
+            ),
+
+            const SizedBox(height: 2),
+
+            Text(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // =========================================================
   // Progress
-  // =========================
+  // =========================================================
 
   Widget _progressCard(BuildContext context) {
-    const progress = 0.0;
+    const double progress = 0.0;
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Text(
-                  'نسبة الإنجاز',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Expanded(
+                  child: Text(
+                    'تقدم التدريب',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
                 ),
-                const Spacer(),
+
                 Text(
                   '${(progress * 100).toInt()}%',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: MasarColors.primaryBlue,
-                  ),
+                        color: MasarColors.primaryBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: const LinearProgressIndicator(
+              child: LinearProgressIndicator(
                 value: progress,
-                minHeight: 8,
-                backgroundColor: MasarColors.lightBlue,
-                color: MasarColors.primaryBlue,
+                minHeight: 9,
+                backgroundColor: MasarColors.border,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  MasarColors.primaryBlue,
+                ),
               ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              'لم يتم تسجيل أي نشاط تدريبي بعد',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: MasarColors.textSecondary,
+                  ),
             ),
           ],
         ),
@@ -242,206 +403,126 @@ class TrainingDashboardScreen extends StatelessWidget {
     );
   }
 
-  // =========================
+  // =========================================================
   // Statistics
-  // =========================
+  // =========================================================
 
   Widget _statistics(BuildContext context) {
-    final stats = [
-      ('0', 'ساعة تدريب', Icons.access_time),
-      ('0', 'أسبوع مكتمل', Icons.calendar_month_outlined),
-      ('0', 'يوم حضور', Icons.person_outline),
-      ('0', 'تقرير مقدم', Icons.description_outlined),
-    ];
-
-    return Row(
-      children: stats.map((stat) {
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 3,
-                ),
-                child: Column(
-                  children: [
-                    Icon(stat.$3, color: MasarColors.primaryBlue, size: 23),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      stat.$1,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-
-                    Text(
-                      stat.$2,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // =========================
-  // Quick Actions
-  // =========================
-
-  Widget _quickActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _action(context, Icons.calendar_month_outlined, 'الحضور', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AttendanceScreen()),
-            );
-          }),
-        ),
-
-        const SizedBox(width: 8),
-
-        Expanded(
-          child: _action(
-            context,
-            Icons.description_outlined,
-            'التقارير الأسبوعية',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ReportsScreen()),
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        Expanded(
-          child: _action(context, Icons.star_outline, 'التقييمات', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const EvaluationScreen()),
-            );
-            // شاشة التقييمات لاحقًا
-          }),
-        ),
-      ],
-    );
-  }
-
-  Widget _action(
-    BuildContext context,
-    IconData icon,
-    String title,
-    VoidCallback onTap,
-  ) {
     return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Icon(icon, color: MasarColors.primaryBlue, size: 25),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'إحصائيات التدريب',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
 
-              const SizedBox(height: 7),
+            const SizedBox(height: 16),
 
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _statItem(
+                    context,
+                    icon: Icons.access_time_outlined,
+                    value: '0',
+                    label: 'ساعة تدريب',
+                  ),
+                ),
 
-              const SizedBox(height: 5),
+                Expanded(
+                  child: _statItem(
+                    context,
+                    icon: Icons.date_range_outlined,
+                    value: '0',
+                    label: 'أسبوع مكتمل',
+                  ),
+                ),
+              ],
+            ),
 
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 11,
-                color: MasarColors.textSecondary,
-              ),
-            ],
-          ),
+            const SizedBox(height: 16),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _statItem(
+                    context,
+                    icon: Icons.event_available_outlined,
+                    value: '0',
+                    label: 'يوم حضور',
+                  ),
+                ),
+
+                Expanded(
+                  child: _statItem(
+                    context,
+                    icon: Icons.description_outlined,
+                    value: '0',
+                    label: 'تقرير مقدم',
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // =========================
-  // Motivation
-  // =========================
+  // =========================================================
+  // Statistics Item
+  // =========================================================
 
-  Widget _motivationCard(BuildContext context) {
+  Widget _statItem(
+    BuildContext context, {
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: MasarColors.lightBlue,
-        borderRadius: BorderRadius.circular(16),
+        color: MasarColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          const Icon(
-            Icons.format_quote,
+          Icon(
+            icon,
             color: MasarColors.primaryBlue,
-            size: 24,
+            size: 23,
           ),
 
-          const SizedBox(width: 6),
+          const SizedBox(height: 7),
 
           Text(
-            'خطوة بخطوة... نصنع مستقبلك.',
-            style: Theme.of(context).textTheme.titleMedium,
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: MasarColors.textPrimary,
+                ),
+          ),
+
+          const SizedBox(height: 2),
+
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: MasarColors.textSecondary,
+                ),
           ),
         ],
       ),
-    );
-  }
-
-  // =========================
-  // Bottom Navigation
-  // =========================
-
-  NavigationBar _bottomNavigation() {
-    return NavigationBar(
-      selectedIndex: 0,
-      onDestinationSelected: (index) {},
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'الرئيسية',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.business_center_outlined),
-          selectedIcon: Icon(Icons.business_center),
-          label: 'فرص التدريب',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.description_outlined),
-          selectedIcon: Icon(Icons.description),
-          label: 'تقاريري',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.notifications_none),
-          selectedIcon: Icon(Icons.notifications),
-          label: 'الإشعارات',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'ملفي',
-        ),
-      ],
     );
   }
 }

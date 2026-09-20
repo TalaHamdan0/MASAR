@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../theme/masar_theme.dart';
-import '../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../../core/widgets/training_bottom_bar.dart';
 
 class EvaluationScreen extends StatefulWidget {
   const EvaluationScreen({super.key});
@@ -10,123 +11,118 @@ class EvaluationScreen extends StatefulWidget {
 }
 
 class _EvaluationScreenState extends State<EvaluationScreen> {
-  // لاحقًا هذه القيمة ستأتي من الـ Backend
-  bool hasCompanyEvaluation = false;
+  final TextEditingController notesController = TextEditingController();
 
-  bool isCompanyEvaluationExpanded = false;
+  // تقييم الطالب لتجربة التدريب
+  final Map<String, double> studentRatings = {
+    'جودة التدريب': 0,
+    'الاستفادة من التدريب': 0,
+    'بيئة العمل': 0,
+    'الإشراف والتوجيه': 0,
+    'تحقيق أهداف التدريب': 0,
+  };
+
+  bool submitted = false;
+
+  @override
+  void dispose() {
+    notesController.dispose();
+    super.dispose();
+  }
+
+  // ============================================================
+  // إرسال تقييم الطالب
+  // ============================================================
+
+  void _submitEvaluation() {
+    final hasEmptyRating =
+        studentRatings.values.any((rating) => rating == 0);
+
+    if (hasEmptyRating) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى تقييم جميع العناصر قبل إرسال التقييم'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      submitted = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('تم إرسال تقييمك بنجاح ✓'),
+        backgroundColor: MasarColors.success,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('التقييمات')),
+      appBar: AppBar(
+        title: const Text('التقييم'),
+      ),
 
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 430),
+            constraints: const BoxConstraints(
+              maxWidth: 430,
+            ),
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _companyEvaluation(),
+                _header(context),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
-                _secretEvaluation(),
+                _secretSupervisorEvaluation(context),
 
-                if (isCompanyEvaluationExpanded) ...[
-                  const SizedBox(height: 12),
-                  _companyEvaluationContent(),
-                ],
+                const SizedBox(height: 16),
+
+                _studentEvaluation(context),
+
+                const SizedBox(height: 16),
+
+                _evaluationStatus(context),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),
         ),
       ),
 
-      bottomNavigationBar: const AppBottomNavBar(selectedIndex: 1),
-    );
-  }
-
-  // تقييم الشركة
-  Widget _companyEvaluation() {
-    return Card(
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            isCompanyEvaluationExpanded = !isCompanyEvaluationExpanded;
-          });
-        },
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: MasarColors.lightBlue,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.business_outlined,
-                  color: MasarColors.primaryBlue,
-                  size: 27,
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'تقييم الشركة',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      'تقييم المشرف في الشركة',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-
-              Icon(
-                isCompanyEvaluationExpanded
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                color: MasarColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: const TrainingBottomBar(
+        selectedIndex: 3,
       ),
     );
   }
 
-  // التقييم السري
-  Widget _secretEvaluation() {
+  // ============================================================
+  // Header
+  // ============================================================
+
+  Widget _header(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 color: MasarColors.lightBlue,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
-                Icons.lock_outline,
+                Icons.assessment_outlined,
                 color: MasarColors.primaryBlue,
-                size: 27,
+                size: 28,
               ),
             ),
 
@@ -137,103 +133,267 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'التقييم السري',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    'تقييم التدريب',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
 
                   Text(
-                    'تقييم سري من مشرف الشركة',
+                    'تابع حالة التقييم وشاركنا تجربتك في التدريب.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
             ),
-
-            const Icon(Icons.lock, color: MasarColors.textSecondary, size: 20),
           ],
         ),
       ),
     );
   }
 
-  // المحتوى الذي يظهر عند الضغط على تقييم الشركة
-  Widget _companyEvaluationContent() {
-    // إذا المشرف لم يقيّم بعد
-    if (!hasCompanyEvaluation) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.hourglass_empty,
-                color: MasarColors.warning,
-                size: 38,
-              ),
+  // ============================================================
+  // التقييم السري من المشرف
+  // ============================================================
 
-              const SizedBox(height: 10),
-
-              Text(
-                'لسا ما تم التقييم من قبل المشرف.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // إذا المشرف قيّم
+  Widget _secretSupervisorEvaluation(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'تفاصيل تقييم الشركة',
-              style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: MasarColors.lightGreen,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.lock_outline,
+                    color: MasarColors.primaryGreen,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'تقييم المشرف الميداني',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        'تقييم سري يُرسل مباشرة إلى الجامعة',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 18),
 
-            _ratingRow('الالتزام والانضباط', 4.5),
-
-            _ratingRow('جودة العمل', 4.0),
-
-            _ratingRow('التواصل', 4.5),
-
-            _ratingRow('العمل ضمن الفريق', 4.0),
-
-            _ratingRow('المبادرة والتعلم', 4.5),
-
-            const SizedBox(height: 12),
-
+            // رسالة السرية
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: MasarColors.background,
-                borderRadius: BorderRadius.circular(14),
+                color: MasarColors.lightBlue,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: MasarColors.border,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'ملاحظات المشرف',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.privacy_tip_outlined,
+                        color: MasarColors.primaryBlue,
+                        size: 22,
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      Expanded(
+                        child: Text(
+                          'التقييم سري',
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: MasarColors.darkBlue,
+                                  ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 8),
 
                   Text(
-                    'ملاحظات المشرف ستظهر هنا.',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    'يقوم المشرف الميداني بتقييم أدائك وإرسال التقييم مباشرة إلى الدكتور المشرف في الجامعة. لا تظهر تفاصيل أو درجات التقييم للطالب.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          height: 1.6,
+                        ),
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // حالة التقييم
+            Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: MasarColors.warning,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                Text(
+                  'بانتظار إرسال تقييم المشرف',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'سيتم تحديث الحالة عند استلام الجامعة للتقييم.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: MasarColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // تقييم الطالب لتجربة التدريب
+  // ============================================================
+
+  Widget _studentEvaluation(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: MasarColors.lightBlue,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.rate_review_outlined,
+                    color: MasarColors.primaryBlue,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'قيّم تجربة التدريب',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        'شاركنا رأيك حول تجربتك التدريبية.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            ...studentRatings.keys.map(
+              (title) => _studentRatingItem(
+                context,
+                title,
+              ),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              'ملاحظات إضافية',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+
+            const SizedBox(height: 8),
+
+            TextField(
+              controller: notesController,
+              enabled: !submitted,
+              maxLines: 4,
+              textDirection: TextDirection.rtl,
+              decoration: const InputDecoration(
+                hintText:
+                    'اكتب ملاحظاتك أو اقتراحاتك حول تجربة التدريب...',
+                alignLabelWithHint: true,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: submitted ? null : _submitEvaluation,
+                icon: Icon(
+                  submitted
+                      ? Icons.check_circle_outline
+                      : Icons.send_outlined,
+                ),
+                label: Text(
+                  submitted ? 'تم إرسال التقييم' : 'إرسال التقييم',
+                ),
               ),
             ),
           ],
@@ -242,49 +402,133 @@ class _EvaluationScreenState extends State<EvaluationScreen> {
     );
   }
 
-  Widget _ratingRow(String title, double rating) {
+  // ============================================================
+  // تقييم عنصر واحد
+  // ============================================================
+
+  Widget _studentRatingItem(
+    BuildContext context,
+    String title,
+  ) {
+    final rating = studentRatings[title] ?? 0;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 35,
-            child: Text(
-              rating.toString(),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: MasarColors.textPrimary,
-              ),
-            ),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(height: 7),
 
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: rating / 5,
-                minHeight: 8,
-                backgroundColor: MasarColors.border,
+          Row(
+            children: [
+              ...List.generate(
+                5,
+                (index) {
+                  final starNumber = index + 1;
+
+                  return IconButton(
+                    onPressed: submitted
+                        ? null
+                        : () {
+                            setState(() {
+                              studentRatings[title] =
+                                  starNumber.toDouble();
+                            });
+                          },
+                    icon: Icon(
+                      starNumber <= rating
+                          ? Icons.star
+                          : Icons.star_border,
+                      color: starNumber <= rating
+                          ? MasarColors.warning
+                          : MasarColors.textSecondary,
+                      size: 28,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 38,
+                      minHeight: 38,
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(width: 8),
+
+              Expanded(
+                child: Text(
+                  rating == 0
+                      ? 'لم يتم التقييم'
+                      : '${rating.toStringAsFixed(0)} / 5',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: MasarColors.textSecondary,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // حالة التقييم النهائي
+  // ============================================================
+
+  Widget _evaluationStatus(BuildContext context) {
+    return Card(
+      color: MasarColors.background,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: MasarColors.lightBlue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.hourglass_empty,
                 color: MasarColors.primaryBlue,
               ),
             ),
-          ),
 
-          const SizedBox(width: 10),
+            const SizedBox(width: 12),
 
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 13,
-                color: MasarColors.textSecondary,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'حالة التقييم النهائي',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    'بانتظار استلام واعتماد تقييم المشرف من قبل الجامعة.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          height: 1.5,
+                        ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
