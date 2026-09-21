@@ -26,13 +26,6 @@ class NotificationsScreen extends StatelessWidget {
         ),
       ),
 
-            //leading: IconButton(
-            //icon: const Icon(Icons.arrow_back_ios_new),
-            //onPressed: () {
-              //Navigator.pop(context);
-            //},
-          //),
-
       body: Directionality(
         textDirection: TextDirection.rtl,
 
@@ -47,10 +40,11 @@ class NotificationsScreen extends StatelessWidget {
                 MasarMockData.notifications[index];
 
             return _NotificationCard(
+              id: notification['id'],
               title: notification['title'],
               message: notification['message'],
-              time: notification['time'],
               type: notification['type'],
+              isRead: notification['isRead'],
             );
           },
         ),
@@ -59,22 +53,23 @@ class NotificationsScreen extends StatelessWidget {
   }
 }
 
-
 // ======================================================
 // Notification Card
 // ======================================================
 
 class _NotificationCard extends StatelessWidget {
+  final String id;
   final String title;
   final String message;
-  final String time;
   final String type;
+  final bool isRead;
 
   const _NotificationCard({
+    required this.id,
     required this.title,
     required this.message,
-    required this.time,
     required this.type,
+    required this.isRead,
   });
 
   @override
@@ -138,17 +133,6 @@ class _NotificationCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       height: 1.5,
-                      color:
-                          MasarColors.textSecondary,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    time,
-                    style: const TextStyle(
-                      fontSize: 11,
                       color:
                           MasarColors.textSecondary,
                     ),

@@ -6,6 +6,7 @@ import 'package:masar_student_app/core/widgets/app_bottom_nav_bar.dart';
 import 'package:masar_student_app/screens/career/career_assessment_screen.dart';
 import 'package:masar_student_app/screens/career/roadmap_screen.dart';
 import 'package:masar_student_app/screens/training_screens/company_selection_screen.dart';
+import 'package:masar_student_app/screens/profile/notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,9 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Icons.notifications_none_rounded,
             ),
             onPressed: () {
-              Navigator.pushNamed(
+              Navigator.push(
                 context,
-                '/notifications',
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen(),
+                ),
               );
             },
           ),

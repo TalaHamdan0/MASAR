@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../theme/masar_theme.dart';
 import 'forgot_password_screen.dart';
 import '../../data/masar_mock_data.dart';
+import 'create_account_screen.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -115,29 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-
-                        // ==========================================
-                        // زر الرجوع
-                        // ==========================================
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 20,
-                              top: 20,
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(
-                                Icons.arrow_back_ios_new_rounded,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ),
                           ),
                         ),
                       ],
@@ -388,18 +367,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 56,
                             child: ElevatedButton(
                               onPressed: () {
-  if (MasarMockData.isFirstLogin) {
-    Navigator.pushReplacementNamed(
-      context,
-      '/complete-profile',
-    );
-  } else {
-    Navigator.pushReplacementNamed(
-      context,
-      '/home',
-    );
-  }
-},
+                                if (MasarMockData.isFirstLogin) {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/complete-profile',
+                                  );
+                                } else {
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      '/home',
+                                    );
+                                  }
+                              },
                               style:
                                   ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -445,24 +424,39 @@ class _LoginScreenState extends State<LoginScreen> {
                           // ==========================================
                           const SizedBox(height: 8),
 
-                          Center(
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/create-account',
-                                );
-                              },
-                              child: const Text(
-                                'ليس لديك حساب؟ إنشاء حساب',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+
+                            children: [
+                              const Text(
+                                'ليس لديك حساب؟',
                                 style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  color:
-                                      MasarColors.textSecondary,
-                                  fontSize: 13,
+                                fontSize: 14,
+                                color: MasarColors.textSecondary,
                                 ),
                               ),
-                            ),
+
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const CreateAccountScreen(),
+                                    ),
+                                  );
+                                },
+
+                                child: const Text(
+                                  'إنشاء حساب',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: MasarColors.primaryBlue,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
 
                           const SizedBox(height: 20),
