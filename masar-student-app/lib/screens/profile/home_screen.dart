@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('الرئيسية'),
+        title: const SizedBox.shrink(),
         actions: [
           IconButton(
             icon: const Icon(
