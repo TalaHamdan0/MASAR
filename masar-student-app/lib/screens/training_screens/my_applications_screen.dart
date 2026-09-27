@@ -22,7 +22,7 @@ class _MyApplicationsScreenState
       'role': 'IT Support Intern',
       'location': 'عمان',
       'duration': '3 أشهر',
-      'hours': '120 ساعة',
+      'hours': '280 ساعة',
       'date': '2026/09/10',
       'status': 'مقبول',
       'isMicrosoft': true,
@@ -33,31 +33,31 @@ class _MyApplicationsScreenState
       'role': 'Data Analyst Intern',
       'location': 'عمان',
       'duration': '3 أشهر',
-      'hours': '120 ساعة',
+      'hours': '280 ساعة',
       'date': '2026/09/05',
       'status': 'مقبول',
       'icon': Icons.all_inclusive,
-      'iconColor': Color(0xFF0081FB),
+      'iconColor': const Color(0xFF0081FB),
       'bgColor': Colors.white,
     },
     {
       'name': 'Orange',
       'role': 'Software Engineer Intern',
       'location': 'عمان',
-      'duration': '6 أشهر',
-      'hours': '160 ساعة',
+      'duration': '3 أشهر',
+      'hours': '280 ساعة',
       'date': '2026/08/28',
       'status': 'مرفوض',
       'icon': Icons.square,
-      'iconColor': Color(0xFFFF6600),
-      'bgColor': Color(0xFFFF6600),
+      'iconColor': const Color(0xFFFF6600),
+      'bgColor': const Color(0xFFFF6600),
     },
     {
       'name': 'Zain',
       'role': 'Marketing Intern',
       'location': 'عمان',
       'duration': '3 أشهر',
-      'hours': '100 ساعة',
+      'hours': '280 ساعة',
       'date': '2026/08/20',
       'status': 'قيد المراجعة',
       'isZain': true,
@@ -80,7 +80,6 @@ class _MyApplicationsScreenState
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: MasarColors.background,
-
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -111,7 +110,6 @@ class _MyApplicationsScreenState
                             color: MasarColors.textPrimary,
                           ),
                         ),
-
                         const Expanded(
                           child: Center(
                             child: Text(
@@ -119,14 +117,13 @@ class _MyApplicationsScreenState
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color:
-                                    MasarColors.textPrimary,
+                                color: MasarColors.textPrimary,
                               ),
                             ),
                           ),
                         ),
 
-                        // حتى يظل العنوان بالنص
+                        // يحافظ على العنوان بالنص
                         const SizedBox(width: 48),
                       ],
                     ),
@@ -172,7 +169,7 @@ class _MyApplicationsScreenState
         ),
 
         // =========================
-        // Navbar الموحد
+        // Navbar
         // =========================
 
         bottomNavigationBar: const AppBottomNavBar(
@@ -286,7 +283,10 @@ class _MyApplicationsScreenState
               children: [
                 Row(
                   children: [
+                    // =========================
                     // شعار الشركة
+                    // =========================
+
                     Container(
                       width: 48,
                       height: 48,
@@ -310,7 +310,10 @@ class _MyApplicationsScreenState
 
                     const SizedBox(width: 12),
 
+                    // =========================
                     // معلومات الشركة
+                    // =========================
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment:
@@ -341,7 +344,10 @@ class _MyApplicationsScreenState
                       ),
                     ),
 
+                    // =========================
                     // حالة الطلب
+                    // =========================
+
                     _buildStatusBadge(
                       app['status'],
                     ),
@@ -350,7 +356,10 @@ class _MyApplicationsScreenState
 
                 const SizedBox(height: 12),
 
+                // =========================
                 // تفاصيل التدريب
+                // =========================
+
                 Row(
                   children: [
                     const Icon(
@@ -601,7 +610,10 @@ class _MyApplicationsScreenState
   Widget _buildCustomCompanyLogo(
     Map<String, dynamic> company,
   ) {
+    // =========================
     // Zain
+    // =========================
+
     if (company['isZain'] == true ||
         company['name'] == 'Zain') {
       return Column(
@@ -634,7 +646,10 @@ class _MyApplicationsScreenState
       );
     }
 
+    // =========================
     // Microsoft
+    // =========================
+
     if (company['isMicrosoft'] == true) {
       return SizedBox(
         width: 24,
@@ -667,7 +682,10 @@ class _MyApplicationsScreenState
       );
     }
 
+    // =========================
     // Amazon
+    // =========================
+
     if (company['isAmazon'] == true) {
       return Column(
         mainAxisAlignment:
@@ -698,12 +716,15 @@ class _MyApplicationsScreenState
       );
     }
 
+    // =========================
     // Arab Bank
+    // =========================
+
     if (company['isArabBank'] == true) {
-      return Column(
+      return const Column(
         mainAxisAlignment:
             MainAxisAlignment.center,
-        children: const [
+        children: [
           Icon(
             Icons.account_balance_rounded,
             color: Colors.white,
@@ -723,7 +744,10 @@ class _MyApplicationsScreenState
       );
     }
 
+    // =========================
     // الشركات الأخرى
+    // =========================
+
     return Column(
       mainAxisAlignment:
           MainAxisAlignment.center,
@@ -824,8 +848,7 @@ class _ZainRealLogoPainter
       size.height,
     );
 
-    final gradient =
-        const SweepGradient(
+    const gradient = SweepGradient(
       colors: [
         Color(0xFF8B5CF6),
         Color(0xFFEC4899),

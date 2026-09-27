@@ -46,6 +46,21 @@ class _CompanyDetailsScreenState
     );
   }
 
+  // =========================
+  // المسار التدريبي
+  // =========================
+
+  String selectedTrainingPath = 'تحليل البيانات';
+
+  final List<String> trainingPaths = [
+    'تطوير البرمجيات',
+    'تحليل البيانات',
+    'الذكاء الاصطناعي',
+    'الأمن السيبراني',
+    'الشبكات',
+    'UI/UX',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -88,6 +103,11 @@ class _CompanyDetailsScreenState
                     const SizedBox(height: 8),
 
                     _buildRoleCard(),
+
+                    const SizedBox(height: 16),
+
+                    // Training Path Dropdown
+                    _buildTrainingPathDropdown(),
 
                     const SizedBox(height: 16),
 
@@ -481,7 +501,7 @@ class _CompanyDetailsScreenState
     }
 
     // =========================
-    // Meta / Orange / باقي الشركات
+    // باقي الشركات
     // =========================
 
     return Column(
@@ -611,6 +631,70 @@ class _CompanyDetailsScreenState
   }
 
   // =========================
+  // Training Path Dropdown
+  // =========================
+
+  Widget _buildTrainingPathDropdown() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(14),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedTrainingPath,
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: MasarColors.primaryBlue,
+          ),
+          dropdownColor: Colors.white,
+          style: const TextStyle(
+            fontSize: 13,
+            color: MasarColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          items: trainingPaths.map(
+            (String path) {
+              return DropdownMenuItem<String>(
+                value: path,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.route_outlined,
+                      size: 20,
+                      color:
+                          MasarColors.primaryBlue,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(path),
+                  ],
+                ),
+              );
+            },
+          ).toList(),
+          onChanged: (String? value) {
+            if (value == null) return;
+
+            setState(() {
+              selectedTrainingPath = value;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  // =========================
   // Details Grid
   // =========================
 
@@ -661,7 +745,7 @@ class _CompanyDetailsScreenState
           _buildGridItem(
             Icons.access_time_rounded,
             'عدد الساعات',
-            '120 ساعة',
+            '280 ساعة',
           ),
         ],
       ),
@@ -819,7 +903,11 @@ class _CompanyDetailsScreenState
             MaterialPageRoute(
               builder: (context) =>
                   ApplyTrainingApplicationScreen(
-                company: widget.company,
+                company: {
+                  ...widget.company,
+                  'trainingPath':
+                      selectedTrainingPath,
+                },
               ),
             ),
           );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'saved_training_screen.dart';
+import 'my_applications_screen.dart';
 import '../../../theme/masar_theme.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import 'company_details_screen.dart';
@@ -356,10 +357,10 @@ class _SelectCompanyScreenState
                   const SizedBox(height: 14),
 
                   // ==================================================
-                  // SAVED TRAINING BUTTON
+                  // MY APPLICATIONS + SAVED TRAINING
                   // ==================================================
 
-                  _buildSavedTrainingButton(),
+                  _buildTrainingActions(),
 
                   const SizedBox(height: 16),
 
@@ -435,49 +436,102 @@ class _SelectCompanyScreenState
   }
 
   // ============================================================
-  // SAVED TRAINING BUTTON
+  // MY APPLICATIONS + SAVED TRAINING
   // ============================================================
 
-  Widget _buildSavedTrainingButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  const SavedTrainingScreen(),
+  Widget _buildTrainingActions() {
+    return Row(
+      children: [
+        // ========================================================
+        // MY APPLICATIONS
+        // ========================================================
+
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const MyApplicationsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.description_outlined,
+              size: 19,
+              color: MasarColors.primaryBlue,
             ),
-          );
-        },
-        icon: const Icon(
-          Icons.bookmark_rounded,
-          size: 20,
-          color: MasarColors.primaryBlue,
-        ),
-        label: const Text(
-          'المحفوظات',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: MasarColors.primaryBlue,
+            label: const Text(
+              'طلباتي',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: MasarColors.primaryBlue,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: MasarColors.lightBlue,
+              foregroundColor: MasarColors.primaryBlue,
+              padding: const EdgeInsets.symmetric(
+                vertical: 12,
+              ),
+              side: const BorderSide(
+                color: MasarColors.primaryBlue,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
-        style: OutlinedButton.styleFrom(
-          backgroundColor: MasarColors.lightBlue,
-          foregroundColor: MasarColors.primaryBlue,
-          padding: const EdgeInsets.symmetric(
-            vertical: 12,
-          ),
-          side: const BorderSide(
-            color: MasarColors.primaryBlue,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+
+        const SizedBox(width: 10),
+
+        // ========================================================
+        // SAVED TRAINING
+        // ========================================================
+
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const SavedTrainingScreen(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.bookmark_rounded,
+              size: 19,
+              color: MasarColors.primaryBlue,
+            ),
+            label: const Text(
+              'المحفوظات',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: MasarColors.primaryBlue,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: MasarColors.lightBlue,
+              foregroundColor: MasarColors.primaryBlue,
+              padding: const EdgeInsets.symmetric(
+                vertical: 12,
+              ),
+              side: const BorderSide(
+                color: MasarColors.primaryBlue,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
