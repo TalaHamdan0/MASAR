@@ -1,9 +1,8 @@
 
 import 'package:flutter/material.dart';
-
+import 'university_main_layout.dart';
 import '../../theme/masar_theme.dart';
 import '../../data/university_mock_data.dart';
-import 'university_home_screen.dart';
 
 class UniversityLoginScreen extends StatefulWidget {
   const UniversityLoginScreen({super.key});
@@ -57,7 +56,7 @@ class _UniversityLoginScreenState
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const UniversityHomeScreen(),
+          builder: (context) => const UniversityMainLayout(),
         ),
       );
     });
@@ -90,8 +89,7 @@ class _UniversityLoginScreenState
                 ],
               ),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Center(
                     child: Container(
@@ -99,21 +97,17 @@ class _UniversityLoginScreenState
                       height: 76,
                       decoration: BoxDecoration(
                         color: MasarColors.lightBlue,
-                        borderRadius:
-                            BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20),
                         child: Image.asset(
                           'assets/images/masar_logo.png',
                           fit: BoxFit.contain,
-                          errorBuilder:
-                              (context, error, stackTrace) {
+                          errorBuilder: (context, error, stackTrace) {
                             return Icon(
                               Icons.route_rounded,
-                              color:
-                                  MasarColors.primaryBlue,
+                              color: MasarColors.primaryBlue,
                               size: 42,
                             );
                           },
@@ -164,7 +158,7 @@ class _UniversityLoginScreenState
                     keyboardType: TextInputType.text,
                     onSubmitted: (_) => _login(),
                     decoration: InputDecoration(
-                      hintText: 'UNI-1001',
+                      hintText: '1001',
                       hintStyle: TextStyle(
                         color: MasarColors.textSecondary
                             .withOpacity(0.65),
@@ -177,31 +171,25 @@ class _UniversityLoginScreenState
                       filled: true,
                       fillColor: MasarColors.background,
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(13),
+                        borderRadius: BorderRadius.circular(13),
                         borderSide: BorderSide(
                           color: MasarColors.border,
                         ),
                       ),
-                      enabledBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(13),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
                         borderSide: BorderSide(
                           color: MasarColors.border,
                         ),
                       ),
-                      focusedBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(13),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
                         borderSide: BorderSide(
                           color: MasarColors.primaryBlue,
                           width: 1.5,
                         ),
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 15,
                       ),
@@ -236,31 +224,25 @@ class _UniversityLoginScreenState
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed:
-                          isLoading ? null : _login,
+                      onPressed: isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            MasarColors.primaryBlue,
+                        backgroundColor: MasarColors.primaryBlue,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor:
-                            MasarColors.primaryBlue
-                                .withOpacity(0.6),
+                            MasarColors.primaryBlue.withOpacity(0.6),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(13),
+                          borderRadius: BorderRadius.circular(13),
                         ),
                       ),
                       child: isLoading
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child:
-                                  CircularProgressIndicator(
+                              child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
                                 valueColor:
-                                    AlwaysStoppedAnimation<
-                                        Color>(
+                                    AlwaysStoppedAnimation<Color>(
                                   Colors.white,
                                 ),
                               ),
@@ -274,39 +256,6 @@ class _UniversityLoginScreenState
                             ),
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: MasarColors.lightGreen,
-                      borderRadius:
-                          BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          color: MasarColors.primaryGreen,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'للتجربة استخدم الرقم: UNI-1001',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color:
-                                  MasarColors.darkGreen,
-                              fontWeight:
-                                  FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -316,4 +265,3 @@ class _UniversityLoginScreenState
     );
   }
 }
-

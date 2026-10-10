@@ -1,18 +1,6 @@
 
 import 'package:flutter/material.dart';
-
-import 'university_login_screen.dart';
 import '../../theme/masar_theme.dart';
-import '../../core/widgets/uni_dashboard_header.dart';
-import '../../core/widgets/uni_dashboard_sidebar.dart';
-
-import 'university_home_screen.dart';
-import 'students_screen.dart';
-import 'companies_screen.dart';
-import 'applications_screen.dart';
-import 'current_trainings_screen.dart';
-import 'reports_screen.dart';
-import 'notifications_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,126 +10,32 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // الإعدادات = index 7
-  static const int selectedIndex = 7;
-
   bool applicationNotifications = true;
   bool reportNotifications = true;
   bool trainingNotifications = true;
 
-  void navigateTo(int index) {
-    if (index == selectedIndex) return;
-
-    Widget screen;
-
-    switch (index) {
-      case 0:
-        screen = const UniversityHomeScreen();
-        break;
-
-      case 1:
-        screen = const StudentsScreen();
-        break;
-
-      case 2:
-        screen = const CompaniesScreen();
-        break;
-
-      case 3:
-        screen = const ApplicationsScreen();
-        break;
-
-      case 4:
-        screen = const CurrentTrainingsScreen();
-        break;
-
-      case 5:
-        screen = const ReportsScreen();
-        break;
-
-      case 6:
-        screen = const NotificationsScreen();
-        break;
-
-      case 7:
-        return;
-
-      default:
-        return;
-    }
-
-    // توحيد طريقة التنقل مع باقي صفحات الـ Dashboard
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => screen,
-      ),
-    );
-  }
-
-  void logout() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const UniversityLoginScreen(),
-      ),
-      (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: MasarColors.background,
-        body: Row(
-          // مهم جداً حتى يبقى السايد بار على اليمين
-          textDirection: TextDirection.ltr,
+    return Container(
+      color: MasarColors.background,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  children: [
-                    const UniDashboardHeader(
-                      title: 'الإعدادات',
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(28),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            _buildPageTitle(),
-                            const SizedBox(height: 24),
+            _buildPageTitle(),
+            const SizedBox(height: 24),
 
-                            _buildAccountSection(),
-                            const SizedBox(height: 20),
+            _buildAccountSection(),
+            const SizedBox(height: 20),
 
-                            _buildNotificationSection(),
-                            const SizedBox(height: 20),
+            _buildNotificationSection(),
+            const SizedBox(height: 20),
 
-                            _buildGeneralSection(),
-                            const SizedBox(height: 20),
+            _buildGeneralSection(),
+            const SizedBox(height: 20),
 
-                            _buildAboutSection(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Sidebar ثابت على اليمين
-            UniDashboardSidebar(
-              selectedIndex: selectedIndex,
-              onItemSelected: navigateTo,
-              onLogout: logout,
-            ),
+            _buildAboutSection(),
           ],
         ),
       ),
@@ -152,7 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'الإعدادات',
           style: TextStyle(
             fontSize: 26,
@@ -161,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 6),
-        Text(
+        const Text(
           'إدارة إعدادات بوابة الجامعة وتفضيلات النظام',
           style: TextStyle(
             fontSize: 14,

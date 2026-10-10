@@ -2,17 +2,6 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/masar_theme.dart';
-import '../../core/widgets/uni_dashboard_sidebar.dart';
-import '../../core/widgets/uni_dashboard_header.dart';
-
-import 'university_home_screen.dart';
-import 'students_screen.dart';
-import 'companies_screen.dart';
-import 'applications_screen.dart';
-import 'current_trainings_screen.dart';
-import 'reports_screen.dart';
-import 'settings_screen.dart';
-import 'university_login_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -22,10 +11,8 @@ class NotificationsScreen extends StatefulWidget {
       _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
-  // الإشعارات = index 6
-  int selectedIndex = 6;
-
+class _NotificationsScreenState
+    extends State<NotificationsScreen> {
   String selectedFilter = 'الكل';
 
   final List<Map<String, dynamic>> notifications = [
@@ -108,56 +95,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return notifications;
   }
 
-  void navigateTo(int index) {
-    if (index == selectedIndex) return;
-
-    Widget screen;
-
-    switch (index) {
-      case 0:
-        screen = const UniversityHomeScreen();
-        break;
-
-      case 1:
-        screen = const StudentsScreen();
-        break;
-
-      case 2:
-        screen = const CompaniesScreen();
-        break;
-
-      case 3:
-        screen = const ApplicationsScreen();
-        break;
-
-      case 4:
-        screen = const CurrentTrainingsScreen();
-        break;
-
-      case 5:
-        screen = const ReportsScreen();
-        break;
-
-      case 6:
-        return;
-
-      case 7:
-        screen = const SettingsScreen();
-        break;
-
-      default:
-        return;
-    }
-
-    // توحيد التنقل مع باقي صفحات الـ Dashboard
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => screen,
-      ),
-    );
-  }
-
   IconData _notificationIcon(String type) {
     switch (type) {
       case 'application':
@@ -178,13 +115,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Color _notificationColor(String type) {
     switch (type) {
       case 'application':
+      case 'opportunity':
         return MasarColors.primaryBlue;
       case 'report':
         return MasarColors.warning;
       case 'training':
-        return MasarColors.primaryGreen;
-      case 'opportunity':
-        return MasarColors.primaryBlue;
       case 'completed':
         return MasarColors.primaryGreen;
       default:
@@ -222,7 +157,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Dialog(
@@ -244,13 +179,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           height: 52,
                           decoration: BoxDecoration(
                             color: color.withOpacity(0.10),
-                            borderRadius:
-                                BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(
-                            _notificationIcon(
-                              notification['type'],
-                            ),
+                            _notificationIcon(notification['type']),
                             color: color,
                             size: 27,
                           ),
@@ -289,20 +221,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () =>
+                            Navigator.pop(dialogContext),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              MasarColors.primaryBlue,
+                          backgroundColor: MasarColors.primaryBlue,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding:
-                              const EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 26,
                             vertical: 13,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: const Text('إغلاق'),
@@ -321,33 +251,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _notificationCard(
     Map<String, dynamic> notification,
   ) {
-    final bool isRead = notification['read'];
-    final color =
-        _notificationColor(notification['type']);
+    final bool isRead = notification['read'] as bool;
+    final color = _notificationColor(notification['type']);
 
     return InkWell(
       borderRadius: BorderRadius.circular(18),
-      onTap: () {
-        showNotificationDetails(notification);
-      },
+      onTap: () => showNotificationDetails(notification),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: isRead
-              ? MasarColors.white
-              : MasarColors.lightBlue,
+          color: isRead ? MasarColors.white : MasarColors.lightBlue,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isRead
                 ? MasarColors.border
-                : MasarColors.primaryBlue
-                    .withOpacity(0.18),
+                : MasarColors.primaryBlue.withOpacity(0.18),
           ),
         ),
         child: Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 48,
@@ -365,8 +288,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             const SizedBox(width: 15),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
@@ -378,8 +300,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             fontWeight: isRead
                                 ? FontWeight.w600
                                 : FontWeight.w800,
-                            color:
-                                MasarColors.textPrimary,
+                            color: MasarColors.textPrimary,
                           ),
                         ),
                       ),
@@ -388,8 +309,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color:
-                                MasarColors.primaryBlue,
+                            color: MasarColors.primaryBlue,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -481,269 +401,150 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Future<void> logout() async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            title: const Text('تسجيل الخروج'),
-            content: const Text(
-              'هل أنت متأكد أنك تريد تسجيل الخروج من لوحة الجامعة؟',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () =>
-                    Navigator.pop(context, false),
-                child: const Text('إلغاء'),
-              ),
-              ElevatedButton(
-                onPressed: () =>
-                    Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      MasarColors.primaryGreen,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                ),
-                child: const Text('تسجيل الخروج'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (shouldLogout == true && mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const UniversityLoginScreen(),
-        ),
-        (route) => false,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: MasarColors.background,
-        body: Row(
-          // مهم جداً: هذا يثبت ترتيب الـ Row
-          // بحيث يبقى السايد بار على اليمين.
-          textDirection: TextDirection.ltr,
-          children: [
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  children: [
-                    const UniDashboardHeader(
-                      title: 'الإشعارات',
+      child: Container(
+        color: MasarColors.background,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(28, 24, 28, 35),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'الإشعارات',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: MasarColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'تابع آخر المستجدات والإجراءات المطلوبة',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: MasarColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  if (unreadCount > 0)
+                    TextButton.icon(
+                      onPressed: markAllAsRead,
+                      icon: const Icon(
+                        Icons.done_all_rounded,
+                        size: 18,
+                      ),
+                      label: const Text('تحديد الكل كمقروء'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: MasarColors.primaryBlue,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: MasarColors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: MasarColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: MasarColors.lightBlue,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.notifications_active_outlined,
+                        color: MasarColors.primaryBlue,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(
-                          28,
-                          24,
-                          28,
-                          35,
-                        ),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'الإشعارات',
-                                      style: TextStyle(
-                                        fontSize: 26,
-                                        fontWeight:
-                                            FontWeight.w800,
-                                        color: MasarColors
-                                            .textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      'تابع آخر المستجدات والإجراءات المطلوبة',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: MasarColors
-                                            .textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const Spacer(),
-                                if (unreadCount > 0)
-                                  TextButton.icon(
-                                    onPressed:
-                                        markAllAsRead,
-                                    icon: const Icon(
-                                      Icons.done_all_rounded,
-                                      size: 18,
-                                    ),
-                                    label: const Text(
-                                      'تحديد الكل كمقروء',
-                                    ),
-                                    style:
-                                        TextButton.styleFrom(
-                                      foregroundColor:
-                                          MasarColors
-                                              .primaryBlue,
-                                    ),
-                                  ),
-                              ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$unreadCount إشعارات غير مقروءة',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: MasarColors.textPrimary,
                             ),
-                            const SizedBox(height: 24),
-                            Container(
-                              padding:
-                                  const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                color:
-                                    MasarColors.white,
-                                borderRadius:
-                                    BorderRadius.circular(18),
-                                border: Border.all(
-                                  color:
-                                      MasarColors.border,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration:
-                                        BoxDecoration(
-                                      color: MasarColors
-                                          .lightBlue,
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              14),
-                                    ),
-                                    child: Icon(
-                                      Icons
-                                          .notifications_active_outlined,
-                                      color: MasarColors
-                                          .primaryBlue,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .start,
-                                    children: [
-                                      Text(
-                                        '$unreadCount إشعارات غير مقروءة',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight:
-                                              FontWeight.w800,
-                                          color: MasarColors
-                                              .textPrimary,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        'تحتاج بعض الإشعارات إلى مراجعة أو إجراء',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: MasarColors
-                                              .textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'تحتاج بعض الإشعارات إلى مراجعة أو إجراء',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: MasarColors.textSecondary,
                             ),
-                            const SizedBox(height: 18),
-                            Row(
-                              children: [
-                                _filterButton('الكل'),
-                                const SizedBox(width: 8),
-                                _filterButton('غير مقروءة'),
-                              ],
-                            ),
-                            const SizedBox(height: 18),
-                            if (filteredNotifications.isEmpty)
-                              Container(
-                                width: double.infinity,
-                                padding:
-                                    const EdgeInsets.symmetric(
-                                  vertical: 80,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      MasarColors.white,
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                          18),
-                                  border: Border.all(
-                                    color:
-                                        MasarColors.border,
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons
-                                          .notifications_none_rounded,
-                                      size: 50,
-                                      color: MasarColors
-                                          .textSecondary,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'لا توجد إشعارات غير مقروءة',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight:
-                                            FontWeight.w600,
-                                        color: MasarColors
-                                            .textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else
-                              Column(
-                                children:
-                                    filteredNotifications
-                                        .map(
-                                          _notificationCard,
-                                        )
-                                        .toList(),
-                              ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-
-            // السايد بار ثابت على اليمين
-            UniDashboardSidebar(
-              selectedIndex: selectedIndex,
-              onItemSelected: navigateTo,
-              onLogout: logout,
-            ),
-          ],
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  _filterButton('الكل'),
+                  const SizedBox(width: 8),
+                  _filterButton('غير مقروءة'),
+                ],
+              ),
+              const SizedBox(height: 18),
+              if (filteredNotifications.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 80),
+                  decoration: BoxDecoration(
+                    color: MasarColors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: MasarColors.border),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.notifications_none_rounded,
+                        size: 50,
+                        color: MasarColors.textSecondary,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'لا توجد إشعارات غير مقروءة',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: MasarColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Column(
+                  children: filteredNotifications
+                      .map(_notificationCard)
+                      .toList(),
+                ),
+            ],
+          ),
         ),
       ),
     );

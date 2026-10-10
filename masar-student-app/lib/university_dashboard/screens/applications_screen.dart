@@ -1,18 +1,6 @@
 
 import 'package:flutter/material.dart';
-
 import '../../theme/masar_theme.dart';
-import '../../core/widgets/uni_dashboard_header.dart';
-import '../../core/widgets/uni_dashboard_sidebar.dart';
-
-import 'university_home_screen.dart';
-import 'university_login_screen.dart';
-import 'students_screen.dart';
-import 'companies_screen.dart';
-import 'current_trainings_screen.dart';
-import 'reports_screen.dart';
-import 'notifications_screen.dart';
-import 'settings_screen.dart';
 
 class ApplicationsScreen extends StatefulWidget {
   const ApplicationsScreen({super.key});
@@ -22,19 +10,14 @@ class ApplicationsScreen extends StatefulWidget {
 }
 
 class _ApplicationsScreenState extends State<ApplicationsScreen> {
-  // فرص التدريب تم حذفها من الـ Sidebar
-  // لذلك طلبات التدريب أصبح index الخاص بها = 3
-  int selectedIndex = 3;
-
-  final TextEditingController searchController =
-      TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
   String selectedStatus = 'الكل';
 
   final List<Map<String, dynamic>> applications = [
     {
-      'student': 'تالا حمدان',
-      'studentId': '20231001',
+      'name': 'تالا حمدان',
+      'id': '20231001',
       'major': 'هندسة البرمجيات',
       'company': 'Data Solutions',
       'training': 'تحليل البيانات',
@@ -44,546 +27,215 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       'gpa': '3.65',
     },
     {
-      'student': 'ليان أحمد',
-      'studentId': '20231002',
-      'major': 'علوم الحاسوب',
+      'name': 'ليان أحمد',
+      'id': '20231002',
+      'major': 'علم الحاسوب',
       'company': 'Creative Hub',
-      'training': 'التصميم و UI/UX',
+      'training': 'تصميم UI/UX',
       'date': '23/09/2026',
       'status': 'مقبول',
-      'documents': 'السيرة الذاتية + Portfolio',
+      'documents': 'السيرة الذاتية + ملف الأعمال',
       'gpa': '3.82',
     },
     {
-      'student': 'رنا سمير',
-      'studentId': '20231003',
+      'name': 'رنا سمير',
+      'id': '20231003',
       'major': 'هندسة البرمجيات',
-      'company': 'شركة التقنية المتقدمة',
-      'training': 'تطوير تطبيقات Flutter',
+      'company': 'Advanced Tech',
+      'training': 'تطوير Flutter',
       'date': '22/09/2026',
       'status': 'قيد المراجعة',
-      'documents': 'السيرة الذاتية + Portfolio',
+      'documents': 'السيرة الذاتية + ملف الأعمال',
       'gpa': '3.54',
     },
     {
-      'student': 'محمد يوسف',
-      'studentId': '20231004',
+      'name': 'محمد يوسف',
+      'id': '20231004',
       'major': 'الأمن السيبراني',
       'company': 'SecureNet',
       'training': 'الأمن السيبراني',
       'date': '21/09/2026',
       'status': 'مقبول',
-      'documents': 'السيرة الذاتية + شهادات',
+      'documents': 'السيرة الذاتية + الشهادات',
       'gpa': '3.71',
     },
     {
-      'student': 'نور علي',
-      'studentId': '20231005',
+      'name': 'نور علي',
+      'id': '20231005',
       'major': 'هندسة البرمجيات',
       'company': 'Quality First',
-      'training': 'ضمان الجودة واختبار البرمجيات',
+      'training': 'ضمان الجودة والاختبار',
       'date': '20/09/2026',
       'status': 'مرفوض',
-      'documents': 'السيرة الذاتية',
+      'documents': 'السيرة الذاتية فقط',
       'gpa': '2.95',
     },
     {
-      'student': 'سارة خالد',
-      'studentId': '20231007',
+      'name': 'سارة خالد',
+      'id': '20231007',
       'major': 'هندسة البرمجيات',
       'company': 'Jordan Tech',
       'training': 'تطوير الواجهات الأمامية',
       'date': '19/09/2026',
       'status': 'قيد المراجعة',
-      'documents': 'السيرة الذاتية + Portfolio',
+      'documents': 'السيرة الذاتية + ملف الأعمال',
       'gpa': '3.48',
     },
     {
-      'student': 'أحمد محمد',
-      'studentId': '20231006',
-      'major': 'علوم الحاسوب',
+      'name': 'أحمد محمد',
+      'id': '20231006',
+      'major': 'علم الحاسوب',
       'company': 'Data Solutions',
       'training': 'تحليل البيانات',
       'date': '18/09/2026',
       'status': 'قيد المراجعة',
-      'documents': 'السيرة الذاتية',
+      'documents': 'السيرة الذاتية فقط',
       'gpa': '3.32',
     },
   ];
 
   @override
-  void initState() {
-    super.initState();
-    searchController.addListener(_refresh);
-  }
-
-  @override
   void dispose() {
-    searchController.removeListener(_refresh);
     searchController.dispose();
     super.dispose();
   }
 
-  void _refresh() {
-    setState(() {});
-  }
-
   List<Map<String, dynamic>> get filteredApplications {
-    final search = searchController.text.trim().toLowerCase();
+    final query = searchController.text.trim().toLowerCase();
 
     return applications.where((application) {
       final matchesSearch =
-          search.isEmpty ||
-          application['student']
-              .toString()
-              .toLowerCase()
-              .contains(search) ||
-          application['studentId']
-              .toString()
-              .toLowerCase()
-              .contains(search) ||
-          application['training']
-              .toString()
-              .toLowerCase()
-              .contains(search) ||
-          application['company']
-              .toString()
-              .toLowerCase()
-              .contains(search);
+          application['name'].toString().toLowerCase().contains(query) ||
+          application['id'].toString().toLowerCase().contains(query) ||
+          application['training'].toString().toLowerCase().contains(query) ||
+          application['company'].toString().toLowerCase().contains(query);
 
-      final matchesStatus =
-          selectedStatus == 'الكل' ||
+      final matchesStatus = selectedStatus == 'الكل' ||
           application['status'] == selectedStatus;
 
       return matchesSearch && matchesStatus;
     }).toList();
   }
 
-  void _navigateTo(int index) {
-    if (index == selectedIndex) return;
-
-    setState(() {
-      selectedIndex = index;
-    });
-
-    Widget? screen;
-
-    switch (index) {
-      case 0:
-        screen = const UniversityHomeScreen();
-        break;
-
-      case 1:
-        screen = const StudentsScreen();
-        break;
-
-      case 2:
-        screen = const CompaniesScreen();
-        break;
-
-      case 3:
-        return;
-
-      case 4:
-        screen = const CurrentTrainingsScreen();
-        break;
-
-      case 5:
-        screen = const ReportsScreen();
-        break;
-
-      case 6:
-        screen = const NotificationsScreen();
-        break;
-
-      case 7:
-        screen = const SettingsScreen();
-        break;
-    }
-
-    if (screen != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => screen!,
-        ),
-      );
-    }
-  }
-
-  void _logout() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            title: const Text('تسجيل الخروج'),
-            content: const Text(
-              'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('إلغاء'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UniversityLoginScreen(),
-                    ),
-                  );
-                },
-                child: const Text('تسجيل الخروج'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final displayed = filteredApplications;
-
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: MasarColors.background,
-        body: Row(
-          textDirection: TextDirection.ltr,
-          children: [
-            // =====================================================
-            // MAIN AREA
-            // =====================================================
-
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  children: [
-                    const UniDashboardHeader(
-                      title: 'طلبات التدريب',
-                    ),
-
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(
-                          28,
-                          24,
-                          28,
-                          30,
-                        ),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.stretch,
-                          children: [
-                            Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'طلبات التدريب',
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w800,
-                                    color:
-                                        MasarColors.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  'عرض ومتابعة طلبات الطلاب المقدمة لبرامج التدريب',
-                                  style: TextStyle(
-                                    fontSize: 13.5,
-                                    color:
-                                        MasarColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // =====================================================
-                            // STATISTICS
-                            // =====================================================
-
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _statCard(
-                                    title: 'إجمالي الطلبات',
-                                    value: '127',
-                                    subtitle: 'طلب تدريب',
-                                    icon:
-                                        Icons.assignment_rounded,
-                                    color:
-                                        MasarColors.primaryBlue,
-                                    background:
-                                        MasarColors.lightBlue,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _statCard(
-                                    title: 'قيد المراجعة',
-                                    value: '18',
-                                    subtitle: 'طلب',
-                                    icon:
-                                        Icons.pending_actions_rounded,
-                                    color:
-                                        MasarColors.warning,
-                                    background:
-                                        const Color(0xFFFFF7E6),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _statCard(
-                                    title: 'طلبات مقبولة',
-                                    value: '84',
-                                    subtitle: 'طلب',
-                                    icon:
-                                        Icons.check_circle_outline_rounded,
-                                    color:
-                                        MasarColors.primaryGreen,
-                                    background:
-                                        MasarColors.lightGreen,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _statCard(
-                                    title: 'طلبات مرفوضة',
-                                    value: '25',
-                                    subtitle: 'طلب',
-                                    icon:
-                                        Icons.cancel_outlined,
-                                    color:
-                                        MasarColors.error,
-                                    background:
-                                        const Color(0xFFFFEEEE),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // =====================================================
-                            // SEARCH + FILTER
-                            // =====================================================
-
-                            Container(
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                color: MasarColors.white,
-                                borderRadius:
-                                    BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: MasarColors.border,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller:
-                                          searchController,
-                                      decoration:
-                                          InputDecoration(
-                                        hintText:
-                                            'ابحث عن طالب أو رقم جامعي أو تدريب أو شركة...',
-                                        hintStyle: TextStyle(
-                                          color: MasarColors
-                                              .textSecondary,
-                                          fontSize: 12.5,
-                                        ),
-                                        prefixIcon: Icon(
-                                          Icons.search_rounded,
-                                          color: MasarColors
-                                              .textSecondary,
-                                        ),
-                                        filled: true,
-                                        fillColor:
-                                            MasarColors.background,
-                                        border:
-                                            OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(
-                                            12,
-                                          ),
-                                          borderSide:
-                                              BorderSide.none,
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets
-                                                .symmetric(
-                                          horizontal: 14,
-                                          vertical: 13,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  SizedBox(
-                                    width: 190,
-                                    child: _statusDropdown(),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // =====================================================
-                            // APPLICATIONS TABLE
-                            // =====================================================
-
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: MasarColors.white,
-                                borderRadius:
-                                    BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: MasarColors.border,
-                                ),
-                              ),
-                              clipBehavior:
-                                  Clip.antiAlias,
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
-                                children: [
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(
-                                      22,
-                                      20,
-                                      22,
-                                      18,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration:
-                                              BoxDecoration(
-                                            color: MasarColors
-                                                .lightBlue,
-                                            borderRadius:
-                                                BorderRadius
-                                                    .circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons
-                                                .assignment_rounded,
-                                            color: MasarColors
-                                                .primaryBlue,
-                                            size: 22,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment
-                                                  .start,
-                                          children: [
-                                            Text(
-                                              'قائمة طلبات التدريب',
-                                              style: TextStyle(
-                                                fontSize: 17,
-                                                fontWeight:
-                                                    FontWeight
-                                                        .w800,
-                                                color: MasarColors
-                                                    .textPrimary,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 3,
-                                            ),
-                                            Text(
-                                              '${displayed.length} طلب ظاهر',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: MasarColors
-                                                    .textSecondary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  Divider(
-                                    height: 1,
-                                    color:
-                                        MasarColors.border,
-                                  ),
-
-                                  _buildApplicationsTable(
-                                    displayed,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // =====================================================
-            // SIDEBAR - RIGHT
-            // =====================================================
-
-            UniDashboardSidebar(
-              selectedIndex: selectedIndex,
-              onItemSelected: _navigateTo,
-              onLogout: _logout,
-            ),
-          ],
+      child: Container(
+        color: MasarColors.background,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPageTitle(),
+              const SizedBox(height: 24),
+              _buildStatistics(),
+              const SizedBox(height: 28),
+              _buildSearchAndFilter(),
+              const SizedBox(height: 20),
+              _buildApplicationsTable(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // STAT CARD
-  // ============================================================
+  Widget _buildPageTitle() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'طلبات التدريب',
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: MasarColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'متابعة طلبات الطلاب والاطلاع على تفاصيل كل طلب وحالته.',
+          style: TextStyle(
+            fontSize: 14,
+            color: MasarColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatistics() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 1000
+            ? 4
+            : constraints.maxWidth >= 600
+                ? 2
+                : 1;
+
+        final cardWidth =
+            (constraints.maxWidth - (columns - 1) * 12) / columns;
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              child: _statCard(
+                title: 'إجمالي الطلبات',
+                value: '127',
+                icon: Icons.assignment_outlined,
+                color: MasarColors.primaryBlue,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _statCard(
+                title: 'قيد المراجعة',
+                value: '18',
+                icon: Icons.pending_actions,
+                color: Colors.orange,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _statCard(
+                title: 'الطلبات المقبولة',
+                value: '84',
+                icon: Icons.check_circle_outline,
+                color: MasarColors.primaryGreen,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _statCard(
+                title: 'الطلبات المرفوضة',
+                value: '25',
+                icon: Icons.cancel_outlined,
+                color: MasarColors.error,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _statCard({
     required String title,
     required String value,
-    required String subtitle,
     required IconData icon,
     required Color color,
-    required Color background,
   }) {
     return Container(
-      height: 112,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: MasarColors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: MasarColors.border),
       ),
       child: Row(
         children: [
@@ -591,48 +243,30 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(14),
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(icon, color: color, size: 25),
           ),
-          const SizedBox(width: 13),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
-              mainAxisAlignment:
-                  MainAxisAlignment.center,
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 12,
-                    color:
-                        MasarColors.textSecondary,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                    color: MasarColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 7),
                 Text(
                   value,
                   style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color:
-                        MasarColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color:
-                        MasarColors.textSecondary,
+                    fontWeight: FontWeight.bold,
+                    color: MasarColors.textPrimary,
                   ),
                 ),
               ],
@@ -643,248 +277,215 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     );
   }
 
-  // ============================================================
-  // STATUS DROPDOWN
-  // ============================================================
-
-  Widget _statusDropdown() {
-    return Container(
-      height: 48,
-      padding:
-          const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: MasarColors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selectedStatus,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: MasarColors.textSecondary,
-          ),
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 12.5,
-            color: MasarColors.textPrimary,
-          ),
-          items: const [
-            'الكل',
-            'قيد المراجعة',
-            'مقبول',
-            'مرفوض',
-          ].map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              selectedStatus = value!;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // APPLICATIONS TABLE
-  // ============================================================
-
-  Widget _buildApplicationsTable(
-    List<Map<String, dynamic>> displayed,
-  ) {
-    if (displayed.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(60),
-        child: Column(
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 48,
-              color: MasarColors.textSecondary,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'لا توجد طلبات مطابقة للبحث',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: MasarColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildSearchAndFilter() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: constraints.maxWidth,
+        final isNarrow = constraints.maxWidth < 550;
+
+        final searchField = TextField(
+          controller: searchController,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            hintText: 'ابحث باسم الطالب أو رقمه أو الشركة أو التدريب',
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: MasarColors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
             ),
-            child: DataTable(
-              headingRowHeight: 56,
-              dataRowMinHeight: 72,
-              dataRowMaxHeight: 80,
-              columnSpacing: 28,
-              horizontalMargin: 22,
-              dividerThickness: 0.6,
-              headingRowColor:
-                  MaterialStateProperty.all(
-                MasarColors.background,
-              ),
-              columns: const [
-                DataColumn(
-                  label: Text('الطالب'),
-                ),
-                DataColumn(
-                  label: Text('الرقم الجامعي'),
-                ),
-                DataColumn(
-                  label: Text('الشركة'),
-                ),
-                DataColumn(
-                  label: Text('التدريب المتوفر'),
-                ),
-                DataColumn(
-                  label: Text('تاريخ التقديم'),
-                ),
-                DataColumn(
-                  label: Text('الحالة'),
-                ),
-                DataColumn(
-                  label: Text('التفاصيل'),
-                ),
-              ],
-              rows: displayed.map((application) {
-                return DataRow(
-                  cells: [
-                    // الطالب
-                    DataCell(
-                      SizedBox(
-                        width: 120,
-                        child: Text(
-                          application['student'],
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight:
-                                FontWeight.w700,
-                            color: MasarColors
-                                .textPrimary,
-                          ),
-                          overflow:
-                              TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-
-                    // الرقم الجامعي
-                    DataCell(
-                      Text(
-                        application['studentId'],
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: MasarColors
-                              .textSecondary,
-                        ),
-                      ),
-                    ),
-
-                    // الشركة
-                    DataCell(
-                      SizedBox(
-                        width: 135,
-                        child: Text(
-                          application['company'],
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: MasarColors
-                                .textPrimary,
-                          ),
-                          overflow:
-                              TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-
-                    // التدريب المتوفر
-                    DataCell(
-                      SizedBox(
-                        width: 170,
-                        child: Text(
-                          application['training'],
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: MasarColors
-                                .textPrimary,
-                            fontWeight:
-                                FontWeight.w600,
-                          ),
-                          overflow:
-                              TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-
-                    // تاريخ التقديم
-                    DataCell(
-                      Text(
-                        application['date'],
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: MasarColors
-                              .textSecondary,
-                        ),
-                      ),
-                    ),
-
-                    // الحالة
-                    DataCell(
-                      _statusBadge(
-                        application['status'],
-                      ),
-                    ),
-
-                    // التفاصيل
-                    DataCell(
-                      IconButton(
-                        tooltip: 'عرض التفاصيل',
-                        onPressed: () {
-                          _showApplicationDetails(
-                            application,
-                          );
-                        },
-                        icon: Icon(
-                          Icons.visibility_outlined,
-                          color: MasarColors
-                              .primaryBlue,
-                          size: 21,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.primaryBlue),
             ),
           ),
+        );
+
+        final filter = DropdownButtonFormField<String>(
+          value: selectedStatus,
+          isExpanded: true,
+          decoration: InputDecoration(
+            labelText: 'حالة الطلب',
+            filled: true,
+            fillColor: MasarColors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+          ),
+          items: const [
+            DropdownMenuItem(value: 'الكل', child: Text('كل الحالات')),
+            DropdownMenuItem(
+              value: 'قيد المراجعة',
+              child: Text('قيد المراجعة'),
+            ),
+            DropdownMenuItem(value: 'مقبول', child: Text('مقبول')),
+            DropdownMenuItem(value: 'مرفوض', child: Text('مرفوض')),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              setState(() => selectedStatus = value);
+            }
+          },
+        );
+
+        if (isNarrow) {
+          return Column(
+            children: [
+              searchField,
+              const SizedBox(height: 12),
+              filter,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(flex: 3, child: searchField),
+            const SizedBox(width: 14),
+            Expanded(flex: 1, child: filter),
+          ],
         );
       },
     );
   }
 
-  // ============================================================
-  // STATUS BADGE
-  // ============================================================
+  Widget _buildApplicationsTable() {
+    final items = filteredApplications;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: MasarColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: MasarColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'قائمة طلبات التدريب',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: MasarColors.textPrimary,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${items.length} طلب',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: MasarColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: MasarColors.border),
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(35),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.search_off,
+                      size: 42,
+                      color: MasarColors.textSecondary,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'لا توجد طلبات مطابقة للبحث',
+                      style: TextStyle(
+                        color: MasarColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(
+                  MasarColors.lightBlue,
+                ),
+                headingTextStyle: TextStyle(
+                  color: MasarColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+                dataTextStyle: TextStyle(
+                  color: MasarColors.textPrimary,
+                  fontSize: 13,
+                ),
+                columnSpacing: 28,
+                horizontalMargin: 20,
+                columns: const [
+                  DataColumn(label: Text('الطالب')),
+                  DataColumn(label: Text('الرقم الجامعي')),
+                  DataColumn(label: Text('الشركة')),
+                  DataColumn(label: Text('التدريب')),
+                  DataColumn(label: Text('تاريخ الطلب')),
+                  DataColumn(label: Text('الحالة')),
+                  DataColumn(label: Text('التفاصيل')),
+                ],
+                rows: items.map((application) {
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(application['name'])),
+                      DataCell(Text(application['id'])),
+                      DataCell(Text(application['company'])),
+                      DataCell(Text(application['training'])),
+                      DataCell(Text(application['date'])),
+                      DataCell(_statusBadge(application['status'])),
+                      DataCell(
+                        TextButton.icon(
+                          onPressed: () =>
+                              _showApplicationDetails(application),
+                          icon: const Icon(
+                            Icons.visibility_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('عرض'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: MasarColors.primaryBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _statusBadge(String status) {
     Color color;
@@ -893,311 +494,119 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     switch (status) {
       case 'مقبول':
         color = MasarColors.primaryGreen;
-        background =
-            MasarColors.lightGreen;
+        background = MasarColors.lightGreen;
         break;
-
       case 'مرفوض':
         color = MasarColors.error;
-        background =
-            const Color(0xFFFFEEEE);
+        background = MasarColors.error.withValues(alpha: 0.10);
         break;
-
       default:
-        color = MasarColors.warning;
-        background =
-            const Color(0xFFFFF7E6);
+        color = Colors.orange.shade800;
+        background = Colors.orange.withValues(alpha: 0.12);
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 11,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: background,
-        borderRadius:
-            BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            status,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
+      child: Text(
+        status,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
       ),
     );
   }
 
-  // ============================================================
-  // APPLICATION DETAILS
-  // ============================================================
-
-  void _showApplicationDetails(
-    Map<String, dynamic> application,
-  ) {
-    showDialog(
+  void _showApplicationDetails(Map<String, dynamic> application) {
+    showDialog<void>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            child: Container(
-              width: 680,
-              constraints:
-                  const BoxConstraints(
-                maxHeight: 720,
-              ),
-              decoration: BoxDecoration(
-                color: MasarColors.white,
-                borderRadius:
-                    BorderRadius.circular(24),
-              ),
+          child: AlertDialog(
+            backgroundColor: MasarColors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            title: Row(
+              children: [
+                Icon(
+                  Icons.assignment_ind_outlined,
+                  color: MasarColors.primaryBlue,
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'تفاصيل طلب التدريب',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: 480,
               child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.all(28),
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // =====================================================
-                    // HEADER
-                    // =====================================================
-
-                    Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration:
-                              BoxDecoration(
-                            color:
-                                MasarColors.lightBlue,
-                            borderRadius:
-                                BorderRadius.circular(
-                              15,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons
-                                .assignment_rounded,
-                            color: MasarColors
-                                .primaryBlue,
-                            size: 27,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment
-                                    .start,
-                            children: [
-                              Text(
-                                'تفاصيل طلب التدريب',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight:
-                                      FontWeight.w800,
-                                  color: MasarColors
-                                      .textPrimary,
-                                ),
-                              ),
-                              const SizedBox(
-                                  height: 4),
-                              Text(
-                                application[
-                                    'training'],
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  color: MasarColors
-                                      .textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _statusBadge(
-                          application['status'],
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: () =>
-                              Navigator.pop(
-                            context,
-                          ),
-                          icon: const Icon(
-                            Icons.close_rounded,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // =====================================================
-                    // STUDENT DATA
-                    // =====================================================
-
                     _detailSection(
-                      title: 'بيانات الطالب',
-                      children: [
-                        _detailItem(
-                          'اسم الطالب',
-                          application['student'],
-                          Icons
-                              .person_outline_rounded,
-                        ),
-                        _detailItem(
-                          'الرقم الجامعي',
-                          application[
-                              'studentId'],
-                          Icons
-                              .badge_outlined,
-                        ),
-                        _detailItem(
-                          'التخصص',
-                          application['major'],
-                          Icons
-                              .school_outlined,
-                        ),
-                        _detailItem(
-                          'المعدل التراكمي',
-                          application['gpa'],
-                          Icons
-                              .grade_outlined,
-                        ),
+                      'معلومات الطالب',
+                      Icons.person_outline,
+                      [
+                        _detailItem('اسم الطالب', application['name']),
+                        _detailItem('الرقم الجامعي', application['id']),
+                        _detailItem('التخصص', application['major']),
+                        _detailItem('المعدل التراكمي', application['gpa']),
                       ],
                     ),
-
-                    const SizedBox(height: 18),
-
-                    // =====================================================
-                    // APPLICATION DATA
-                    // =====================================================
-
+                    const SizedBox(height: 20),
                     _detailSection(
-                      title: 'بيانات الطلب',
-                      children: [
-                        _detailItem(
-                          'الشركة',
-                          application['company'],
-                          Icons
-                              .business_outlined,
-                        ),
-                        _detailItem(
-                          'التدريب المتوفر',
-                          application['training'],
-                          Icons
-                              .work_outline_rounded,
-                        ),
-                        _detailItem(
-                          'تاريخ التقديم',
-                          application['date'],
-                          Icons
-                              .calendar_today_outlined,
-                        ),
-                        _detailItem(
-                          'حالة الطلب',
-                          application['status'],
-                          Icons
-                              .info_outline_rounded,
-                        ),
+                      'معلومات الطلب',
+                      Icons.business_outlined,
+                      [
+                        _detailItem('الشركة', application['company']),
+                        _detailItem('التدريب المطلوب', application['training']),
+                        _detailItem('تاريخ التقديم', application['date']),
+                        _detailItem('حالة الطلب', application['status']),
                       ],
                     ),
-
-                    const SizedBox(height: 18),
-
-                    // =====================================================
-                    // DOCUMENTS
-                    // =====================================================
-
+                    const SizedBox(height: 20),
                     _detailSection(
-                      title: 'الوثائق المرفقة',
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons
-                                  .description_outlined,
-                              color: MasarColors
-                                  .primaryBlue,
-                              size: 19,
-                            ),
-                            const SizedBox(
-                                width: 9),
-                            Expanded(
-                              child: Text(
-                                application[
-                                    'documents'],
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  color: MasarColors
-                                      .textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
+                      'الوثائق المرفقة',
+                      Icons.attach_file,
+                      [
+                        _detailItem(
+                          'الوثائق',
+                          application['documents'],
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 18),
-
-                    // =====================================================
-                    // INFO
-                    // =====================================================
-
+                    const SizedBox(height: 16),
                     Container(
-                      padding:
-                          const EdgeInsets.all(16),
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            MasarColors.background,
-                        borderRadius:
-                            BorderRadius.circular(
-                          14,
-                        ),
-                        border: Border.all(
-                          color:
-                              MasarColors.border,
-                        ),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: MasarColors.lightBlue,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
-                            Icons
-                                .info_outline_rounded,
-                            color: MasarColors
-                                .primaryBlue,
-                            size: 20,
+                            Icons.info_outline,
+                            color: MasarColors.primaryBlue,
                           ),
-                          const SizedBox(
-                              width: 10),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'هذه الشاشة مخصصة لعرض ومتابعة حالة الطلب فقط.',
+                              'تعرض هذه الصفحة تفاصيل الطلب وحالته الحالية.',
                               style: TextStyle(
-                                fontSize: 12,
-                                color: MasarColors
-                                    .textSecondary,
+                                color: MasarColors.textPrimary,
+                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -1208,101 +617,85 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                 ),
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(
+                  'إغلاق',
+                  style: TextStyle(color: MasarColors.primaryBlue),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  // ============================================================
-  // DETAIL SECTION
-  // ============================================================
-
-  Widget _detailSection({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: MasarColors.background,
-        borderRadius:
-            BorderRadius.circular(16),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color:
-                  MasarColors.textPrimary,
+  Widget _detailSection(
+    String title,
+    IconData icon,
+    List<Widget> children,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: MasarColors.primaryBlue, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: MasarColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: MasarColors.background,
+            borderRadius: BorderRadius.circular(10),
           ),
-          const SizedBox(height: 14),
-          ...children,
-        ],
-      ),
+          child: Column(
+            children: children,
+          ),
+        ),
+      ],
     );
   }
 
-  // ============================================================
-  // DETAIL ITEM
-  // ============================================================
-
-  Widget _detailItem(
-    String title,
-    String value,
-    IconData icon,
-  ) {
+  Widget _detailItem(String label, String value) {
     return Padding(
-      padding:
-          const EdgeInsets.only(bottom: 13),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration:
-                BoxDecoration(
-              color: MasarColors.white,
-              borderRadius:
-                  BorderRadius.circular(9),
-            ),
-            child: Icon(
-              icon,
-              size: 17,
-              color:
-                  MasarColors.primaryBlue,
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: MasarColors.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ),
           const SizedBox(width: 10),
-          Text(
-            '$title: ',
-            style: TextStyle(
-              fontSize: 12,
-              color:
-                  MasarColors.textSecondary,
-              fontWeight:
-                  FontWeight.w600,
-            ),
-          ),
           Expanded(
+            flex: 3,
             child: Text(
               value,
+              textAlign: TextAlign.start,
               style: TextStyle(
-                fontSize: 12,
-                color:
-                    MasarColors.textPrimary,
-                fontWeight:
-                    FontWeight.w600,
+                color: MasarColors.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1311,4 +704,3 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     );
   }
 }
-

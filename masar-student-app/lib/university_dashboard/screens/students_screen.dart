@@ -1,17 +1,6 @@
 
 import 'package:flutter/material.dart';
-
 import '../../theme/masar_theme.dart';
-import '../../core/widgets/uni_dashboard_header.dart';
-import '../../core/widgets/uni_dashboard_sidebar.dart';
-import 'university_home_screen.dart';
-import 'companies_screen.dart';
-
-import 'applications_screen.dart';
-import 'current_trainings_screen.dart';
-import 'reports_screen.dart';
-import 'notifications_screen.dart';
-import 'settings_screen.dart';
 
 class StudentsScreen extends StatefulWidget {
   const StudentsScreen({super.key});
@@ -21,10 +10,7 @@ class StudentsScreen extends StatefulWidget {
 }
 
 class _StudentsScreenState extends State<StudentsScreen> {
-  int selectedIndex = 1;
-
-  final TextEditingController searchController =
-      TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
   String selectedMajor = 'الكل';
   String selectedTrainingStatus = 'الكل';
@@ -151,130 +137,44 @@ class _StudentsScreenState extends State<StudentsScreen> {
   }
 
   List<Map<String, dynamic>> get filteredStudents {
-    final query =
-        searchController.text.trim().toLowerCase();
+    final query = searchController.text.trim().toLowerCase();
 
     return students.where((student) {
       final matchesSearch =
-          student['name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              student['id']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              student['major']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              student['careerPath']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query);
+          student['name'].toString().toLowerCase().contains(query) ||
+          student['id'].toString().toLowerCase().contains(query) ||
+          student['major'].toString().toLowerCase().contains(query) ||
+          student['careerPath'].toString().toLowerCase().contains(query);
 
-      final matchesMajor =
-          selectedMajor == 'الكل' ||
-              student['major'] == selectedMajor;
+      final matchesMajor = selectedMajor == 'الكل' ||
+          student['major'] == selectedMajor;
 
-      final matchesTraining =
-          selectedTrainingStatus == 'الكل' ||
-              student['trainingStatus'] ==
-                  selectedTrainingStatus;
+      final matchesTraining = selectedTrainingStatus == 'الكل' ||
+          student['trainingStatus'] == selectedTrainingStatus;
 
-      return matchesSearch &&
-          matchesMajor &&
-          matchesTraining;
+      return matchesSearch && matchesMajor && matchesTraining;
     }).toList();
   }
 
-  void navigateTo(int index) {
-    if (index == selectedIndex) return;
-
-    Widget screen;
-
-    switch (index) {
-      case 0:
-        screen = const UniversityHomeScreen();
-        break;
-
-      case 1:
-        screen = const StudentsScreen();
-        break;
-
-      case 2:
-        screen = const CompaniesScreen();
-        break;
-
-      case 3:
-  screen = const ApplicationsScreen();
-  break;
-
-case 4:
-  screen = const CurrentTrainingsScreen();
-  break;
-
-case 5:
-  screen = const ReportsScreen();
-  break;
-
-case 6:
-  screen = const NotificationsScreen();
-  break;
-
-case 7:
-  screen = const SettingsScreen();
-  break;
-
-      case 8:
-        screen = const SettingsScreen();
-        break;
-
-      default:
-        screen =  const UniversityHomeScreen();
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => screen,
-      ),
-    );
-  }
-
-  void logout() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const UniversityHomeScreen(),
-      ),
-    );
-  }
-
-  void showStudentDetails(
-      Map<String, dynamic> student) {
+  void showStudentDetails(Map<String, dynamic> student) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Dialog(
             backgroundColor: Colors.transparent,
             child: Container(
               width: 720,
-              constraints: const BoxConstraints(
-                maxHeight: 760,
-              ),
+              constraints: const BoxConstraints(maxHeight: 760),
               decoration: BoxDecoration(
                 color: MasarColors.white,
-                borderRadius:
-                    BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(28),
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
@@ -282,69 +182,51 @@ case 7:
                           width: 54,
                           height: 54,
                           decoration: BoxDecoration(
-                            color:
-                                MasarColors.lightBlue,
-                            borderRadius:
-                                BorderRadius.circular(15),
+                            color: MasarColors.lightBlue,
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.person_rounded,
-                            color:
-                                MasarColors.primaryBlue,
+                            color: MasarColors.primaryBlue,
                             size: 27,
                           ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                student['name'],
+                                student['name'].toString(),
                                 style: const TextStyle(
                                   fontSize: 21,
-                                  fontWeight:
-                                      FontWeight.w800,
-                                  color: MasarColors
-                                      .textPrimary,
+                                  fontWeight: FontWeight.w800,
+                                  color: MasarColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                student['id'],
+                                student['id'].toString(),
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: MasarColors
-                                      .textSecondary,
+                                  color: MasarColors.textSecondary,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        _accountBadge(
-                          student['accountStatus'],
-                        ),
+                        _accountBadge(student['accountStatus'].toString()),
                         const SizedBox(width: 10),
                         IconButton(
-                          onPressed: () =>
-                              Navigator.pop(context),
-                          icon: const Icon(
-                            Icons.close_rounded,
-                          ),
+                          onPressed: () => Navigator.pop(dialogContext),
+                          icon: const Icon(Icons.close_rounded),
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 28),
 
-                    _sectionTitle(
-                      'المعلومات الأكاديمية',
-                      Icons.school_outlined,
-                    ),
-
+                    _sectionTitle('المعلومات الأكاديمية', Icons.school_outlined),
                     const SizedBox(height: 12),
-
                     _sectionContainer(
                       children: [
                         Row(
@@ -352,16 +234,15 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'اسم الطالب',
-                                student['name'],
-                                Icons
-                                    .person_outline_rounded,
+                                student['name'].toString(),
+                                Icons.person_outline_rounded,
                               ),
                             ),
                             const SizedBox(width: 20),
                             Expanded(
                               child: _detailItem(
                                 'الرقم الجامعي',
-                                student['id'],
+                                student['id'].toString(),
                                 Icons.badge_outlined,
                               ),
                             ),
@@ -373,16 +254,15 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'التخصص',
-                                student['major'],
-                                Icons
-                                    .menu_book_outlined,
+                                student['major'].toString(),
+                                Icons.menu_book_outlined,
                               ),
                             ),
                             const SizedBox(width: 20),
                             Expanded(
                               child: _detailItem(
                                 'المعدل التراكمي',
-                                student['gpa'],
+                                student['gpa'].toString(),
                                 Icons.grade_outlined,
                               ),
                             ),
@@ -394,7 +274,7 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'البريد الإلكتروني',
-                                student['email'],
+                                student['email'].toString(),
                                 Icons.email_outlined,
                               ),
                             ),
@@ -402,7 +282,7 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'رقم الهاتف',
-                                student['phone'],
+                                student['phone'].toString(),
                                 Icons.phone_outlined,
                               ),
                             ),
@@ -412,14 +292,8 @@ case 7:
                     ),
 
                     const SizedBox(height: 24),
-
-                    _sectionTitle(
-                      'المسار والتدريب',
-                      Icons.route_outlined,
-                    ),
-
+                    _sectionTitle('المسار والتدريب', Icons.route_outlined),
                     const SizedBox(height: 12),
-
                     _sectionContainer(
                       children: [
                         Row(
@@ -427,7 +301,7 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'المسار المهني',
-                                student['careerPath'],
+                                student['careerPath'].toString(),
                                 Icons.route_rounded,
                               ),
                             ),
@@ -435,8 +309,7 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'حالة التدريب',
-                                student[
-                                    'trainingStatus'],
+                                student['trainingStatus'].toString(),
                                 Icons.school_rounded,
                               ),
                             ),
@@ -448,9 +321,8 @@ case 7:
                             Expanded(
                               child: _detailItem(
                                 'ساعات التدريب',
-                                student['hours'],
-                                Icons
-                                    .access_time_rounded,
+                                student['hours'].toString(),
+                                Icons.access_time_rounded,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -458,8 +330,7 @@ case 7:
                               child: _detailItem(
                                 'التقارير',
                                 '${student['reports']} تقارير',
-                                Icons
-                                    .description_outlined,
+                                Icons.description_outlined,
                               ),
                             ),
                           ],
@@ -468,152 +339,100 @@ case 7:
                     ),
 
                     const SizedBox(height: 24),
-
-                    _sectionTitle(
-                      'المهارات',
-                      Icons.auto_awesome_outlined,
-                    ),
-
+                    _sectionTitle('المهارات', Icons.auto_awesome_outlined),
                     const SizedBox(height: 12),
-
                     _sectionContainer(
                       children: [
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children:
-                              (student['skills'] as List)
-                                  .map(
-                                    (skill) =>
-                                        Container(
-                                      padding:
-                                          const EdgeInsets
-                                              .symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      decoration:
-                                          BoxDecoration(
-                                        color: MasarColors
-                                            .lightBlue,
-                                        borderRadius:
-                                            BorderRadius
-                                                .circular(
-                                          20,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        skill.toString(),
-                                        style: TextStyle(
-                                          color: MasarColors
-                                              .primaryBlue,
-                                          fontSize: 12,
-                                          fontWeight:
-                                              FontWeight
-                                                  .w600,
-                                        ),
-                                      ),
+                          children: (student['skills'] as List)
+                              .map(
+                                (skill) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: MasarColors.lightBlue,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    skill.toString(),
+                                    style: const TextStyle(
+                                      color: MasarColors.primaryBlue,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                  )
-                                  .toList(),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 24),
-
                     _sectionTitle(
                       'الشهادات',
                       Icons.workspace_premium_outlined,
                     ),
-
                     const SizedBox(height: 12),
-
                     _sectionContainer(
                       children: [
-                        ...(student['certificates']
-                                as List)
-                            .map(
-                          (certificate) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.only(
-                                bottom: 10,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons
-                                        .verified_rounded,
-                                    size: 19,
-                                    color: MasarColors
-                                        .primaryGreen,
+                        ...(student['certificates'] as List).map(
+                          (certificate) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.verified_rounded,
+                                  size: 19,
+                                  color: MasarColors.primaryGreen,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  certificate.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: MasarColors.textPrimary,
                                   ),
-                                  const SizedBox(
-                                      width: 10),
-                                  Text(
-                                    certificate.toString(),
-                                    style:
-                                        const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight:
-                                          FontWeight.w600,
-                                      color: MasarColors
-                                          .textPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 24),
-
-                    _sectionTitle(
-                      'المشاريع',
-                      Icons.code_rounded,
-                    ),
-
+                    _sectionTitle('المشاريع', Icons.code_rounded),
                     const SizedBox(height: 12),
-
                     _sectionContainer(
                       children: [
-                        ...(student['projects'] as List)
-                            .map(
-                          (project) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.only(
-                                bottom: 10,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.folder_rounded,
-                                    size: 19,
-                                    color: MasarColors
-                                        .primaryBlue,
+                        ...(student['projects'] as List).map(
+                          (project) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.folder_rounded,
+                                  size: 19,
+                                  color: MasarColors.primaryBlue,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  project.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: MasarColors.textPrimary,
                                   ),
-                                  const SizedBox(
-                                      width: 10),
-                                  Text(
-                                    project.toString(),
-                                    style:
-                                        const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight:
-                                          FontWeight.w600,
-                                      color: MasarColors
-                                          .textPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -627,17 +446,10 @@ case 7:
     );
   }
 
-  Widget _sectionTitle(
-    String title,
-    IconData icon,
-  ) {
+  Widget _sectionTitle(String title, IconData icon) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 19,
-          color: MasarColors.primaryBlue,
-        ),
+        Icon(icon, size: 19, color: MasarColors.primaryBlue),
         const SizedBox(width: 8),
         Text(
           title,
@@ -651,53 +463,37 @@ case 7:
     );
   }
 
-  Widget _sectionContainer({
-    required List<Widget> children,
-  }) {
+  Widget _sectionContainer({required List<Widget> children}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: MasarColors.background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
+        border: Border.all(color: MasarColors.border),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),
     );
   }
 
-  Widget _detailItem(
-    String label,
-    String value,
-    IconData icon,
-  ) {
+  Widget _detailItem(String label, String value, IconData icon) {
     return Row(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: MasarColors.textSecondary,
-        ),
+        Icon(icon, size: 18, color: MasarColors.textSecondary),
         const SizedBox(width: 9),
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
                 style: const TextStyle(
                   fontSize: 11.5,
-                  color:
-                      MasarColors.textSecondary,
+                  color: MasarColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -720,10 +516,7 @@ case 7:
     final isActive = status == 'نشط';
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: isActive
             ? MasarColors.lightGreen
@@ -733,9 +526,7 @@ case 7:
       child: Text(
         status,
         style: TextStyle(
-          color: isActive
-              ? MasarColors.primaryGreen
-              : MasarColors.error,
+          color: isActive ? MasarColors.primaryGreen : MasarColors.error,
           fontSize: 11.5,
           fontWeight: FontWeight.w700,
         ),
@@ -744,41 +535,30 @@ case 7:
   }
 
   Widget _trainingBadge(String status) {
-    Color color;
-    Color background;
+    late Color color;
+    late Color background;
 
     switch (status) {
       case 'مكتمل':
         color = MasarColors.primaryGreen;
         background = MasarColors.lightGreen;
         break;
-
       case 'متأخر':
         color = MasarColors.error;
-        background =
-            MasarColors.error.withOpacity(0.08);
+        background = MasarColors.error.withOpacity(0.08);
         break;
-
       case 'مستمر':
         color = MasarColors.primaryBlue;
         background = MasarColors.lightBlue;
         break;
-
       case 'لم يبدأ':
-        color = MasarColors.textSecondary;
-        background = MasarColors.background;
-        break;
-
       default:
         color = MasarColors.textSecondary;
         background = MasarColors.background;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(20),
@@ -809,9 +589,7 @@ case 7:
         decoration: BoxDecoration(
           color: MasarColors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: MasarColors.border,
-          ),
+          border: Border.all(color: MasarColors.border),
         ),
         child: Row(
           children: [
@@ -820,29 +598,21 @@ case 7:
               height: 48,
               decoration: BoxDecoration(
                 color: background,
-                borderRadius:
-                    BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 23,
-              ),
+              child: Icon(icon, color: color, size: 23),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                mainAxisAlignment:
-                    MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     title,
                     style: const TextStyle(
                       fontSize: 12,
-                      color:
-                          MasarColors.textSecondary,
+                      color: MasarColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -851,8 +621,7 @@ case 7:
                     style: const TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.w800,
-                      color:
-                          MasarColors.textPrimary,
+                      color: MasarColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -860,8 +629,7 @@ case 7:
                     subtitle,
                     style: const TextStyle(
                       fontSize: 10.5,
-                      color:
-                          MasarColors.textSecondary,
+                      color: MasarColors.textSecondary,
                     ),
                   ),
                 ],
@@ -881,9 +649,7 @@ case 7:
       decoration: BoxDecoration(
         color: MasarColors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
+        border: Border.all(color: MasarColors.border),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -892,147 +658,78 @@ case 7:
             return SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: constraints.maxWidth,
-                ),
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
                 child: DataTable(
                   headingRowHeight: 54,
                   dataRowMinHeight: 68,
                   dataRowMaxHeight: 75,
                   columnSpacing: 30,
-                  headingRowColor:
-                      MaterialStateProperty.all(
+                  headingRowColor: MaterialStateProperty.all(
                     MasarColors.background,
                   ),
                   columns: const [
-                    DataColumn(
-                      label: Text('الطالب'),
-                    ),
-                    DataColumn(
-                      label: Text('الرقم الجامعي'),
-                    ),
-                    DataColumn(
-                      label: Text('التخصص'),
-                    ),
-                    DataColumn(
-                      label: Text('المسار المهني'),
-                    ),
-                    DataColumn(
-                      label: Text('حالة التدريب'),
-                    ),
-                    DataColumn(
-                      label: Text('ساعات التدريب'),
-                    ),
-                    DataColumn(
-                      label: Text('حالة الحساب'),
-                    ),
-                    DataColumn(
-                      label: Text('التفاصيل'),
-                    ),
+                    DataColumn(label: Text('الطالب')),
+                    DataColumn(label: Text('الرقم الجامعي')),
+                    DataColumn(label: Text('التخصص')),
+                    DataColumn(label: Text('المسار المهني')),
+                    DataColumn(label: Text('حالة التدريب')),
+                    DataColumn(label: Text('ساعات التدريب')),
+                    DataColumn(label: Text('حالة الحساب')),
+                    DataColumn(label: Text('التفاصيل')),
                   ],
                   rows: data.map((student) {
                     return DataRow(
                       cells: [
                         DataCell(
                           Row(
-                            mainAxisSize:
-                                MainAxisSize.min,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
                                 width: 36,
                                 height: 36,
-                                decoration:
-                                    BoxDecoration(
-                                  color: MasarColors
-                                      .lightBlue,
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(10),
+                                decoration: BoxDecoration(
+                                  color: MasarColors.lightBlue,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.person_rounded,
                                   size: 19,
-                                  color: MasarColors
-                                      .primaryBlue,
+                                  color: MasarColors.primaryBlue,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                student['name'],
-                                style:
-                                    const TextStyle(
+                                student['name'].toString(),
+                                style: const TextStyle(
                                   fontSize: 12.5,
-                                  fontWeight:
-                                      FontWeight.w700,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        DataCell(Text(student['id'].toString())),
+                        DataCell(Text(student['major'].toString())),
+                        DataCell(Text(student['careerPath'].toString())),
                         DataCell(
-                          Text(
-                            student['id'],
-                            style:
-                                const TextStyle(
-                              fontSize: 12,
-                              color: MasarColors
-                                  .textSecondary,
-                            ),
-                          ),
+                          _trainingBadge(student['trainingStatus'].toString()),
                         ),
                         DataCell(
                           Text(
-                            student['major'],
-                            style:
-                                const TextStyle(
-                              fontSize: 12,
-                            ),
+                            student['hours'].toString(),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                         DataCell(
-                          Text(
-                            student['careerPath'],
-                            style:
-                                const TextStyle(
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          _trainingBadge(
-                            student[
-                                'trainingStatus'],
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            student['hours'],
-                            style:
-                                const TextStyle(
-                              fontSize: 12,
-                              fontWeight:
-                                  FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          _accountBadge(
-                            student[
-                                'accountStatus'],
-                          ),
+                          _accountBadge(student['accountStatus'].toString()),
                         ),
                         DataCell(
                           IconButton(
                             tooltip: 'عرض التفاصيل',
-                            onPressed: () {
-                              showStudentDetails(
-                                  student);
-                            },
-                            icon: Icon(
-                              Icons
-                                  .visibility_outlined,
-                              color: MasarColors
-                                  .primaryBlue,
+                            onPressed: () => showStudentDetails(student),
+                            icon: const Icon(
+                              Icons.visibility_outlined,
+                              color: MasarColors.primaryBlue,
                               size: 21,
                             ),
                           ),
@@ -1049,320 +746,6 @@ case 7:
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final totalStudents = students.length;
-
-    final activeStudents = students
-        .where(
-          (student) =>
-              student['accountStatus'] == 'نشط',
-        )
-        .length;
-
-    final trainingStudents = students
-        .where(
-          (student) =>
-              student['trainingStatus'] == 'مستمر',
-        )
-        .length;
-
-    final completedStudents = students
-        .where(
-          (student) =>
-              student['trainingStatus'] == 'مكتمل',
-        )
-        .length;
-
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: MasarColors.background,
-
-        body: Row(
-          textDirection: TextDirection.ltr,
-          children: [
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  children: [
-                    const UniDashboardHeader(
-                      title: 'الطلاب',
-                    ),
-
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding:
-                            const EdgeInsets.fromLTRB(
-                          30,
-                          25,
-                          30,
-                          35,
-                        ),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'الطلاب',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight:
-                                    FontWeight.w800,
-                                color: MasarColors
-                                    .textPrimary,
-                              ),
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            const Text(
-                              'إدارة ومتابعة بيانات الطلاب وحالة التدريب',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: MasarColors
-                                    .textSecondary,
-                              ),
-                            ),
-
-                            const SizedBox(height: 25),
-
-                            Row(
-                              children: [
-                                _statCard(
-                                  'إجمالي الطلاب',
-                                  '$totalStudents',
-                                  'طالب مسجل',
-                                  Icons.people_alt_rounded,
-                                  MasarColors
-                                      .primaryBlue,
-                                  MasarColors
-                                      .lightBlue,
-                                ),
-                                const SizedBox(
-                                    width: 16),
-                                _statCard(
-                                  'الحسابات النشطة',
-                                  '$activeStudents',
-                                  'حساب نشط',
-                                  Icons
-                                      .verified_user_rounded,
-                                  MasarColors
-                                      .primaryGreen,
-                                  MasarColors
-                                      .lightGreen,
-                                ),
-                                const SizedBox(
-                                    width: 16),
-                                _statCard(
-                                  'في التدريب',
-                                  '$trainingStudents',
-                                  'طالب',
-                                  Icons.school_rounded,
-                                  MasarColors.warning,
-                                  MasarColors.warning
-                                      .withOpacity(0.10),
-                                ),
-                                const SizedBox(
-                                    width: 16),
-                                _statCard(
-                                  'التدريب المكتمل',
-                                  '$completedStudents',
-                                  'طالب',
-                                  Icons
-                                      .check_circle_rounded,
-                                  MasarColors
-                                      .primaryGreen,
-                                  MasarColors
-                                      .lightGreen,
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 28),
-
-                            Container(
-                              padding:
-                                  const EdgeInsets.all(
-                                18,
-                              ),
-                              decoration:
-                                  BoxDecoration(
-                                color:
-                                    MasarColors.white,
-                                borderRadius:
-                                    BorderRadius.circular(
-                                  18,
-                                ),
-                                border: Border.all(
-                                  color:
-                                      MasarColors.border,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller:
-                                          searchController,
-                                      onChanged: (_) {
-                                        setState(() {});
-                                      },
-                                      decoration:
-                                          InputDecoration(
-                                        hintText:
-                                            'ابحث باسم الطالب، الرقم الجامعي، التخصص أو المسار...',
-                                        prefixIcon:
-                                            const Icon(
-                                          Icons
-                                              .search_rounded,
-                                        ),
-                                        filled: true,
-                                        fillColor:
-                                            MasarColors
-                                                .background,
-                                        border:
-                                            OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius
-                                                  .circular(
-                                            13,
-                                          ),
-                                          borderSide:
-                                              BorderSide
-                                                  .none,
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets
-                                                .symmetric(
-                                          vertical: 13,
-                                          horizontal: 15,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(
-                                      width: 14),
-
-                                  _filterDropdown(
-                                    value:
-                                        selectedMajor,
-                                    items: const [
-                                      'الكل',
-                                      'هندسة البرمجيات',
-                                      'علوم الحاسوب',
-                                      'الأمن السيبراني',
-                                    ],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedMajor =
-                                            value!;
-                                      });
-                                    },
-                                    hint: 'التخصص',
-                                  ),
-
-                                  const SizedBox(
-                                      width: 12),
-
-                                  _filterDropdown(
-                                    value:
-                                        selectedTrainingStatus,
-                                    items: const [
-                                      'الكل',
-                                      'مستمر',
-                                      'مكتمل',
-                                      'متأخر',
-                                      'لم يبدأ',
-                                    ],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedTrainingStatus =
-                                            value!;
-                                      });
-                                    },
-                                    hint:
-                                        'حالة التدريب',
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 22),
-
-                            Row(
-                              children: [
-                                const Text(
-                                  'قائمة الطلاب',
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight:
-                                        FontWeight.w800,
-                                    color: MasarColors
-                                        .textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding:
-                                      const EdgeInsets
-                                          .symmetric(
-                                    horizontal: 9,
-                                    vertical: 4,
-                                  ),
-                                  decoration:
-                                      BoxDecoration(
-                                    color: MasarColors
-                                        .lightBlue,
-                                    borderRadius:
-                                        BorderRadius
-                                            .circular(
-                                      20,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '${filteredStudents.length}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight:
-                                          FontWeight.w700,
-                                      color: MasarColors
-                                          .primaryBlue,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            _buildTable(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // =====================================================
-            // SIDEBAR — RIGHT
-            // =====================================================
-
-            UniDashboardSidebar(
-              selectedIndex: selectedIndex,
-              onItemSelected: navigateTo,
-              onLogout: logout,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _filterDropdown({
     required String value,
     required List<String> items,
@@ -1371,15 +754,11 @@ case 7:
   }) {
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: MasarColors.background,
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
+        border: Border.all(color: MasarColors.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -1390,13 +769,201 @@ case 7:
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(
-                  fontSize: 12.5,
-                ),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
           onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final totalStudents = students.length;
+
+    final activeStudents = students
+        .where((student) => student['accountStatus'] == 'نشط')
+        .length;
+
+    final trainingStudents = students
+        .where((student) => student['trainingStatus'] == 'مستمر')
+        .length;
+
+    final completedStudents = students
+        .where((student) => student['trainingStatus'] == 'مكتمل')
+        .length;
+
+    return Container(
+      color: MasarColors.background,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(30, 25, 30, 35),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'الطلاب',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: MasarColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'إدارة ومتابعة بيانات الطلاب وحالة التدريب',
+              style: TextStyle(
+                fontSize: 13,
+                color: MasarColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            Row(
+              children: [
+                _statCard(
+                  'إجمالي الطلاب',
+                  '$totalStudents',
+                  'طالب مسجل',
+                  Icons.people_alt_rounded,
+                  MasarColors.primaryBlue,
+                  MasarColors.lightBlue,
+                ),
+                const SizedBox(width: 16),
+                _statCard(
+                  'الحسابات النشطة',
+                  '$activeStudents',
+                  'حساب نشط',
+                  Icons.verified_user_rounded,
+                  MasarColors.primaryGreen,
+                  MasarColors.lightGreen,
+                ),
+                const SizedBox(width: 16),
+                _statCard(
+                  'في التدريب',
+                  '$trainingStudents',
+                  'طالب',
+                  Icons.school_rounded,
+                  MasarColors.warning,
+                  MasarColors.warning.withOpacity(0.10),
+                ),
+                const SizedBox(width: 16),
+                _statCard(
+                  'التدريب المكتمل',
+                  '$completedStudents',
+                  'طالب',
+                  Icons.check_circle_rounded,
+                  MasarColors.primaryGreen,
+                  MasarColors.lightGreen,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 28),
+
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: MasarColors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: MasarColors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText:
+                            'ابحث باسم الطالب، الرقم الجامعي، التخصص أو المسار...',
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        filled: true,
+                        fillColor: MasarColors.background,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(13),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 13,
+                          horizontal: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  _filterDropdown(
+                    value: selectedMajor,
+                    items: const [
+                      'الكل',
+                      'هندسة البرمجيات',
+                      'علوم الحاسوب',
+                      'الأمن السيبراني',
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => selectedMajor = value);
+                    },
+                    hint: 'التخصص',
+                  ),
+                  const SizedBox(width: 12),
+                  _filterDropdown(
+                    value: selectedTrainingStatus,
+                    items: const [
+                      'الكل',
+                      'مستمر',
+                      'مكتمل',
+                      'متأخر',
+                      'لم يبدأ',
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => selectedTrainingStatus = value);
+                    },
+                    hint: 'حالة التدريب',
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            Row(
+              children: [
+                const Text(
+                  'قائمة الطلاب',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: MasarColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: MasarColors.lightBlue,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${filteredStudents.length}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: MasarColors.primaryBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+            _buildTable(),
+          ],
         ),
       ),
     );

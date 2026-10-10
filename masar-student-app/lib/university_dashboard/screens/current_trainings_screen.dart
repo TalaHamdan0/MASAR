@@ -1,18 +1,6 @@
 
 import 'package:flutter/material.dart';
-
 import '../../theme/masar_theme.dart';
-import '../../core/widgets/uni_dashboard_sidebar.dart';
-import '../../core/widgets/uni_dashboard_header.dart';
-import 'university_home_screen.dart';
-import 'students_screen.dart';
-import 'companies_screen.dart';
-
-import 'applications_screen.dart';
-import 'reports_screen.dart';
-import 'notifications_screen.dart';
-import 'settings_screen.dart';
-import 'university_login_screen.dart';
 
 class CurrentTrainingsScreen extends StatefulWidget {
   const CurrentTrainingsScreen({super.key});
@@ -150,78 +138,17 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
     super.dispose();
   }
 
-  void _navigateTo(int index) {
-    if (index == 4) return;
-
-    Widget screen;
-
-    switch (index) {
-      case 0:
-        screen = const UniversityHomeScreen();
-        break;
-
-      case 1:
-        screen = const StudentsScreen();
-        break;
-
-      case 2:
-        screen = const CompaniesScreen();
-        break;
-
-      case 3:
-        screen = const ApplicationsScreen();
-        break;
-
-      case 4:
-        return;
-
-      case 5:
-        screen = const ReportsScreen();
-        break;
-
-      case 6:
-        screen = const NotificationsScreen();
-        break;
-
-      case 7:
-        screen = const SettingsScreen();
-        break;
-
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => screen,
-      ),
-    );
-  }
-
-  void _logout() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const UniversityLoginScreen(),
-      ),
-      (route) => false,
-    );
-  }
-
   List<Map<String, dynamic>> get _filteredTrainings {
     final query = _searchController.text.trim().toLowerCase();
 
     return _trainings.where((training) {
-      final matchesSearch =
-          query.isEmpty ||
+      final matchesSearch = query.isEmpty ||
           training['studentName'].toString().toLowerCase().contains(query) ||
           training['studentId'].toString().toLowerCase().contains(query) ||
           training['company'].toString().toLowerCase().contains(query) ||
           training['careerPath'].toString().toLowerCase().contains(query);
 
-      final matchesStatus =
-          _selectedStatus == 'الكل' ||
+      final matchesStatus = _selectedStatus == 'الكل' ||
           training['status'].toString() == _selectedStatus;
 
       return matchesSearch && matchesStatus;
@@ -243,46 +170,22 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: MasarColors.background,
-        body: Row(
-          textDirection: TextDirection.ltr,
-          children: [
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  children: [
-                    const UniDashboardHeader(
-                      title: 'التدريبات الحالية',
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(28),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildPageIntro(),
-                            const SizedBox(height: 24),
-                            _buildStatistics(),
-                            const SizedBox(height: 24),
-                            _buildFilters(),
-                            const SizedBox(height: 20),
-                            _buildTrainingsTable(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            UniDashboardSidebar(
-              selectedIndex: 4,
-              onItemSelected: _navigateTo,
-              onLogout: _logout,
-            ),
-          ],
+      child: Container(
+        color: MasarColors.background,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPageIntro(),
+              const SizedBox(height: 24),
+              _buildStatistics(),
+              const SizedBox(height: 24),
+              _buildFilters(),
+              const SizedBox(height: 20),
+              _buildTrainingsTable(),
+            ],
+          ),
         ),
       ),
     );
@@ -376,33 +279,31 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
               color: color.withOpacity(0.10),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: MasarColors.textSecondary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: MasarColors.textSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: MasarColors.textPrimary,
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: MasarColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -450,26 +351,14 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                 ),
               ),
               items: const [
-                DropdownMenuItem(
-                  value: 'الكل',
-                  child: Text('الكل'),
-                ),
-                DropdownMenuItem(
-                  value: 'مستمر',
-                  child: Text('مستمر'),
-                ),
+                DropdownMenuItem(value: 'الكل', child: Text('الكل')),
+                DropdownMenuItem(value: 'مستمر', child: Text('مستمر')),
                 DropdownMenuItem(
                   value: 'قريب من الإنجاز',
                   child: Text('قريب من الإنجاز'),
                 ),
-                DropdownMenuItem(
-                  value: 'مكتمل',
-                  child: Text('مكتمل'),
-                ),
-                DropdownMenuItem(
-                  value: 'متأخر',
-                  child: Text('متأخر'),
-                ),
+                DropdownMenuItem(value: 'مكتمل', child: Text('مكتمل')),
+                DropdownMenuItem(value: 'متأخر', child: Text('متأخر')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -537,10 +426,8 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                     rows: trainings.map((training) {
                       final hours = training['hours'] as int;
                       final totalHours = training['totalHours'] as int;
-
                       final evaluation =
                           training['evaluation'] as Map<String, dynamic>;
-
                       final evaluationReceived =
                           evaluation['status'] == 'وصل';
 
@@ -552,7 +439,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  training['studentName'],
+                                  training['studentName'].toString(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     color: MasarColors.textPrimary,
@@ -560,7 +447,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  training['studentId'],
+                                  training['studentId'].toString(),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: MasarColors.textSecondary,
@@ -569,22 +456,8 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                               ],
                             ),
                           ),
-                          DataCell(
-                            Text(
-                              training['company'],
-                              style: TextStyle(
-                                color: MasarColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                          DataCell(
-                            Text(
-                              training['careerPath'],
-                              style: TextStyle(
-                                color: MasarColors.textPrimary,
-                              ),
-                            ),
-                          ),
+                          DataCell(Text(training['company'].toString())),
+                          DataCell(Text(training['careerPath'].toString())),
                           DataCell(
                             Text(
                               '${training['startDate']} - ${training['endDate']}',
@@ -626,18 +499,13 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                           DataCell(
                             evaluationReceived
                                 ? OutlinedButton.icon(
-                                    onPressed: () {
-                                      _showSecretEvaluation(
-                                        training,
-                                      );
-                                    },
+                                    onPressed: () =>
+                                        _showSecretEvaluation(training),
                                     icon: const Icon(
                                       Icons.lock_outline_rounded,
                                       size: 16,
                                     ),
-                                    label: const Text(
-                                      'عرض التقييم',
-                                    ),
+                                    label: const Text('عرض التقييم'),
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor:
                                           MasarColors.primaryGreen,
@@ -645,23 +513,19 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                                         color: MasarColors.primaryGreen
                                             .withOpacity(0.45),
                                       ),
-                                      padding:
-                                          const EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
                                         vertical: 9,
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
                                   )
                                 : _buildEvaluationNotReceived(),
                           ),
                           DataCell(
-                            _buildStatusChip(
-                              training['status'].toString(),
-                            ),
+                            _buildStatusChip(training['status'].toString()),
                           ),
                           DataCell(
                             IconButton(
@@ -670,9 +534,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                                 Icons.visibility_outlined,
                                 color: MasarColors.primaryBlue,
                               ),
-                              onPressed: () {
-                                _showTrainingDetails(training);
-                              },
+                              onPressed: () => _showTrainingDetails(training),
                             ),
                           ),
                         ],
@@ -703,10 +565,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
 
   Widget _buildEvaluationNotReceived() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: MasarColors.background,
         borderRadius: BorderRadius.circular(10),
@@ -760,10 +619,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(20),
@@ -785,23 +641,13 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             backgroundColor: MasarColors.white,
-            titlePadding: const EdgeInsets.fromLTRB(
-              24,
-              22,
-              24,
-              8,
-            ),
-            contentPadding: const EdgeInsets.fromLTRB(
-              24,
-              8,
-              24,
-              24,
-            ),
+            titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
+            contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
             title: Row(
               children: [
                 Expanded(
@@ -815,7 +661,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(dialogContext),
                   icon: const Icon(Icons.close_rounded),
                 ),
               ],
@@ -830,18 +676,9 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                       title: 'بيانات الطالب',
                       icon: Icons.person_outline_rounded,
                       children: [
-                        _buildDetailRow(
-                          'اسم الطالب',
-                          training['studentName'],
-                        ),
-                        _buildDetailRow(
-                          'الرقم الجامعي',
-                          training['studentId'],
-                        ),
-                        _buildDetailRow(
-                          'التخصص',
-                          training['major'],
-                        ),
+                        _buildDetailRow('اسم الطالب', training['studentName'].toString()),
+                        _buildDetailRow('الرقم الجامعي', training['studentId'].toString()),
+                        _buildDetailRow('التخصص', training['major'].toString()),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -849,26 +686,11 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                       title: 'بيانات التدريب',
                       icon: Icons.business_center_outlined,
                       children: [
-                        _buildDetailRow(
-                          'جهة التدريب',
-                          training['company'],
-                        ),
-                        _buildDetailRow(
-                          'المسار المهني',
-                          training['careerPath'],
-                        ),
-                        _buildDetailRow(
-                          'تاريخ البداية',
-                          training['startDate'],
-                        ),
-                        _buildDetailRow(
-                          'تاريخ النهاية',
-                          training['endDate'],
-                        ),
-                        _buildDetailRow(
-                          'حالة التدريب',
-                          training['status'],
-                        ),
+                        _buildDetailRow('جهة التدريب', training['company'].toString()),
+                        _buildDetailRow('المسار المهني', training['careerPath'].toString()),
+                        _buildDetailRow('تاريخ البداية', training['startDate'].toString()),
+                        _buildDetailRow('تاريخ النهاية', training['endDate'].toString()),
+                        _buildDetailRow('حالة التدريب', training['status'].toString()),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -903,8 +725,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                           minHeight: 9,
                           borderRadius: BorderRadius.circular(10),
                           backgroundColor: MasarColors.border,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(
+                          valueColor: AlwaysStoppedAnimation<Color>(
                             MasarColors.primaryBlue,
                           ),
                         ),
@@ -922,12 +743,9 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
     );
   }
 
-  Widget _buildSecretEvaluationPreview(
-    Map<String, dynamic> training,
-  ) {
+  Widget _buildSecretEvaluationPreview(Map<String, dynamic> training) {
     final evaluation =
         training['evaluation'] as Map<String, dynamic>;
-
     final received = evaluation['status'] == 'وصل';
 
     return Container(
@@ -969,10 +787,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                     Navigator.pop(context);
                     _showSecretEvaluation(training);
                   },
-                  icon: const Icon(
-                    Icons.visibility_outlined,
-                    size: 17,
-                  ),
+                  icon: const Icon(Icons.visibility_outlined, size: 17),
                   label: const Text('عرض التقييم'),
                 ),
             ],
@@ -1015,39 +830,26 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
     );
   }
 
-  void _showSecretEvaluation(
-    Map<String, dynamic> training,
-  ) {
+  void _showSecretEvaluation(Map<String, dynamic> training) {
     final evaluation =
         training['evaluation'] as Map<String, dynamic>;
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             backgroundColor: MasarColors.white,
-            titlePadding: const EdgeInsets.fromLTRB(
-              24,
-              22,
-              24,
-              8,
-            ),
-            contentPadding: const EdgeInsets.fromLTRB(
-              24,
-              8,
-              24,
-              24,
-            ),
+            titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
+            contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
             title: Row(
               children: [
                 Container(
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color:
-                        MasarColors.primaryGreen.withOpacity(0.10),
+                    color: MasarColors.primaryGreen.withOpacity(0.10),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -1058,8 +860,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'التقييم السري',
@@ -1082,7 +883,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(dialogContext),
                   icon: const Icon(Icons.close_rounded),
                 ),
               ],
@@ -1109,16 +910,14 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  training['company'],
+                                  training['company'].toString(),
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
-                                    color:
-                                        MasarColors.textPrimary,
+                                    color: MasarColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 3),
@@ -1126,8 +925,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                                   '${training['studentName']} • ${training['studentId']}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color:
-                                        MasarColors.textSecondary,
+                                    color: MasarColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -1139,19 +937,14 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                     const SizedBox(height: 20),
                     _buildEvaluationRatingCard(
                       title: 'التقييم العام',
-                      rating:
-                          evaluation['overallRating'] as int,
+                      rating: evaluation['overallRating'] as int,
                     ),
                     const SizedBox(height: 12),
                     _buildEvaluationRatingCard(
                       title: 'الالتزام والانضباط',
-                      rating:
-                          evaluation['commitmentRating'] as int,
+                      rating: evaluation['commitmentRating'] as int,
                     ),
-                    if (evaluation['notes']
-                        .toString()
-                        .trim()
-                        .isNotEmpty) ...[
+                    if (evaluation['notes'].toString().trim().isNotEmpty) ...[
                       const SizedBox(height: 18),
                       Text(
                         'ملاحظات جهة التدريب',
@@ -1168,12 +961,10 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                         decoration: BoxDecoration(
                           color: MasarColors.background,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: MasarColors.border,
-                          ),
+                          border: Border.all(color: MasarColors.border),
                         ),
                         child: Text(
-                          evaluation['notes'],
+                          evaluation['notes'].toString(),
                           style: TextStyle(
                             fontSize: 13,
                             height: 1.6,
@@ -1182,14 +973,11 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
                         ),
                       ),
                     ],
-                    if (evaluation['date']
-                        .toString()
-                        .trim()
-                        .isNotEmpty) ...[
+                    if (evaluation['date'].toString().trim().isNotEmpty) ...[
                       const SizedBox(height: 16),
                       _buildDetailRow(
                         'تاريخ إرسال التقييم',
-                        evaluation['date'],
+                        evaluation['date'].toString(),
                       ),
                     ],
                   ],
@@ -1208,10 +996,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: MasarColors.background,
         borderRadius: BorderRadius.circular(12),
@@ -1230,20 +1015,17 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
             ),
           ),
           Row(
-            children: List.generate(
-              5,
-              (index) {
-                return Icon(
-                  index < rating
-                      ? Icons.star_rounded
-                      : Icons.star_border_rounded,
-                  size: 21,
-                  color: index < rating
-                      ? MasarColors.warning
-                      : MasarColors.border,
-                );
-              },
-            ),
+            children: List.generate(5, (index) {
+              return Icon(
+                index < rating
+                    ? Icons.star_rounded
+                    : Icons.star_border_rounded,
+                size: 21,
+                color: index < rating
+                    ? MasarColors.warning
+                    : MasarColors.border,
+              );
+            }),
           ),
           const SizedBox(width: 8),
           Text(
@@ -1277,11 +1059,7 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                color: MasarColors.primaryBlue,
-                size: 20,
-              ),
+              Icon(icon, color: MasarColors.primaryBlue, size: 20),
               const SizedBox(width: 8),
               Text(
                 title,
@@ -1331,4 +1109,3 @@ class _CurrentTrainingsScreenState extends State<CurrentTrainingsScreen> {
     );
   }
 }
-

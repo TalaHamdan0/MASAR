@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-
 import '../../theme/masar_theme.dart';
 
 class UniDashboardSidebar extends StatelessWidget {
@@ -44,20 +43,15 @@ class UniDashboardSidebar extends StatelessWidget {
       decoration: BoxDecoration(
         color: MasarColors.white,
         border: Border(
-          left: BorderSide(
-            color: MasarColors.border,
-          ),
+          left: BorderSide(color: MasarColors.border),
         ),
       ),
       child: Column(
         children: [
           const SizedBox(height: 28),
 
-          // Logo + MASAR
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
               children: [
                 Container(
@@ -72,11 +66,7 @@ class UniDashboardSidebar extends StatelessWidget {
                     child: Image.asset(
                       'assets/images/masar_logo.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (
-                        context,
-                        error,
-                        stackTrace,
-                      ) {
+                      errorBuilder: (context, error, stackTrace) {
                         return Icon(
                           Icons.route_rounded,
                           color: MasarColors.primaryBlue,
@@ -86,9 +76,7 @@ class UniDashboardSidebar extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 12),
-
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -115,150 +103,51 @@ class UniDashboardSidebar extends StatelessWidget {
 
           const SizedBox(height: 35),
 
-          // Menu
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-              ),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               itemCount: menuItems.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 6),
               itemBuilder: (context, index) {
-                final isSelected = selectedIndex == index;
-
-                return Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 6,
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      onItemSelected(index);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(
-                        milliseconds: 200,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 13,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? MasarColors.lightBlue
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            menuIcons[index],
-                            size: 21,
-                            color: isSelected
-                                ? MasarColors.primaryBlue
-                                : MasarColors.textSecondary,
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: Text(
-                              menuItems[index],
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? MasarColors.primaryBlue
-                                    : MasarColors.textPrimary,
-                              ),
-                            ),
-                          ),
-
-                          // طلبات التدريب
-                          if (index == 3)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: MasarColors.primaryGreen,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                '18',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-
-                          // الإشعارات
-                          if (index == 6)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: MasarColors.error,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                '5',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                return _buildMenuItem(index);
               },
             ),
           ),
 
-          // Logout
           Padding(
             padding: const EdgeInsets.all(14),
-            child: InkWell(
+            child: Material(
+              color: MasarColors.lightGreen,
               borderRadius: BorderRadius.circular(12),
-              onTap: onLogout,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 13,
-                ),
-                decoration: BoxDecoration(
-                  color: MasarColors.lightGreen,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.logout_rounded,
-                      color: MasarColors.primaryGreen,
-                      size: 21,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onLogout,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 13,
                     ),
-
-                    const SizedBox(width: 12),
-
-                    Text(
-                      'تسجيل الخروج',
-                      style: TextStyle(
-                        color: MasarColors.primaryGreen,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
-                      ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.logout_rounded,
+                          color: MasarColors.primaryGreen,
+                          size: 21,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'تسجيل الخروج',
+                          style: TextStyle(
+                            color: MasarColors.primaryGreen,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -267,5 +156,79 @@ class UniDashboardSidebar extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildMenuItem(int index) {
+    final bool isSelected = selectedIndex == index;
+
+    return Material(
+      color: isSelected
+          ? MasarColors.lightBlue
+          : Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => onItemSelected(index),
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 13,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  menuIcons[index],
+                  size: 21,
+                  color: isSelected
+                      ? MasarColors.primaryBlue
+                      : MasarColors.textSecondary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    menuItems[index],
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: isSelected
+                          ? MasarColors.primaryBlue
+                          : MasarColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (index == 3)
+                  _buildBadge('18', MasarColors.primaryGreen),
+                if (index == 6)
+                  _buildBadge('5', MasarColors.error),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 7,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
