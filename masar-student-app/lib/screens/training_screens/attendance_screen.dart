@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import '../../../theme/masar_theme.dart';
@@ -21,22 +22,32 @@ class AttendanceScreen extends StatelessWidget {
       ),
 
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _calendar(context),
-            const SizedBox(height: 16),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 430,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _calendar(context),
+                  const SizedBox(height: 16),
 
-            _todayStatus(context),
-            const SizedBox(height: 20),
+                  _todayStatus(context),
+                  const SizedBox(height: 20),
 
-            _sectionTitle(context, 'سجل الحضور'),
-            const SizedBox(height: 8),
+                  _sectionTitle(context, 'سجل الحضور'),
+                  const SizedBox(height: 8),
 
-            _attendanceList(context),
+                  _attendanceList(context),
 
-            const SizedBox(height: 24),
-          ],
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
 
@@ -76,12 +87,9 @@ class AttendanceScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 16, 14, 18),
         child: Column(
           children: [
-            // Month Header
             Row(
               children: [
-                _calendarArrow(
-                  Icons.chevron_left,
-                ),
+                _calendarArrow(Icons.chevron_left),
 
                 Expanded(
                   child: Center(
@@ -97,9 +105,7 @@ class AttendanceScreen extends StatelessWidget {
                   ),
                 ),
 
-                _calendarArrow(
-                  Icons.chevron_right,
-                ),
+                _calendarArrow(Icons.chevron_right),
               ],
             ),
 
@@ -150,7 +156,9 @@ class AttendanceScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: const Duration(
+                            milliseconds: 200,
+                          ),
                           width: 40,
                           height: 40,
                           alignment: Alignment.center,
@@ -179,7 +187,6 @@ class AttendanceScreen extends StatelessWidget {
 
                         const SizedBox(height: 6),
 
-                        // Attendance indicator
                         Container(
                           width: 6,
                           height: 6,

@@ -1,38 +1,73 @@
 import 'package:flutter/material.dart';
 
-import 'package:masar_student_app/theme/masar_theme.dart';
-import 'package:masar_student_app/data/masar_mock_data.dart';
 import 'package:masar_student_app/core/models/skill_model.dart';
+import 'package:masar_student_app/core/services/profile_analysis.dart';
+import 'package:masar_student_app/data/masar_mock_data.dart';
+import 'package:masar_student_app/theme/masar_theme.dart';
 
 import 'roadmap_screen.dart';
 
 class CareerReadinessScreen extends StatelessWidget {
-  final int readinessScore;
+  // للتوافق مع الاستدعاءات القديمة فقط.
+  final int? readinessScore;
   final Map<String, int>? skillScores;
 
   const CareerReadinessScreen({
     super.key,
-    required this.readinessScore,
+    this.readinessScore,
     this.skillScores,
   });
 
+  ProfileAnalysis get _analysis {
+    return ProfileAnalysis.fromProfile(
+      MasarMockData.currentStudent,
+      MasarMockData.getCareerPathById(
+        MasarMockData.currentStudent?.careerPathId ?? '',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final selectedCareerPath =
-        MasarMockData.selectedCareerPath;
+    final analysis = _analysis;
+    final selectedCareerPath = analysis.path;
 
-    final List<Skill> skills = MasarMockData.skills
-        .where(
-          (skill) => selectedCareerPath.requiredSkills
-              .contains(skill.name),
-        )
-        .toList();
+    final skills = analysis.requiredSkills.map((name) {
+      return Skill(
+        id: ProfileAnalysis.normalize(name),
+        name: name,
+        level: analysis.covers(name) ? 100 : 0,
+        status: analysis.covers(name)
+            ? 'مسجّلة'
+            : 'غير موثّقة',
+      );
+    }).toList();
 
-    return Directionality(
+    if (!analysis.canAnalyze) {
+      return _MobilePage(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          backgroundColor: MasarColors.background,
+          appBar: AppBar(
+            title: const Text('الجاهزية المهنية'),
+          ),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                analysis.unavailableReason!,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return _MobilePage(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: MasarColors.background,
-
         appBar: AppBar(
           backgroundColor: MasarColors.background,
           elevation: 0,
@@ -44,20 +79,19 @@ class CareerReadinessScreen extends StatelessWidget {
             ),
           ),
         ),
-
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _buildOverallProgress(readinessScore),
-
+              _buildOverallProgress(
+                analysis.coverageScore!,
+              ),
               const SizedBox(height: 24),
 
               Align(
                 alignment: Alignment.centerRight,
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'فجوة المهارات',
@@ -69,7 +103,8 @@ class CareerReadinessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'مقارنة نتائج التقييم بمتطلبات ${selectedCareerPath.title}',
+                      'مقارنة ملفك بمتطلبات '
+                      '${selectedCareerPath!.title}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: MasarColors.textSecondary,
@@ -86,9 +121,7 @@ class CareerReadinessScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-
               _buildImprovementSummary(skills),
-
               const SizedBox(height: 20),
 
               SizedBox(
@@ -98,28 +131,22 @@ class CareerReadinessScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            const RoadmapScreen(),
+                        builder: (_) => const RoadmapScreen(),
                       ),
                     );
                   },
-                  icon: const Icon(
-                    Icons.arrow_back,
-                  ),
+                  icon: const Icon(Icons.arrow_back),
                   label: const Text(
-                    'عرض خارطة الطريق',
+                    'عرض خارطة الطريق التجريبية',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        MasarColors.primaryBlue,
+                    backgroundColor: MasarColors.primaryBlue,
                     foregroundColor: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       vertical: 16,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -129,15 +156,11 @@ class CareerReadinessScreen extends StatelessWidget {
             ],
           ),
         ),
-
-        bottomNavigationBar:
-            BottomNavigationBar(
+        bottomNavigationBar: BottomNavigationBar(
           currentIndex: 1,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor:
-              MasarColors.primaryBlue,
-          unselectedItemColor:
-              MasarColors.textSecondary,
+          selectedItemColor: MasarColors.primaryBlue,
+          unselectedItemColor: MasarColors.textSecondary,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
@@ -174,11 +197,11 @@ class CareerReadinessScreen extends StatelessWidget {
     String title;
 
     if (score >= 80) {
-      title = 'جاهزية قوية';
+      title = 'تغطية مرتفعة للملف';
     } else if (score >= 60) {
-      title = 'جاهزية جيدة';
+      title = 'تغطية جزئية للملف';
     } else {
-      title = 'تحتاج إلى تطوير';
+      title = 'مهارات تحتاج إلى توثيق';
     }
 
     return Container(
@@ -186,8 +209,7 @@ class CareerReadinessScreen extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: MasarColors.border,
         ),
@@ -195,14 +217,13 @@ class CareerReadinessScreen extends StatelessWidget {
       child: Column(
         children: [
           const Text(
-            'درجة الجاهزية',
+            'تغطية متطلبات المسار',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: MasarColors.textPrimary,
             ),
           ),
-
           const SizedBox(height: 20),
 
           SizedBox(
@@ -217,51 +238,42 @@ class CareerReadinessScreen extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: 1,
                     strokeWidth: 12,
-                    backgroundColor:
-                        MasarColors.background,
+                    backgroundColor: MasarColors.background,
                     valueColor:
-                        const AlwaysStoppedAnimation<
-                            Color>(
+                        const AlwaysStoppedAnimation<Color>(
                       MasarColors.background,
                     ),
                   ),
                 ),
-
                 SizedBox(
                   width: 150,
                   height: 150,
                   child: CircularProgressIndicator(
                     value: score / 100,
                     strokeWidth: 12,
-                    backgroundColor:
-                        Colors.transparent,
+                    backgroundColor: Colors.transparent,
                     valueColor:
-                        const AlwaysStoppedAnimation<
-                            Color>(
+                        const AlwaysStoppedAnimation<Color>(
                       MasarColors.primaryBlue,
                     ),
                   ),
                 ),
-
                 Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       '$score%',
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color:
-                            MasarColors.textPrimary,
+                        color: MasarColors.textPrimary,
                       ),
                     ),
                     const Text(
-                      'الجاهزية',
+                      'تغطية الملف',
                       style: TextStyle(
                         fontSize: 12,
-                        color:
-                            MasarColors.textSecondary,
+                        color: MasarColors.textSecondary,
                       ),
                     ),
                   ],
@@ -277,22 +289,20 @@ class CareerReadinessScreen extends StatelessWidget {
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color:
-                  MasarColors.primaryGreen,
+              color: MasarColors.primaryGreen,
             ),
           ),
 
           const SizedBox(height: 6),
 
-          Text(
-            score >= 80
-                ? 'مستواك قريب من متطلبات المسار المهني.'
-                : 'استمر في تطوير مهاراتك للوصول إلى المستوى المطلوب.',
+          const Text(
+            'يعتمد المؤشر على المهارات وتقنيات المشاريع المسجّلة، '
+            'وليس قياسًا للإتقان. '
+            'لا تُحتسب الشهادات حتى تُربط بمهارات محددة.',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color:
-                  MasarColors.textSecondary,
+              color: MasarColors.textSecondary,
             ),
           ),
         ],
@@ -301,47 +311,29 @@ class CareerReadinessScreen extends StatelessWidget {
   }
 
   Widget _buildSkillGapCard(Skill skill) {
-    const int requiredLevel = 70;
+    final covered = _analysis.covers(skill.name);
 
-    // إذا كانت نتيجة الاختبار موجودة نستخدمها.
-    // غير ذلك نستخدم المستوى الموجود في Mock Data.
-    final int currentLevel =
-        skillScores?[skill.id] ?? skill.level;
+    // تعبئة شريط التوثيق فقط، وليست نسبة إتقان.
+    final currentLevel = covered ? 100 : 0;
 
-    final int gap =
-        requiredLevel - currentLevel;
+    final status = covered
+        ? 'مسجّلة في الملف'
+        : 'غير موثّقة في الملف';
 
-    late String status;
-    late Color statusColor;
-    late IconData icon;
+    final statusColor = covered
+        ? MasarColors.primaryGreen
+        : MasarColors.warning;
 
-    if (currentLevel >= requiredLevel) {
-      status = 'محقق';
-      statusColor =
-          MasarColors.primaryGreen;
-      icon = Icons.check_circle;
-    } else if (currentLevel >= 50) {
-      status = 'قريب';
-      statusColor =
-          MasarColors.warning;
-      icon = Icons.trending_up;
-    } else {
-      status = 'يحتاج تطوير';
-      statusColor =
-          MasarColors.error;
-      icon =
-          Icons.warning_amber_rounded;
-    }
+    final icon = covered
+        ? Icons.check_circle
+        : Icons.info_outline;
 
     return Container(
-      margin:
-          const EdgeInsets.only(bottom: 12),
-      padding:
-          const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: MasarColors.border,
         ),
@@ -355,29 +347,23 @@ class CareerReadinessScreen extends StatelessWidget {
                   skill.name,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight:
-                        FontWeight.bold,
-                    color:
-                        MasarColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    color: MasarColors.textPrimary,
                   ),
                 ),
               ),
-
               Icon(
                 icon,
                 size: 18,
                 color: statusColor,
               ),
-
               const SizedBox(width: 5),
-
               Text(
                 status,
                 style: TextStyle(
                   color: statusColor,
                   fontSize: 12,
-                  fontWeight:
-                      FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -389,58 +375,46 @@ class CareerReadinessScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'نتيجة التقييم',
+                      'حالة التوثيق',
                       style: TextStyle(
                         fontSize: 11,
-                        color:
-                            MasarColors
-                                .textSecondary,
+                        color: MasarColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$currentLevel%',
+                      covered ? 'مسجّلة' : 'غير موثّقة',
                       style: const TextStyle(
                         fontSize: 15,
-                        fontWeight:
-                            FontWeight.bold,
-                        color:
-                            MasarColors
-                                .textPrimary,
+                        fontWeight: FontWeight.bold,
+                        color: MasarColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              Expanded(
+              const Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'المستوى المطلوب',
+                    Text(
+                      'ضمن متطلبات المسار',
                       style: TextStyle(
                         fontSize: 11,
-                        color:
-                            MasarColors
-                                .textSecondary,
+                        color: MasarColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      '70%',
+                    SizedBox(height: 4),
+                    Text(
+                      'نعم',
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight:
-                            FontWeight.bold,
-                        color:
-                            MasarColors
-                                .textPrimary,
+                        fontWeight: FontWeight.bold,
+                        color: MasarColors.textPrimary,
                       ),
                     ),
                   ],
@@ -449,27 +423,23 @@ class CareerReadinessScreen extends StatelessWidget {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'الفجوة',
                       style: TextStyle(
                         fontSize: 11,
-                        color:
-                            MasarColors
-                                .textSecondary,
+                        color: MasarColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      gap > 0
-                          ? '$gap%'
-                          : 'مكتمل',
+                      covered
+                          ? 'مغطاة بالملف'
+                          : 'تحتاج توثيقًا',
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                         color: statusColor,
                       ),
                     ),
@@ -482,18 +452,12 @@ class CareerReadinessScreen extends StatelessWidget {
           const SizedBox(height: 12),
 
           ClipRRect(
-            borderRadius:
-                BorderRadius.circular(10),
-            child:
-                LinearProgressIndicator(
-              value:
-                  currentLevel / 100,
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: currentLevel / 100,
               minHeight: 7,
-              backgroundColor:
-                  MasarColors.background,
-              valueColor:
-                  AlwaysStoppedAnimation<
-                      Color>(
+              backgroundColor: MasarColors.background,
+              valueColor: AlwaysStoppedAnimation<Color>(
                 statusColor,
               ),
             ),
@@ -503,44 +467,33 @@ class CareerReadinessScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImprovementSummary(
-      List<Skill> skills) {
-    final skillsToImprove = skills
-        .where(
-          (skill) =>
-              (skillScores?[skill.id] ??
-                  skill.level) <
-              70,
-        )
-        .toList();
+  Widget _buildImprovementSummary(List<Skill> skills) {
+    final skillsToImprove = skills.where((skill) {
+      return !_analysis.covers(skill.name);
+    }).toList();
 
     if (skillsToImprove.isEmpty) {
       return Container(
         width: double.infinity,
-        padding:
-            const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color:
-              MasarColors.lightGreen,
-          borderRadius:
-              BorderRadius.circular(18),
+          color: MasarColors.lightGreen,
+          borderRadius: BorderRadius.circular(18),
         ),
         child: const Row(
           children: [
             Icon(
               Icons.check_circle,
-              color:
-                  MasarColors.primaryGreen,
+              color: MasarColors.primaryGreen,
             ),
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'ممتاز! جميع المهارات الأساسية تحقق المستوى المطلوب.',
+                'جميع متطلبات المسار مسجّلة في ملفك. '
+                'هذا لا يثبت إتقانها.',
                 style: TextStyle(
-                  fontWeight:
-                      FontWeight.w600,
-                  color:
-                      MasarColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  color: MasarColors.textPrimary,
                 ),
               ),
             ),
@@ -551,26 +504,20 @@ class CareerReadinessScreen extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color:
-            MasarColors.lightBlue,
-        borderRadius:
-            BorderRadius.circular(18),
+        color: MasarColors.lightBlue,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'المهارات التي تحتاج إلى تطوير',
+            'المهارات غير الموثّقة في الملف',
             style: TextStyle(
               fontSize: 16,
-              fontWeight:
-                  FontWeight.bold,
-              color:
-                  MasarColors.textPrimary,
+              fontWeight: FontWeight.bold,
+              color: MasarColors.textPrimary,
             ),
           ),
 
@@ -578,28 +525,20 @@ class CareerReadinessScreen extends StatelessWidget {
 
           ...skillsToImprove.map(
             (skill) => Padding(
-              padding:
-                  const EdgeInsets.only(
-                bottom: 7,
-              ),
+              padding: const EdgeInsets.only(bottom: 7),
               child: Row(
                 children: [
                   const Icon(
                     Icons.arrow_back_ios_rounded,
                     size: 12,
-                    color:
-                        MasarColors
-                            .primaryBlue,
+                    color: MasarColors.primaryBlue,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     skill.name,
-                    style:
-                        const TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
-                      color:
-                          MasarColors
-                              .textPrimary,
+                      color: MasarColors.textPrimary,
                     ),
                   ),
                 ],
@@ -607,6 +546,38 @@ class CareerReadinessScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// يقيّد الصفحة كاملة، بما فيها الشريط العلوي والسفلي، بعرض موبايل.
+class _MobilePage extends StatelessWidget {
+  final TextDirection textDirection;
+  final Widget child;
+
+  const _MobilePage({
+    required this.textDirection,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: textDirection,
+      child: ColoredBox(
+        color: MasarColors.background,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 430,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: child,
+            ),
+          ),
+        ),
       ),
     );
   }

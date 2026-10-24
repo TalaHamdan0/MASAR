@@ -90,7 +90,7 @@ class _ForgotPasswordScreenState
                           const SizedBox(height: 8),
 
                           const Text(
-                            'أدخل بريدك الجامعي لاستعادة الوصول إلى حسابك',
+                            'أدخل البريد الإلكتروني المسجّل بحسابك لاستعادة الوصول إليه',
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 14,
@@ -149,7 +149,7 @@ class _ForgotPasswordScreenState
                             const SizedBox(height: 10),
 
                             const Text(
-                              'سنرسل لك رمز تحقق إلى بريدك الجامعي لتتمكن من إعادة تعيين كلمة المرور.',
+                              'سنرسل رمز تحقق إلى البريد الإلكتروني المسجّل بحسابك لتتمكن من إعادة تعيين كلمة المرور.',
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 14,
@@ -163,7 +163,7 @@ class _ForgotPasswordScreenState
                             const SizedBox(height: 30),
 
                             // ==========================================
-                            // البريد الجامعي
+                            // البريد الإلكتروني المسجّل بالحساب
                             // ==========================================
                             TextFormField(
                               controller: _emailController,
@@ -171,9 +171,9 @@ class _ForgotPasswordScreenState
                                   TextInputType.emailAddress,
                               textDirection: TextDirection.ltr,
                               decoration: InputDecoration(
-                                labelText: 'البريد الجامعي',
+                                labelText: 'البريد الإلكتروني المسجّل بالحساب',
                                 hintText:
-                                    'example@university.edu',
+                                    'example@gmail.com',
 
                                 prefixIcon: const Icon(
                                   Icons.email_outlined,
@@ -227,15 +227,15 @@ class _ForgotPasswordScreenState
                               validator: (value) {
                                 if (value == null ||
                                     value.trim().isEmpty) {
-                                  return 'أدخل البريد الجامعي';
+                                  return 'أدخل البريد الإلكتروني المسجّل بالحساب';
                                 }
 
                                 final emailRegex = RegExp(
                                   r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
                                 );
 
-                                if (!emailRegex
-                                    .hasMatch(value.trim())) {
+                                if (value.trim().length > 254 ||
+                                    !emailRegex.hasMatch(value.trim())) {
                                   return 'أدخل بريدًا إلكترونيًا صحيحًا';
                                 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../theme/masar_theme.dart';
 
@@ -160,6 +161,11 @@ class _ChangePasswordScreenState
                               _currentPasswordController,
                           obscureText:
                               !_showCurrentPassword,
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(10),
+                          ],
                           decoration: InputDecoration(
                             labelText:
                                 'كلمة المرور الحالية',
@@ -219,7 +225,7 @@ class _ChangePasswordScreenState
 
                           validator: (value) {
                             if (value == null ||
-                                value.isEmpty) {
+                                value.trim().isEmpty) {
                               return 'أدخل كلمة المرور الحالية';
                             }
 
@@ -237,6 +243,11 @@ class _ChangePasswordScreenState
                         controller:
                             _newPasswordController,
                         obscureText: !_showNewPassword,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(10),
+                        ],
 
                         decoration: InputDecoration(
                           labelText:
@@ -297,12 +308,13 @@ class _ChangePasswordScreenState
 
                         validator: (value) {
                           if (value == null ||
-                              value.isEmpty) {
+                              value.trim().isEmpty) {
                             return 'أدخل كلمة المرور الجديدة';
                           }
 
-                          if (value.length < 6) {
-                            return 'يجب أن تكون 6 أحرف على الأقل';
+                          if (value.characters.length < 8 ||
+                              value.characters.length > 10) {
+                            return 'كلمة المرور من 8 إلى 10 خانات';
                           }
 
                           return null;
@@ -319,6 +331,11 @@ class _ChangePasswordScreenState
                             _confirmPasswordController,
                         obscureText:
                             !_showConfirmPassword,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(10),
+                        ],
 
                         decoration: InputDecoration(
                           labelText:
@@ -379,7 +396,7 @@ class _ChangePasswordScreenState
 
                         validator: (value) {
                           if (value == null ||
-                              value.isEmpty) {
+                              value.trim().isEmpty) {
                             return 'أكد كلمة المرور الجديدة';
                           }
 
@@ -458,59 +475,31 @@ class _ChangePasswordScreenState
   // Change / Reset Password
   // ==================================================
   void _changePassword() {
-    if (!_formKey.currentState!.validate()) {
+    if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
-    // ==================================================
-    // Reset Password Flow
-    // Forgot Password → OTP → New Password → Login
-    // ==================================================
-    if (widget.isResetPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+    FocusScope.of(context).unfocus();
+
+    // لا نعرض نجاحًا أو ننتقل للدخول قبل رد الباكند.
+    // التغيير من الإعدادات يحتاج جلسة وتحققًا من كلمة المرور الحالية.
+    // الاستعادة تحتاج إذن إعادة تعيين صادرًا بعد التحقق من الرمز.
+    final message = widget.isResetPassword
+        ? 'خدمة إعادة تعيين كلمة المرور غير جاهزة بعد؛ بانتظار ربط الباكند.'
+        : 'خدمة تغيير كلمة المرور غير جاهزة بعد؛ بانتظار ربط الباكند.';
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
           content: Text(
-            'تم إعادة تعيين كلمة المرور بنجاح',
+            message,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Cairo',
             ),
           ),
         ),
       );
-
-      Future.delayed(
-        const Duration(milliseconds: 800),
-        () {
-          if (!mounted) return;
-
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/login',
-            (route) => false,
-          );
-        },
-      );
-    }
-
-    // ==================================================
-    // Normal Change Password from Settings
-    // ==================================================
-    else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تم تغيير كلمة المرور بنجاح',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-            ),
-          ),
-        ),
-      );
-
-      // ما بنرجع على Login
-      // المستخدم يبقى في نفس الشاشة.
-    }
   }
 }
