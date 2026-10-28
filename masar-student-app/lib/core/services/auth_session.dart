@@ -18,7 +18,6 @@ class AuthSession {
     _studentEmail = null;
   }
 
-  // حفظ الجلسة بعد نجاح إنشاء الحساب أو تسجيل الدخول.
   static Student start(Map<String, dynamic> data) {
     final token = data['accessToken'];
     final profile = data['student'];
@@ -41,7 +40,6 @@ class AuthSession {
     return student;
   }
 
-  // تحديث الجلسة بعد حفظ الملف المهني بنجاح في الباك إند.
   static Student updateProfile(Map<String, dynamic> data) {
     if (_accessToken == null) {
       throw const FormatException('لا توجد جلسة دخول.');
@@ -95,6 +93,7 @@ class AuthSession {
     return Student(
       id: id,
       name: name,
+      nameEn: _text(data, 'nameEn'),
       email: email,
       university: _text(data, 'university'),
       major: _text(data, 'major'),

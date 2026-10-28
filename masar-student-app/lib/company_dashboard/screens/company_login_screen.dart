@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'company_home_screen.dart';
+
 import 'company_main_layout.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
@@ -11,25 +11,30 @@ class CompanyLoginScreen extends StatefulWidget {
 
 class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+
+  final _employeeNumberController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isObscured = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _employeeNumberController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
-void _submitForm() {
-  if (_formKey.currentState!.validate()) {
+
+  void _submitForm() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const CompanyMainLayout(),
       ),
     );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +64,6 @@ void _submitForm() {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // الشعار
                     Center(
                       child: Container(
                         width: 70,
@@ -73,19 +77,18 @@ void _submitForm() {
                           child: Image.asset(
                             'assets/images/masar_logo.png',
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.route_rounded,
-                                  color: Color(0xFF1565C0),
-                                  size: 36,
-                                ),
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.route_rounded,
+                                color: Color(0xFF1565C0),
+                                size: 36,
+                              );
+                            },
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // العناوين
                     const Text(
                       'بوابة الشركة / جهة التدريب',
                       textAlign: TextAlign.center,
@@ -107,10 +110,8 @@ void _submitForm() {
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // حقل البريد الإلكتروني (المعدل مع شرط الصيغة الرسمية)
                     const Text(
-                      'البريد الإلكتروني للشركة / مسؤول التوظيف',
+                      'الرقم الوظيفي',
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontFamily: 'Cairo',
@@ -121,31 +122,25 @@ void _submitForm() {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: _emailController,
+                      controller: _employeeNumberController,
                       textAlign: TextAlign.right,
                       textDirection: TextDirection.ltr,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'يرجى إدخال البريد الإلكتروني';
+                          return 'يرجى إدخال الرقم الوظيفي';
                         }
-                        // شرط التحقق من صيغة الإيميل الرسمي
-                        final emailRegex = RegExp(
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                        );
-                        if (!emailRegex.hasMatch(value.trim())) {
-                          return 'يرجى إدخال بريد إلكتروني صحيح (مثال: hr@company.com)';
-                        }
+
                         return null;
                       },
                       decoration: InputDecoration(
-                        hintText: 'hr@company.com',
+                        hintText: 'أدخل الرقم الوظيفي',
                         hintStyle: const TextStyle(
                           color: Color(0xFF9CA3AF),
                           fontSize: 13,
                         ),
                         prefixIcon: const Icon(
-                          Icons.email_outlined,
+                          Icons.badge_outlined,
                           color: Color(0xFF1565C0),
                           size: 20,
                         ),
@@ -169,13 +164,13 @@ void _submitForm() {
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.red),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // حقل كلمة المرور (رجع كما كان في الأصل مع شرط إدخال أي قيمة فقط)
                     const Text(
                       'كلمة المرور',
                       textAlign: TextAlign.right,
@@ -195,6 +190,7 @@ void _submitForm() {
                         if (value == null || value.isEmpty) {
                           return 'يرجى إدخال كلمة المرور';
                         }
+
                         return null;
                       },
                       decoration: InputDecoration(
@@ -242,13 +238,13 @@ void _submitForm() {
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.red),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // زر تسجيل الدخول
                     SizedBox(
                       height: 48,
                       child: ElevatedButton(
@@ -272,28 +268,28 @@ void _submitForm() {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // البوكس الأخضر السفلي
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: const Color(0xFFECFDF5),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                        border: Border.all(
+                          color: const Color(0xFFA7F3D0),
+                        ),
                       ),
-                      child: Row(
+                      child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.info_outline,
                             color: Color(0xFF059669),
                             size: 20,
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
+                              children: [
                                 Text(
                                   'للتجربة استخدم:',
                                   style: TextStyle(
@@ -305,7 +301,7 @@ void _submitForm() {
                                 ),
                                 SizedBox(height: 2),
                                 Text(
-                                  'البريد: hr@company.com',
+                                  'الرقم الوظيفي: 1001',
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
                                     fontSize: 11,

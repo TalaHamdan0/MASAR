@@ -6,6 +6,7 @@ import 'project_model.dart';
 class Student {
   final String id;
   final String name;
+  final String nameEn;
   final String major;
   final String university;
   final String academicYear;
@@ -21,6 +22,7 @@ class Student {
   const Student({
     required this.id,
     required this.name,
+    this.nameEn = '',
     required this.major,
     required this.university,
     required this.academicYear,
@@ -36,6 +38,7 @@ class Student {
   Student copyWith({
     String? id,
     String? name,
+    String? nameEn,
     String? major,
     String? university,
     String? academicYear,
@@ -50,6 +53,7 @@ class Student {
     return Student(
       id: id ?? this.id,
       name: name ?? this.name,
+      nameEn: nameEn ?? this.nameEn,
       major: major ?? this.major,
       university: university ?? this.university,
       academicYear: academicYear ?? this.academicYear,

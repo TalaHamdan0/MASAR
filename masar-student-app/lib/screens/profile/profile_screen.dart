@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/services/auth_session.dart';
 import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../../data/masar_mock_data.dart';
 import '../../theme/masar_theme.dart';
@@ -22,12 +23,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: MasarColors.background,
-
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('الملف الشخصي'),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
@@ -38,48 +37,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           child: Column(
             children: [
-              // ==================================================
-              // PROFILE IMAGE
-              // ==================================================
-
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 42,
                 backgroundColor: MasarColors.lightBlue,
-                child: const Icon(
+                child: Icon(
                   Icons.person,
                   size: 48,
                   color: MasarColors.primaryBlue,
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              // ==================================================
-              // STUDENT NAME
-              // ==================================================
-
               Text(
-                profile['name'],
+                profile['name']?.toString() ?? '',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-
               const SizedBox(height: 4),
-
-              // ==================================================
-              // MAJOR
-              // ==================================================
-
               Text(
-                profile['major'],
+                profile['major']?.toString() ?? '',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-
               const SizedBox(height: 20),
-
-              // ==================================================
-              // EDIT PROFILE
-              // ==================================================
-
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -87,10 +64,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            const EditProfileScreen(),
+                        builder: (_) => const EditProfileScreen(),
                       ),
                     );
+
+                    if (!mounted) return;
 
                     setState(() {});
                   },
@@ -101,8 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       double.infinity,
                       50,
                     ),
-                    foregroundColor:
-                        MasarColors.primaryBlue,
+                    foregroundColor: MasarColors.primaryBlue,
                     side: const BorderSide(
                       color: MasarColors.primaryBlue,
                     ),
@@ -117,17 +94,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 28),
-
-              // ==================================================
-              // ACCOUNT
-              // ==================================================
-
               const _SectionTitle(
                 title: 'الحساب',
               ),
-
               _ProfileTile(
                 icon: Icons.lock_outline,
                 title: 'تغيير كلمة المرور',
@@ -135,23 +105,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const ChangePasswordScreen(),
+                      builder: (_) => const ChangePasswordScreen(),
                     ),
                   );
                 },
               ),
-
               const SizedBox(height: 20),
-
-              // ==================================================
-              // PRIVACY
-              // ==================================================
-
               const _SectionTitle(
                 title: 'الخصوصية',
               ),
-
               Card(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -164,9 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Icons.visibility_outlined,
                         color: MasarColors.darkBlue,
                       ),
-
                       const SizedBox(width: 14),
-
                       const Expanded(
                         child: Text(
                           'إظهار الملف المهني للشركات',
@@ -178,16 +138,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-
                       Switch(
-                        value: MasarMockData
-                            .profileVisibleToCompanies,
-                        activeTrackColor:
-                            MasarColors.primaryGreen,
+                        value: MasarMockData.profileVisibleToCompanies,
+                        activeTrackColor: MasarColors.primaryGreen,
                         onChanged: (value) {
                           setState(() {
-                            MasarMockData
-                                    .profileVisibleToCompanies =
+                            MasarMockData.profileVisibleToCompanies =
                                 value;
                           });
                         },
@@ -196,17 +152,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // ==================================================
-              // ABOUT APP
-              // ==================================================
-
               const _SectionTitle(
                 title: 'حول التطبيق',
               ),
-
               _ProfileTile(
                 icon: Icons.info_outline,
                 title: 'عن مسار',
@@ -214,13 +163,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const AboutMasarScreen(),
+                      builder: (_) => const AboutMasarScreen(),
                     ),
                   );
                 },
               ),
-
               _ProfileTile(
                 icon: Icons.privacy_tip_outlined,
                 title: 'سياسة الخصوصية',
@@ -228,19 +175,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const PrivacyPolicyScreen(),
+                      builder: (_) => const PrivacyPolicyScreen(),
                     ),
                   );
                 },
               ),
-
               const SizedBox(height: 30),
-
-              // ==================================================
-              // LOGOUT
-              // ==================================================
-
               TextButton.icon(
                 onPressed: () {
                   _showLogoutDialog(context);
@@ -262,25 +202,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-
-      // ==========================================================
-      // BOTTOM NAVIGATION
-      // ==========================================================
-
       bottomNavigationBar: const AppBottomNavBar(
         selectedIndex: 4,
       ),
     );
   }
 
-  // ==============================================================
-  // LOGOUT DIALOG
-  // ==============================================================
-
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text(
             'تسجيل الخروج',
@@ -298,23 +229,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text('إلغاء'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                AuthSession.clear();
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'تم تسجيل الخروج',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                      ),
-                    ),
-                  ),
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
                 );
               },
               child: const Text(
@@ -331,10 +256,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-// ================================================================
-// SECTION TITLE
-// ================================================================
 
 class _SectionTitle extends StatelessWidget {
   final String title;
@@ -357,10 +278,6 @@ class _SectionTitle extends StatelessWidget {
     );
   }
 }
-
-// ================================================================
-// PROFILE TILE
-// ================================================================
 
 class _ProfileTile extends StatelessWidget {
   final IconData icon;

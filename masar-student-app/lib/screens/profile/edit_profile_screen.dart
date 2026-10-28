@@ -11,16 +11,32 @@ class EditProfileScreen extends StatefulWidget {
       _EditProfileScreenState();
 }
 
-class _EditProfileScreenState
-    extends State<EditProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameController;
-  late TextEditingController _gpaController;
 
   String? _selectedMajor;
   String? _selectedAcademicYear;
   String? _selectedCareerPath;
+
+  String _profileText(
+    Map<String, dynamic> profile,
+    String key,
+  ) {
+    return profile[key]?.toString() ?? '';
+  }
+
+  String? _matchingValue(
+    String? value,
+    List<String> options,
+  ) {
+    if (value == null || !options.contains(value)) {
+      return null;
+    }
+
+    return value;
+  }
 
   @override
   void initState() {
@@ -29,39 +45,59 @@ class _EditProfileScreenState
     final profile = MasarMockData.profileMockData;
 
     _nameController = TextEditingController(
-      text: profile['name'],
+      text: _profileText(profile, 'name'),
     );
 
-    _gpaController = TextEditingController(
-      text: profile['gpa'],
+    _selectedMajor = _matchingValue(
+      profile['major']?.toString(),
+      MasarMockData.majors,
     );
 
-    _selectedMajor = profile['major'];
-    _selectedAcademicYear = profile['academicYear'];
-    //_selectedCareerPath = profile['careerPath'];
-    final careerPathValue = profile['careerPath']?.toString();
+    _selectedAcademicYear = _matchingValue(
+      profile['academicYear']?.toString(),
+      MasarMockData.academicYears,
+    );
 
-final matchingCareerPaths = MasarMockData.careerPaths.where(
-  (path) =>
-      path.id == careerPathValue ||
-      path.title == careerPathValue,
-).toList();
+    final careerPathValue =
+        MasarMockData.currentStudent?.careerPathId ??
+            profile['careerPath']?.toString();
 
-_selectedCareerPath = matchingCareerPaths.isNotEmpty
-    ? matchingCareerPaths.first.id
-    : null;
+    final matchingCareerPaths =
+        MasarMockData.careerPaths.where(
+      (path) =>
+          path.id == careerPathValue ||
+          path.title == careerPathValue,
+    ).toList();
+
+    _selectedCareerPath = matchingCareerPaths.isNotEmpty
+        ? matchingCareerPaths.first.id
+        : null;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _gpaController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final profile = MasarMockData.profileMockData;
+
+    final studentNumber = _profileText(
+      profile,
+      'studentNumber',
+    );
+
+    final email = _profileText(
+      profile,
+      'email',
+    );
+
+    final university = _profileText(
+      profile,
+      'university',
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -75,7 +111,6 @@ _selectedCareerPath = matchingCareerPaths.isNotEmpty
         ),
         title: const Text('تعديل الملف الشخصي'),
       ),
-
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -92,126 +127,104 @@ _selectedCareerPath = matchingCareerPaths.isNotEmpty
                       value.trim().isEmpty) {
                     return 'أدخل الاسم الكامل';
                   }
+
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
               TextFormField(
-                initialValue: profile['universityId'],
+                initialValue: studentNumber,
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'الرقم الجامعي',
+                  hintText: 'غير متوفر حاليًا',
                 ),
               ),
-
               const SizedBox(height: 16),
-
               TextFormField(
-                initialValue: profile['email'],
+                initialValue: email,
                 readOnly: true,
                 decoration: const InputDecoration(
-                  labelText: 'البريد الجامعي',
+                  labelText: 'البريد الإلكتروني',
                 ),
               ),
-
               const SizedBox(height: 16),
-
               TextFormField(
-                initialValue: profile['university'],
+                initialValue: university,
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'الجامعة',
                 ),
               ),
-
               const SizedBox(height: 16),
-
               DropdownButtonFormField<String>(
-  value: _selectedMajor,
-  decoration: const InputDecoration(
-    labelText: 'التخصص',
-  ),
-  items: MasarMockData.majors.map((major) {
-    return DropdownMenuItem<String>(
-      value: major,
-      child: Text(major),
-    );
-  }).toList(),
-  onChanged: (value) {
-    setState(() {
-      _selectedMajor = value;
-    });
-  },
-  validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'اختر التخصص';
-    }
-    return null;
-  },
-),
+                value: _selectedMajor,
+                decoration: const InputDecoration(
+                  labelText: 'التخصص',
+                ),
+                items: MasarMockData.majors.map((major) {
+                  return DropdownMenuItem<String>(
+                    value: major,
+                    child: Text(major),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMajor = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'اختر التخصص';
+                  }
 
-const SizedBox(height: 16),
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedAcademicYear,
+                decoration: const InputDecoration(
+                  labelText: 'السنة الدراسية',
+                ),
+                items: MasarMockData.academicYears.map((year) {
+                  return DropdownMenuItem<String>(
+                    value: year,
+                    child: Text(year),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedAcademicYear = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'اختر السنة الدراسية';
+                  }
 
-DropdownButtonFormField<String>(
-  value: _selectedAcademicYear,
-  decoration: const InputDecoration(
-    labelText: 'السنة الدراسية',
-  ),
-  items: MasarMockData.academicYears.map((year) {
-    return DropdownMenuItem<String>(
-      value: year,
-      child: Text(year),
-    );
-  }).toList(),
-  onChanged: (value) {
-    setState(() {
-      _selectedAcademicYear = value;
-    });
-  },
-  validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'اختر السنة الدراسية';
-    }
-    return null;
-  },
-),
-
-const SizedBox(height: 16),
-
-TextFormField(
-  controller: _gpaController,
-  keyboardType: const TextInputType.numberWithOptions(
-    decimal: true,
-  ),
-  decoration: const InputDecoration(
-    labelText: 'المعدل التراكمي',
-  ),
-),
-
-const SizedBox(height: 16),
-
-DropdownButtonFormField<String>(
-  value: _selectedCareerPath,
-  decoration: const InputDecoration(
-    labelText: 'المسار المهني',
-  ),
-  items: MasarMockData.careerPaths.map((path) {
-    return DropdownMenuItem<String>(
-      value: path.id,
-      child: Text(path.title),
-    );
-  }).toList(),
-  onChanged: (value) {
-    setState(() {
-      _selectedCareerPath = value;
-    });
-  },
-),
-
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedCareerPath,
+                decoration: const InputDecoration(
+                  labelText: 'المسار المهني',
+                ),
+                items: MasarMockData.careerPaths.map((path) {
+                  return DropdownMenuItem<String>(
+                    value: path.id,
+                    child: Text(path.title),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCareerPath = value;
+                  });
+                },
+              ),
               const SizedBox(height: 30),
-
               ElevatedButton(
                 onPressed: _saveChanges,
                 child: const Text('حفظ التغييرات'),
@@ -228,19 +241,33 @@ DropdownButtonFormField<String>(
       return;
     }
 
-    final profile = MasarMockData.profileMockData;
+    final name = _nameController.text.trim();
+    final major = _selectedMajor!;
+    final academicYear = _selectedAcademicYear!;
+    final currentStudent = MasarMockData.currentStudent;
 
-    // تحديث الـ Mock Data فقط
-    profile['name'] = _nameController.text.trim();
-    profile['major'] = _selectedMajor!;
-    profile['academicYear'] = _selectedAcademicYear!;
-    profile['gpa'] = _gpaController.text.trim();
-    profile['careerPath'] = _selectedCareerPath;
+    if (currentStudent != null) {
+      final updatedStudent = currentStudent.copyWith(
+        name: name,
+        major: major,
+        academicYear: academicYear,
+        careerPathId: _selectedCareerPath,
+      );
+
+      MasarMockData.updateStudent(updatedStudent);
+    } else {
+      final profile = MasarMockData.profileMockData;
+
+      profile['name'] = name;
+      profile['major'] = major;
+      profile['academicYear'] = academicYear;
+      profile['careerPath'] = _selectedCareerPath;
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'تم حفظ التغييرات بنجاح',
+          'تم تحديث البيانات مؤقتًا داخل التطبيق.',
           style: TextStyle(
             fontFamily: 'Cairo',
           ),

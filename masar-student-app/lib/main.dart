@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/services/api_service.dart';
+import 'core/services/auth_session.dart';
 
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -16,7 +17,6 @@ void main() {
 
   runApp(const MasarStudentApp());
 
-  // فحص مؤقت للاتصال، بدون تأخير فتح التطبيق.
   _checkBackendConnection();
 }
 
@@ -33,17 +33,24 @@ Future<void> _checkBackendConnection() async {
 class MasarStudentApp extends StatelessWidget {
   const MasarStudentApp({super.key});
 
+  Widget _studentPage(Widget page) {
+    final token = AuthSession.accessToken;
+
+    if (token == null || token.trim().isEmpty) {
+      return const LoginScreen();
+    }
+
+    return page;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
       navigatorObservers: [
         _MasarNavigationObserver(),
       ],
-
       title: 'MASAR',
-
       theme: ThemeData(
         fontFamily: 'Cairo',
         useMaterial3: true,
@@ -51,24 +58,17 @@ class MasarStudentApp extends StatelessWidget {
           seedColor: const Color(0xFF1565C0),
         ),
       ),
-
-      // شاشة اختيار اللوحات هي شاشة البداية
       home: const DashboardSelectorScreen(),
-
       routes: {
         '/login': (context) => const LoginScreen(),
-
         '/create-account': (context) =>
             const CreateAccountScreen(),
-
         '/complete-profile': (context) =>
-            const CompleteProfileScreen(),
-
-        '/home': (context) => const HomeScreen(),
-
+            _studentPage(const CompleteProfileScreen()),
+        '/home': (context) =>
+            _studentPage(const HomeScreen()),
         '/company-login': (context) =>
             const CompanyLoginScreen(),
-
         '/university-login': (context) =>
             const UniversityLoginScreen(),
       },
@@ -86,17 +86,14 @@ class DashboardSelectorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               maxWidth: 430,
             ),
-
             child: Padding(
               padding: const EdgeInsets.all(24),
-
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -105,9 +102,7 @@ class DashboardSelectorScreen extends StatelessWidget {
                     size: 65,
                     color: primaryBlue,
                   ),
-
                   const SizedBox(height: 12),
-
                   const Text(
                     'MASAR',
                     style: TextStyle(
@@ -116,20 +111,16 @@ class DashboardSelectorScreen extends StatelessWidget {
                       color: primaryBlue,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
-                    'اختاري لوحة التحكم التي تريدين فتحها',
+                    'اختار لوحة التحكم التي تريد فتحها',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15,
                       color: Color(0xFF64748B),
                     ),
                   ),
-
                   const SizedBox(height: 32),
-
                   _dashboardButton(
                     context,
                     title: 'تطبيق الطالب',
@@ -146,9 +137,7 @@ class DashboardSelectorScreen extends StatelessWidget {
                       );
                     },
                   ),
-
                   const SizedBox(height: 16),
-
                   _dashboardButton(
                     context,
                     title: 'لوحة تحكم الشركة',
@@ -162,9 +151,7 @@ class DashboardSelectorScreen extends StatelessWidget {
                       );
                     },
                   ),
-
                   const SizedBox(height: 16),
-
                   _dashboardButton(
                     context,
                     title: 'لوحة تحكم الجامعة',
@@ -200,45 +187,36 @@ class DashboardSelectorScreen extends StatelessWidget {
       child: Card(
         elevation: 1,
         color: Colors.white,
-
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(
             color: Color(0xFFE2E8F0),
           ),
         ),
-
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(18),
-
           child: Padding(
             padding: const EdgeInsets.all(18),
-
             child: Row(
               children: [
                 Container(
                   width: 52,
                   height: 52,
-
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(14),
                   ),
-
                   child: Icon(
                     icon,
                     color: color,
                     size: 28,
                   ),
                 ),
-
                 const SizedBox(width: 14),
-
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
@@ -248,9 +226,7 @@ class DashboardSelectorScreen extends StatelessWidget {
                           color: Color(0xFF172033),
                         ),
                       ),
-
                       const SizedBox(height: 5),
-
                       Text(
                         subtitle,
                         style: const TextStyle(
@@ -261,7 +237,6 @@ class DashboardSelectorScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 17,
@@ -276,7 +251,6 @@ class DashboardSelectorScreen extends StatelessWidget {
   }
 }
 
-// مراقبة انتقالات الصفحات للتشخيص
 class _MasarNavigationObserver extends NavigatorObserver {
   @override
   void didPush(

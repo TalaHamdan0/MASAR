@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:masar_student_app/core/models/skill_model.dart';
 import 'package:masar_student_app/core/services/profile_analysis.dart';
+import 'package:masar_student_app/core/widgets/app_bottom_nav_bar.dart';
 import 'package:masar_student_app/data/masar_mock_data.dart';
 import 'package:masar_student_app/theme/masar_theme.dart';
 
 import 'roadmap_screen.dart';
 
 class CareerReadinessScreen extends StatelessWidget {
-  // للتوافق مع الاستدعاءات القديمة فقط.
   final int? readinessScore;
   final Map<String, int>? skillScores;
 
@@ -30,22 +29,9 @@ class CareerReadinessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final analysis = _analysis;
-    final selectedCareerPath = analysis.path;
-
-    final skills = analysis.requiredSkills.map((name) {
-      return Skill(
-        id: ProfileAnalysis.normalize(name),
-        name: name,
-        level: analysis.covers(name) ? 100 : 0,
-        status: analysis.covers(name)
-            ? 'مسجّلة'
-            : 'غير موثّقة',
-      );
-    }).toList();
 
     if (!analysis.canAnalyze) {
       return _MobilePage(
-        textDirection: TextDirection.rtl,
         child: Scaffold(
           backgroundColor: MasarColors.background,
           appBar: AppBar(
@@ -55,17 +41,29 @@ class CareerReadinessScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                analysis.unavailableReason!,
+                analysis.unavailableReason ??
+                    'لا تتوفر بيانات كافية لتحليل الملف.',
                 textAlign: TextAlign.center,
               ),
             ),
+          ),
+          bottomNavigationBar: const AppBottomNavBar(
+            selectedIndex: 0,
           ),
         ),
       );
     }
 
+    final path = analysis.path;
+    final skills = analysis.requiredSkills;
+    final documented = skills
+        .where((skill) => analysis.covers(skill))
+        .toList();
+    final undocumented = skills
+        .where((skill) => !analysis.covers(skill))
+        .toList();
+
     return _MobilePage(
-      textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: MasarColors.background,
         appBar: AppBar(
@@ -84,10 +82,11 @@ class CareerReadinessScreen extends StatelessWidget {
           child: Column(
             children: [
               _buildOverallProgress(
-                analysis.coverageScore!,
+                score: analysis.coverageScore!,
+                documentedCount: documented.length,
+                totalCount: skills.length,
               ),
               const SizedBox(height: 24),
-
               Align(
                 alignment: Alignment.centerRight,
                 child: Column(
@@ -103,8 +102,7 @@ class CareerReadinessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'مقارنة ملفك بمتطلبات '
-                      '${selectedCareerPath!.title}',
+                      'مقارنة ملفك بمتطلبات ${path?.title ?? 'المسار المختار'}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: MasarColors.textSecondary,
@@ -113,17 +111,16 @@ class CareerReadinessScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
-
               ...skills.map(
-                (skill) => _buildSkillGapCard(skill),
+                (skill) => _buildSkillCard(
+                  skill,
+                  analysis.covers(skill),
+                ),
               ),
-
               const SizedBox(height: 24),
-              _buildImprovementSummary(skills),
+              _buildSummary(undocumented),
               const SizedBox(height: 20),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -136,9 +133,7 @@ class CareerReadinessScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text(
-                    'عرض خارطة الطريق التجريبية',
-                  ),
+                  label: const Text('عرض خارطة الطريق'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: MasarColors.primaryBlue,
                     foregroundColor: Colors.white,
@@ -151,59 +146,22 @@ class CareerReadinessScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
             ],
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 1,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: MasarColors.primaryBlue,
-          unselectedItemColor: MasarColors.textSecondary,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'الرئيسية',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined),
-              activeIcon: Icon(Icons.map),
-              label: 'خارطة الطريق',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.work_outline),
-              activeIcon: Icon(Icons.work),
-              label: 'الفرص',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.badge_outlined),
-              activeIcon: Icon(Icons.badge),
-              label: 'الملف المهني',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'الملف الشخصي',
-            ),
-          ],
+        bottomNavigationBar: const AppBottomNavBar(
+          selectedIndex: 0,
         ),
       ),
     );
   }
 
-  Widget _buildOverallProgress(int score) {
-    String title;
-
-    if (score >= 80) {
-      title = 'تغطية مرتفعة للملف';
-    } else if (score >= 60) {
-      title = 'تغطية جزئية للملف';
-    } else {
-      title = 'مهارات تحتاج إلى توثيق';
-    }
-
+  Widget _buildOverallProgress({
+    required int score,
+    required int documentedCount,
+    required int totalCount,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -225,7 +183,6 @@ class CareerReadinessScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-
           SizedBox(
             width: 150,
             height: 150,
@@ -236,24 +193,10 @@ class CareerReadinessScreen extends StatelessWidget {
                   width: 150,
                   height: 150,
                   child: CircularProgressIndicator(
-                    value: 1,
-                    strokeWidth: 12,
-                    backgroundColor: MasarColors.background,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(
-                      MasarColors.background,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: CircularProgressIndicator(
                     value: score / 100,
                     strokeWidth: 12,
-                    backgroundColor: Colors.transparent,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(
+                    backgroundColor: MasarColors.background,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
                       MasarColors.primaryBlue,
                     ),
                   ),
@@ -281,27 +224,23 @@ class CareerReadinessScreen extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 18),
-
           Text(
-            title,
+            '$documentedCount من أصل $totalCount مهارات موثّقة',
+            textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 17,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: MasarColors.primaryGreen,
             ),
           ),
-
-          const SizedBox(height: 6),
-
+          const SizedBox(height: 8),
           const Text(
-            'يعتمد المؤشر على المهارات وتقنيات المشاريع المسجّلة، '
-            'وليس قياسًا للإتقان. '
-            'لا تُحتسب الشهادات حتى تُربط بمهارات محددة.',
+            'تعتمد النتيجة على المهارات وتقنيات المشاريع المسجّلة في ملفك، ولا تقيس مستوى إتقانك. لا تُحتسب الشهادات حتى تُربط بمهارات محددة.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
+              height: 1.5,
               color: MasarColors.textSecondary,
             ),
           ),
@@ -310,25 +249,16 @@ class CareerReadinessScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillGapCard(Skill skill) {
-    final covered = _analysis.covers(skill.name);
-
-    // تعبئة شريط التوثيق فقط، وليست نسبة إتقان.
-    final currentLevel = covered ? 100 : 0;
-
-    final status = covered
-        ? 'مسجّلة في الملف'
-        : 'غير موثّقة في الملف';
-
-    final statusColor = covered
+  Widget _buildSkillCard(
+    String skill,
+    bool documented,
+  ) {
+    final color = documented
         ? MasarColors.primaryGreen
         : MasarColors.warning;
 
-    final icon = covered
-        ? Icons.check_circle
-        : Icons.info_outline;
-
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -338,127 +268,37 @@ class CareerReadinessScreen extends StatelessWidget {
           color: MasarColors.border,
         ),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  skill.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: MasarColors.textPrimary,
-                  ),
-                ),
+          Expanded(
+            child: Text(
+              skill,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: MasarColors.textPrimary,
               ),
-              Icon(
-                icon,
-                size: 18,
-                color: statusColor,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                status,
-                style: TextStyle(
-                  color: statusColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+            ),
           ),
-
-          const SizedBox(height: 14),
-
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'حالة التوثيق',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: MasarColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      covered ? 'مسجّلة' : 'غير موثّقة',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: MasarColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ضمن متطلبات المسار',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: MasarColors.textSecondary,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'نعم',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: MasarColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'الفجوة',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: MasarColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      covered
-                          ? 'مغطاة بالملف'
-                          : 'تحتاج توثيقًا',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(width: 8),
+          Icon(
+            documented
+                ? Icons.check_circle
+                : Icons.info_outline,
+            size: 18,
+            color: color,
           ),
-
-          const SizedBox(height: 12),
-
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: currentLevel / 100,
-              minHeight: 7,
-              backgroundColor: MasarColors.background,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                statusColor,
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              documented
+                  ? 'موثّقة في الملف'
+                  : 'غير موثّقة في الملف',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -467,12 +307,8 @@ class CareerReadinessScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImprovementSummary(List<Skill> skills) {
-    final skillsToImprove = skills.where((skill) {
-      return !_analysis.covers(skill.name);
-    }).toList();
-
-    if (skillsToImprove.isEmpty) {
+  Widget _buildSummary(List<String> undocumented) {
+    if (undocumented.isEmpty) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
@@ -489,8 +325,7 @@ class CareerReadinessScreen extends StatelessWidget {
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'جميع متطلبات المسار مسجّلة في ملفك. '
-                'هذا لا يثبت إتقانها.',
+                'جميع مهارات المسار المحددة موثّقة في ملفك. توثيقها لا يثبت إتقانها.',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: MasarColors.textPrimary,
@@ -520,10 +355,17 @@ class CareerReadinessScreen extends StatelessWidget {
               color: MasarColors.textPrimary,
             ),
           ),
-
+          const SizedBox(height: 8),
+          const Text(
+            'يمكنك إضافتها لملفك إذا كنت تعرفها، أو العمل على تعلمها.',
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.5,
+              color: MasarColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: 10),
-
-          ...skillsToImprove.map(
+          ...undocumented.map(
             (skill) => Padding(
               padding: const EdgeInsets.only(bottom: 7),
               child: Row(
@@ -534,11 +376,13 @@ class CareerReadinessScreen extends StatelessWidget {
                     color: MasarColors.primaryBlue,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    skill.name,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: MasarColors.textPrimary,
+                  Expanded(
+                    child: Text(
+                      skill,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: MasarColors.textPrimary,
+                      ),
                     ),
                   ),
                 ],
@@ -551,20 +395,17 @@ class CareerReadinessScreen extends StatelessWidget {
   }
 }
 
-// يقيّد الصفحة كاملة، بما فيها الشريط العلوي والسفلي، بعرض موبايل.
 class _MobilePage extends StatelessWidget {
-  final TextDirection textDirection;
   final Widget child;
 
   const _MobilePage({
-    required this.textDirection,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: textDirection,
+      textDirection: TextDirection.rtl,
       child: ColoredBox(
         color: MasarColors.background,
         child: Center(

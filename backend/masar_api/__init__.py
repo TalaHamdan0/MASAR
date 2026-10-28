@@ -1,6 +1,10 @@
+import logging
+from pathlib import Path
+
 import oracledb
 from flask import Flask, jsonify, request
 
+from .authentication import authentication_bp
 from .database import (
     DatabaseConfigurationError,
     configure_database,
@@ -14,13 +18,42 @@ def create_app():
     app = Flask(__name__)
     app.json.ensure_ascii = False
 
+    log_path = (
+        Path(__file__).resolve().parent.parent
+        / "masar_backend.log"
+    )
+
+    if not any(
+        getattr(handler, "baseFilename", None) == str(log_path)
+        for handler in app.logger.handlers
+    ):
+        file_handler = logging.FileHandler(
+            log_path,
+            encoding="utf-8",
+        )
+
+        file_handler.setFormatter(
+            logging.Formatter(
+                "%(asctime)s %(levelname)s %(message)s"
+            )
+        )
+
+        app.logger.addHandler(file_handler)
+
+    app.logger.setLevel(logging.INFO)
+
     configure_database(app)
+
     app.register_blueprint(registration_bp)
+    app.register_blueprint(authentication_bp)
+
     register_feature_blueprints(app)
 
     allowed_origins = {
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     }
 
     @app.after_request
@@ -41,6 +74,13 @@ def create_app():
         response.vary.add("Origin")
         response.headers["Cache-Control"] = "no-store"
 
+        app.logger.info(
+            "%s %s -> %s",
+            request.method,
+            request.path,
+            response.status_code,
+        )
+
         return response
 
     @app.errorhandler(DatabaseConfigurationError)
@@ -57,14 +97,18 @@ def create_app():
     @app.errorhandler(oracledb.Error)
     def handle_database_error(error):
         details = error.args[0] if error.args else None
+        error_code = getattr(details, "full_code", None)
 
-        error_code = getattr(
-            details,
-            "full_code",
-            "ORACLE_ERROR",
-        )
+        if not error_code:
+            number = getattr(details, "code", None)
 
-        app.logger.error(
+            error_code = (
+                f"ORA-{number:05d}"
+                if isinstance(number, int)
+                else "DATABASE_ERROR"
+            )
+
+        app.logger.exception(
             "Oracle operation failed: %s",
             error_code,
         )
@@ -72,7 +116,10 @@ def create_app():
         return jsonify({
             "error": {
                 "code": "database_unavailable",
-                "message": "تعذر الاتصال بقاعدة البيانات أو تنفيذ الطلب.",
+                "message": (
+                    "تعذر تنفيذ طلب قاعدة البيانات. "
+                    f"رمز الخطأ: {error_code}"
+                ),
             }
         }), 503
 
@@ -81,6 +128,7 @@ def create_app():
         return jsonify({
             "status": "ok",
             "message": "MASAR backend is running",
+            "build": "masar-profile-save-v2",
         })
 
     @app.get("/api/v1/health/database")
@@ -112,6 +160,7 @@ def create_app():
                         university_type
                     FROM universities
                     WHERE is_active = 1
+                      AND university_id = 12
                     ORDER BY university_name
                 """)
 
@@ -127,14 +176,5 @@ def create_app():
                 for row in rows
             ],
         })
-
-    @app.post("/api/v1/auth/login")
-    def login():
-        return jsonify({
-            "error": {
-                "code": "login_not_ready",
-                "message": "خدمة تسجيل الدخول قيد التجهيز.",
-            }
-        }), 503
 
     return app

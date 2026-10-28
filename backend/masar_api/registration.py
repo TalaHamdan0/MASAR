@@ -1,12 +1,15 @@
-import hashlib
 import re
-import secrets
 
 import oracledb
 from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash
 
 from .database import get_connection
+from .repository import (
+    WISE_UNIVERSITY_ID,
+    create_session,
+    read_student,
+)
 
 
 registration_bp = Blueprint("registration", __name__)
@@ -25,14 +28,7 @@ def error_response(code, message, status):
 def register():
     payload = request.get_json(silent=True)
 
-    if not isinstance(payload, dict):
-        return error_response(
-            "invalid_json",
-            "أرسلي بيانات الحساب بصيغة JSON.",
-            400,
-        )
-
-    required_fields = (
+    fields = (
         "name",
         "studentNumber",
         "universityId",
@@ -40,9 +36,9 @@ def register():
         "password",
     )
 
-    if any(
+    if not isinstance(payload, dict) or any(
         not isinstance(payload.get(key), str)
-        for key in required_fields
+        for key in fields
     ):
         return error_response(
             "invalid_fields",
@@ -52,7 +48,7 @@ def register():
 
     name = payload["name"].strip()
     student_number = payload["studentNumber"].strip()
-    university_id_text = payload["universityId"].strip()
+    university_id = payload["universityId"].strip()
     email = payload["email"].strip().lower()
     password = payload["password"]
 
@@ -66,14 +62,14 @@ def register():
     if not re.fullmatch(r"[0-9]{1,40}", student_number):
         return error_response(
             "invalid_student_number",
-            "الرقم الجامعي يجب أن يحتوي أرقامًا فقط وبحد أقصى 40 خانة.",
+            "أدخلي رقمًا جامعيًا صحيحًا من 1 إلى 40 رقمًا.",
             422,
         )
 
-    if not re.fullmatch(r"[1-9][0-9]{0,27}", university_id_text):
+    if university_id != str(WISE_UNIVERSITY_ID):
         return error_response(
             "invalid_university",
-            "اختاري جامعة صالحة.",
+            "التسجيل متاح لجامعة العلوم الإسلامية العالمية فقط.",
             422,
         )
 
@@ -90,40 +86,30 @@ def register():
             422,
         )
 
-    if not 8 <= len(password) <= 10:
+    if not 8 <= len(password) <= 10 or not password.strip():
         return error_response(
             "invalid_password",
             "كلمة المرور يجب أن تكون من 8 إلى 10 خانات.",
             422,
         )
 
-    university_id = int(university_id_text)
     password_hash = generate_password_hash(password)
-
-    access_token = secrets.token_urlsafe(32)
-    token_hash = hashlib.sha256(
-        access_token.encode("utf-8")
-    ).hexdigest()
-
-    expires_in = 8 * 60 * 60
 
     try:
         with get_connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT university_name
+                    SELECT university_id
                     FROM universities
                     WHERE university_id = :university_id
                       AND is_active = 1
-                """, university_id=university_id)
+                """, university_id=WISE_UNIVERSITY_ID)
 
-                university = cursor.fetchone()
-
-                if university is None:
+                if cursor.fetchone() is None:
                     return error_response(
-                        "invalid_university",
-                        "الجامعة غير موجودة أو غير مفعّلة.",
-                        422,
+                        "university_unavailable",
+                        "التسجيل في الجامعة غير متاح حاليًا.",
+                        503,
                     )
 
                 cursor.execute("""
@@ -137,8 +123,8 @@ def register():
                 if role is None:
                     return error_response(
                         "account_setup_missing",
-                        "إعدادات حساب الطالب غير مكتملة في النظام.",
-                        500,
+                        "إعدادات حساب الطالب غير مكتملة.",
+                        503,
                     )
 
                 user_id_out = cursor.var(int)
@@ -148,26 +134,24 @@ def register():
                         full_name,
                         email,
                         password_hash,
-                        account_status,
-                        email_verified
+                        role_id
                     )
                     VALUES (
                         :name,
                         :email,
                         :password_hash,
-                        'ACTIVE',
-                        0
+                        :role_id
                     )
                     RETURNING user_id INTO :user_id_out
                 """,
                     name=name,
                     email=email,
                     password_hash=password_hash,
+                    role_id=int(role[0]),
                     user_id_out=user_id_out,
                 )
 
                 user_id = int(user_id_out.getvalue()[0])
-                student_id_out = cursor.var(int)
 
                 cursor.execute("""
                     INSERT INTO students (
@@ -186,92 +170,27 @@ def register():
                         0,
                         'PENDING'
                     )
-                    RETURNING student_id INTO :student_id_out
                 """,
                     user_id=user_id,
-                    university_id=university_id,
+                    university_id=WISE_UNIVERSITY_ID,
                     student_number=student_number,
-                    student_id_out=student_id_out,
                 )
 
-                student_id = int(student_id_out.getvalue()[0])
-
-                cursor.execute("""
-                    INSERT INTO user_roles (
-                        user_id,
-                        role_id
-                    )
-                    VALUES (
-                        :user_id,
-                        :role_id
-                    )
-                """,
-                    user_id=user_id,
-                    role_id=role[0],
+                student = read_student(cursor, user_id)
+                token, expires_in = create_session(
+                    cursor,
+                    user_id,
                 )
-
-                cursor.execute("""
-                    INSERT INTO user_settings (user_id)
-                    VALUES (:user_id)
-                """, user_id=user_id)
-
-                cursor.execute("""
-                    INSERT INTO student_privacy_settings (
-                        student_id
-                    )
-                    VALUES (:student_id)
-                """, student_id=student_id)
-
-                cursor.execute("""
-                    INSERT INTO auth_sessions (
-                        user_id,
-                        token_hash,
-                        remember_me,
-                        created_at,
-                        expires_at
-                    )
-                    VALUES (
-                        :user_id,
-                        :token_hash,
-                        0,
-                        LOCALTIMESTAMP,
-                        LOCALTIMESTAMP
-                            + NUMTODSINTERVAL(:expires_in, 'SECOND')
-                    )
-                """,
-                    user_id=user_id,
-                    token_hash=token_hash,
-                    expires_in=expires_in,
-                )
-
-                response = jsonify({
-                    "data": {
-                        "accessToken": access_token,
-                        "expiresIn": expires_in,
-                        "student": {
-                            "id": str(student_id),
-                            "name": name,
-                            "email": email,
-                            "studentNumber": student_number,
-                            "universityId": str(university_id),
-                            "university": university[0],
-                            "major": "",
-                            "academicYear": "",
-                            "gpa": "",
-                            "careerPathId": None,
-                            "profileCompleted": False,
-                            "version": 0,
-                            "skills": [],
-                            "softSkills": [],
-                            "certificates": [],
-                            "projects": [],
-                        },
-                    }
-                })
 
             connection.commit()
 
-        return response, 201
+        return jsonify({
+            "data": {
+                "accessToken": token,
+                "expiresIn": expires_in,
+                "student": student,
+            }
+        }), 201
 
     except oracledb.IntegrityError as error:
         details = error.args[0] if error.args else None
@@ -279,7 +198,7 @@ def register():
         if getattr(details, "code", None) == 1:
             return error_response(
                 "account_exists",
-                "البريد الإلكتروني مستخدم، أو الرقم الجامعي مسجّل في الجامعة المختارة.",
+                "البريد الإلكتروني أو الرقم الجامعي مستخدم بالفعل.",
                 409,
             )
 

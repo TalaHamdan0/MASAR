@@ -6,3 +6,6 @@ student_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/students",
 )
+
+
+from . import profile

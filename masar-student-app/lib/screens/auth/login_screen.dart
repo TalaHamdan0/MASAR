@@ -44,9 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text(
             message,
             textDirection: TextDirection.rtl,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-            ),
+            style: const TextStyle(fontFamily: 'Cairo'),
           ),
         ),
       );
@@ -56,32 +54,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final identifier = _identifierController.text.trim();
     final password = _passwordController.text;
 
-    if (identifier.isEmpty) {
-      return 'يرجى إدخال البريد الإلكتروني أو الرقم الجامعي.';
-    }
-
-    if (identifier.contains('@')) {
-      final emailPattern = RegExp(
-        r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-      );
-
-      if (identifier.length > 254 ||
-          !emailPattern.hasMatch(identifier)) {
-        return 'يرجى إدخال بريد إلكتروني صحيح.';
-      }
-    } else {
-      if (identifier.length > 40 ||
-          RegExp(r'\s').hasMatch(identifier)) {
-        return 'يرجى إدخال رقم جامعي صحيح بدون مسافات.';
-      }
+    if (!RegExp(r'^[0-9]{1,40}$').hasMatch(identifier)) {
+      return 'يرجى إدخال رقم جامعي صحيح يحتوي على أرقام فقط.';
     }
 
     if (password.trim().isEmpty) {
       return 'يرجى إدخال كلمة المرور.';
     }
 
-    if (password.characters.length < 8 ||
-        password.characters.length > 10) {
+    if (password.runes.length < 8 ||
+        password.runes.length > 10) {
       return 'كلمة المرور يجب أن تكون من 8 إلى 10 خانات.';
     }
 
@@ -89,9 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_isLoading) {
-      return;
-    }
+    if (_isLoading) return;
 
     final validationMessage = _validateInputs();
 
@@ -118,15 +98,25 @@ class _LoginScreenState extends State<LoginScreen> {
         rememberMe: rememberMe,
       );
 
-      if (!mounted) {
-        return;
+      if (!mounted) return;
+
+      final profile = data['student'];
+
+      if (profile is! Map<String, dynamic> ||
+          profile['profileCompleted'] is! bool) {
+        throw const FormatException(
+          'Profile completion status is missing.',
+        );
       }
+
+      final profileCompleted =
+          profile['profileCompleted'] as bool;
 
       final student = AuthSession.start(data);
 
       MasarMockData.currentStudent = student;
       MasarMockData.student = student;
-      MasarMockData.isFirstLogin = false;
+      MasarMockData.isFirstLogin = !profileCompleted;
 
       MasarMockData.profileMockData.addAll({
         'name': student.name,
@@ -134,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
         'university': student.university,
         'academicYear': student.academicYear,
         'email': student.email,
-        'gpa': student.gpa,
+        'studentNumber': profile['studentNumber'],
         'careerPath': student.careerPathId,
       });
 
@@ -142,28 +132,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushNamedAndRemoveUntil(
         context,
-        '/home',
+        profileCompleted ? '/home' : '/complete-profile',
         (route) => false,
       );
     } on ApiException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       _showMessage(error.message);
     } on FormatException {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       _showMessage(
         'وصلت بيانات طالب غير مكتملة من الباكند.',
       );
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       _showMessage(
         'تعذر إكمال تسجيل الدخول. حاولي مجددًا.',
       );
@@ -177,19 +158,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _startDemoSession() {
-    final identifier =
-        _identifierController.text.trim().toLowerCase();
-
+    final identifier = _identifierController.text.trim();
     final password = _passwordController.text;
 
-    final validIdentifier =
-        identifier == DemoMode.studentEmail ||
-        identifier == DemoMode.studentNumber;
-
-    if (!validIdentifier ||
+    if (identifier != DemoMode.studentNumber ||
         password != DemoMode.studentPassword) {
       throw const ApiException(
-        'استخدمي بريد أو رقم حساب العرض التجريبي وكلمة المرور المحددة.',
+        'استخدمي الرقم الجامعي وكلمة المرور لحساب العرض التجريبي.',
       );
     }
 
@@ -203,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
       academicYear: 'السنة الثالثة',
       email: DemoMode.studentEmail,
       careerPathId: 'data_analyst',
-      gpa: '3.2',
+      gpa: '',
       skills: List.of(MasarMockData.skills),
       softSkills: List.of(MasarMockData.softSkills),
       certificates: List.of(MasarMockData.certificates),
@@ -231,9 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.grey.shade200,
         body: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 430,
-            ),
+            constraints: const BoxConstraints(maxWidth: 430),
             child: Container(
               width: double.infinity,
               color: MasarColors.background,
@@ -326,15 +299,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _identifierController,
                             enabled: !_isLoading,
                             textDirection: TextDirection.ltr,
-                            keyboardType: TextInputType.emailAddress,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(40),
+                            ],
                             textInputAction: TextInputAction.next,
                             autocorrect: false,
                             enableSuggestions: false,
                             decoration: const InputDecoration(
-                              labelText:
-                                  'الرقم الجامعي أو البريد الإلكتروني',
-                              hintText:
-                                  'الرقم الجامعي أو you@gmail.com',
+                              labelText: 'الرقم الجامعي',
+                              hintText: 'أدخل الرقم الجامعي',
                               prefixIcon: Icon(
                                 Icons.person_outline,
                                 color: MasarColors.textSecondary,
@@ -385,9 +360,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(10),
                             ],
-                            onSubmitted: (_) {
-                              _login();
-                            },
+                            onSubmitted: (_) => _login(),
                             decoration: InputDecoration(
                               labelText: 'كلمة المرور',
                               hintText: 'أدخل كلمة المرور',
@@ -427,15 +400,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 borderSide: BorderSide.none,
                               ),
-                              enabledBorder:
-                                  const OutlineInputBorder(
+                              enabledBorder: const OutlineInputBorder(
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(16),
                                 ),
                                 borderSide: BorderSide.none,
                               ),
-                              focusedBorder:
-                                  const OutlineInputBorder(
+                              focusedBorder: const OutlineInputBorder(
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(16),
                                 ),
@@ -458,7 +429,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
+                                            builder: (_) =>
                                                 const ForgotPasswordScreen(),
                                           ),
                                         );
@@ -480,15 +451,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                     'تذكرني',
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
-                                      color:
-                                          MasarColors.textSecondary,
+                                      color: MasarColors.textSecondary,
                                       fontSize: 12,
                                     ),
                                   ),
                                   Checkbox(
                                     value: rememberMe,
-                                    activeColor:
-                                        MasarColors.primaryBlue,
+                                    activeColor: MasarColors.primaryBlue,
                                     checkColor: Colors.white,
                                     side: const BorderSide(
                                       color: MasarColors.border,
@@ -501,8 +470,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ? null
                                         : (value) {
                                             setState(() {
-                                              rememberMe =
-                                                  value ?? false;
+                                              rememberMe = value ?? false;
                                             });
                                           },
                                   ),
@@ -517,21 +485,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _login,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    MasarColors.primaryBlue,
+                                backgroundColor: MasarColors.primaryBlue,
                                 foregroundColor: Colors.white,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(30),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
                               child: _isLoading
                                   ? const SizedBox(
                                       width: 22,
                                       height: 22,
-                                      child:
-                                          CircularProgressIndicator(
+                                      child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: Colors.white,
                                       ),
@@ -545,8 +510,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           style: TextStyle(
                                             fontFamily: 'Cairo',
                                             fontSize: 16,
-                                            fontWeight:
-                                                FontWeight.bold,
+                                            fontWeight: FontWeight.bold,
                                             color: Colors.white,
                                           ),
                                         ),
@@ -562,8 +526,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 8),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
                                 'ليس لديك حساب؟',
@@ -579,7 +542,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
+                                            builder: (_) =>
                                                 const CreateAccountScreen(),
                                           ),
                                         );
@@ -615,10 +578,7 @@ class HeaderClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final Path path = Path();
 
-    path.lineTo(
-      0,
-      size.height - 50,
-    );
+    path.lineTo(0, size.height - 50);
 
     path.quadraticBezierTo(
       size.width / 2,
@@ -627,11 +587,7 @@ class HeaderClipper extends CustomClipper<Path> {
       size.height - 80,
     );
 
-    path.lineTo(
-      size.width,
-      0,
-    );
-
+    path.lineTo(size.width, 0);
     path.close();
 
     return path;

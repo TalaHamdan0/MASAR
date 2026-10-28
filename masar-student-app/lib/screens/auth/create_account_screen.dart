@@ -14,180 +14,29 @@ class CreateAccountScreen extends StatefulWidget {
       _CreateAccountScreenState();
 }
 
-class _CreateAccountScreenState
-    extends State<CreateAccountScreen> {
-  final TextEditingController _nameController =
-      TextEditingController();
+class _CreateAccountScreenState extends State<CreateAccountScreen> {
+  static const String _universityName =
+      'جامعة العلوم الإسلامية العالمية';
 
-  final TextEditingController _universityIdController =
-      TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _emailController =
-      TextEditingController();
-
-  final TextEditingController _passwordController =
-      TextEditingController();
-
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-
-  final GlobalKey<FormState> _formKey =
-      GlobalKey<FormState>();
-
-  String? _selectedUniversityName;
+  final _nameController = TextEditingController();
+  final _studentNumberController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
-  static const TextStyle _fieldStyle = TextStyle(
-    fontFamily: 'Cairo',
-    fontSize: 15,
-    color: MasarColors.textPrimary,
-  );
-
-  static const List<_UniversityOption> _universities = [
-    // الجامعات الحكومية
-    _UniversityOption(
-      name: 'الجامعة الأردنية',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة اليرموك',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة مؤتة',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة العلوم والتكنولوجيا الأردنية',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'الجامعة الهاشمية',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة آل البيت',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة البلقاء التطبيقية',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة الحسين بن طلال',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'جامعة الطفيلة التقنية',
-      category: 'حكومية',
-    ),
-    _UniversityOption(
-      name: 'الجامعة الألمانية الأردنية',
-      category: 'حكومية',
-    ),
-
-    // الجامعات الخاصة
-    _UniversityOption(
-      name: 'جامعة عمان العربية',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة الشرق الأوسط',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة جدارا',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة عمان الأهلية',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة العلوم التطبيقية الخاصة',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة فيلادلفيا',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة الإسراء',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة البترا',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة الزيتونة الأردنية',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة جرش',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة إربد الأهلية',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة الزرقاء',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة الأميرة سمية للتكنولوجيا',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'الجامعة الأمريكية في مادبا',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة عجلون الوطنية',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة العقبة للتكنولوجيا',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة العقبة للعلوم الطبية',
-      category: 'خاصة',
-    ),
-    _UniversityOption(
-      name: 'جامعة ابن سينا للعلوم الطبية',
-      category: 'خاصة',
-    ),
-
-    // جامعات ذات قانون خاص
-    _UniversityOption(
-      name: 'جامعة العلوم الإسلامية العالمية',
-      category: 'ذات قانون خاص',
-    ),
-    _UniversityOption(
-      name: 'جامعة الحسين التقنية',
-      category: 'ذات قانون خاص',
-    ),
-
-    // الجامعات الإقليمية العاملة في الأردن
-    _UniversityOption(
-      name: 'الجامعة العربية المفتوحة - الأردن',
-      category: 'إقليمية',
-    ),
-  ];
-
   @override
   void dispose() {
     _nameController.dispose();
-    _universityIdController.dispose();
+    _studentNumberController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-
     super.dispose();
   }
 
@@ -216,13 +65,6 @@ class _CreateAccountScreenState
       return;
     }
 
-    final universityName = _selectedUniversityName;
-
-    if (universityName == null) {
-      _showMessage('يرجى اختيار الجامعة');
-      return;
-    }
-
     FocusScope.of(context).unfocus();
 
     setState(() {
@@ -231,10 +73,10 @@ class _CreateAccountScreenState
 
     try {
       final data = await ApiService.register(
-        name: _nameController.text,
-        studentNumber: _universityIdController.text,
-        universityName: universityName,
-        email: _emailController.text,
+        name: _nameController.text.trim(),
+        studentNumber: _studentNumberController.text.trim(),
+        universityName: _universityName,
+        email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
@@ -244,7 +86,6 @@ class _CreateAccountScreenState
 
       final student = AuthSession.start(data);
 
-      // بيانات الطالب القادمة من الباكند.
       MasarMockData.currentStudent = student;
       MasarMockData.student = student;
       MasarMockData.isFirstLogin = true;
@@ -255,7 +96,7 @@ class _CreateAccountScreenState
         'university': student.university,
         'academicYear': student.academicYear,
         'email': student.email,
-        'gpa': student.gpa,
+        'studentNumber': _studentNumberController.text.trim(),
         'careerPath': student.careerPathId,
       });
 
@@ -267,27 +108,21 @@ class _CreateAccountScreenState
         '/complete-profile',
       );
     } on ApiException catch (error) {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        _showMessage(error.message);
       }
-
-      _showMessage(error.message);
     } on FormatException {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        _showMessage(
+          'وصلت بيانات طالب غير مكتملة من الباكند.',
+        );
       }
-
-      _showMessage(
-        'وصلت بيانات طالب غير مكتملة من الباكند.',
-      );
     } catch (_) {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        _showMessage(
+          'تعذر إكمال إنشاء الحساب. حاولي لاحقًا.',
+        );
       }
-
-      _showMessage(
-        'تعذر إكمال إنشاء الحساب. حاولي لاحقًا.',
-      );
     } finally {
       if (mounted) {
         setState(() {
@@ -320,10 +155,8 @@ class _CreateAccountScreenState
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // الرجوع
                         Align(
                           alignment: Alignment.topLeft,
                           child: IconButton(
@@ -339,9 +172,7 @@ class _CreateAccountScreenState
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 5),
-
                         const Text(
                           'أنشئ حسابك في MASAR',
                           textAlign: TextAlign.right,
@@ -352,9 +183,7 @@ class _CreateAccountScreenState
                             color: MasarColors.darkBlue,
                           ),
                         ),
-
                         const SizedBox(height: 10),
-
                         const Text(
                           'لنبدأ بإعداد حسابك',
                           textAlign: TextAlign.right,
@@ -365,22 +194,21 @@ class _CreateAccountScreenState
                             color: MasarColors.textSecondary,
                           ),
                         ),
-
                         const SizedBox(height: 32),
-
-                        // الاسم الكامل
                         const _RequiredLabel(
                           text: 'الاسم الكامل',
                         ),
-
                         const SizedBox(height: 8),
-
                         TextFormField(
                           controller: _nameController,
                           enabled: !_isLoading,
                           textDirection: TextDirection.rtl,
                           textInputAction: TextInputAction.next,
-                          style: _fieldStyle,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 15,
+                            color: MasarColors.textPrimary,
+                          ),
                           decoration: const InputDecoration(
                             hintText: 'أدخل اسمك الكامل',
                             prefixIcon: Icon(
@@ -395,30 +223,35 @@ class _CreateAccountScreenState
                               return 'يرجى إدخال الاسم الكامل';
                             }
 
-                            if (name.length > 120) {
-                              return 'الحد الأقصى للاسم 120 حرفًا';
+                            if (name.runes.length < 2 ||
+                                name.runes.length > 200) {
+                              return 'الاسم من حرفين إلى 200 حرف';
                             }
 
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // الرقم الجامعي
                         const _RequiredLabel(
                           text: 'الرقم الجامعي',
                         ),
-
                         const SizedBox(height: 8),
-
                         TextFormField(
-                          controller: _universityIdController,
+                          controller: _studentNumberController,
                           enabled: !_isLoading,
                           keyboardType: TextInputType.number,
                           textDirection: TextDirection.ltr,
+                          textAlign: TextAlign.right,
                           textInputAction: TextInputAction.next,
-                          style: _fieldStyle,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(40),
+                          ],
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 15,
+                            color: MasarColors.textPrimary,
+                          ),
                           decoration: const InputDecoration(
                             hintText: 'أدخل الرقم الجامعي',
                             prefixIcon: Icon(
@@ -433,115 +266,50 @@ class _CreateAccountScreenState
                               return 'يرجى إدخال الرقم الجامعي';
                             }
 
-                            if (number.length > 40 ||
-                                RegExp(r'\s').hasMatch(number)) {
-                              return 'رقم جامعي حتى 40 خانة بدون مسافات';
+                            if (!RegExp(r'^[0-9]{1,40}$')
+                                .hasMatch(number)) {
+                              return 'يرجى إدخال رقم جامعي صحيح';
                             }
 
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // اختيار الجامعة
-                        const _RequiredLabel(
-                          text: 'الجامعة',
+                        const Text(
+                          'الجامعة',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: MasarColors.darkBlue,
+                          ),
                         ),
-
                         const SizedBox(height: 8),
-
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedUniversityName,
-                          isExpanded: true,
-                          menuMaxHeight: 360,
-                          itemHeight: 76,
-                          dropdownColor: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          style: _fieldStyle,
+                        TextFormField(
+                          initialValue: _universityName,
+                          readOnly: true,
+                          enableInteractiveSelection: false,
+                          maxLines: 2,
+                          minLines: 1,
+                          textDirection: TextDirection.rtl,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 14,
+                            color: MasarColors.textPrimary,
+                          ),
                           decoration: const InputDecoration(
-                            hintText: 'اختر جامعتك',
                             prefixIcon: Icon(
                               Icons.account_balance_outlined,
                               color: MasarColors.primaryBlue,
                             ),
-                            errorMaxLines: 2,
                           ),
-                          selectedItemBuilder: (context) {
-                            return _universities.map((university) {
-                              return Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  university.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: 14,
-                                    color: MasarColors.textPrimary,
-                                  ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          items: _universities.map((university) {
-                            return DropdownMenuItem<String>(
-                              value: university.name,
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center,
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    university.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: MasarColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    university.category,
-                                    style: const TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 11,
-                                      color: MasarColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: _isLoading
-                              ? null
-                              : (value) {
-                                  setState(() {
-                                    _selectedUniversityName = value;
-                                  });
-                                },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى اختيار الجامعة';
-                            }
-
-                            return null;
-                          },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // البريد الإلكتروني الشخصي
                         const _RequiredLabel(
                           text: 'البريد الإلكتروني الشخصي',
                         ),
-
                         const SizedBox(height: 8),
-
                         TextFormField(
                           controller: _emailController,
                           enabled: !_isLoading,
@@ -550,7 +318,11 @@ class _CreateAccountScreenState
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
                           enableSuggestions: false,
-                          style: _fieldStyle,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 15,
+                            color: MasarColors.textPrimary,
+                          ),
                           decoration: const InputDecoration(
                             hintText: 'example@gmail.com',
                             prefixIcon: Icon(
@@ -562,7 +334,7 @@ class _CreateAccountScreenState
                             final email = value?.trim() ?? '';
 
                             if (email.isEmpty) {
-                              return 'يرجى إدخال بريدك الإلكتروني الشخصي';
+                              return 'يرجى إدخال البريد الإلكتروني الشخصي';
                             }
 
                             final pattern = RegExp(
@@ -577,16 +349,11 @@ class _CreateAccountScreenState
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // كلمة المرور
                         const _RequiredLabel(
                           text: 'كلمة المرور',
                         ),
-
                         const SizedBox(height: 8),
-
                         TextFormField(
                           controller: _passwordController,
                           enabled: !_isLoading,
@@ -598,7 +365,11 @@ class _CreateAccountScreenState
                           inputFormatters: [
                             LengthLimitingTextInputFormatter(10),
                           ],
-                          style: _fieldStyle,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 15,
+                            color: MasarColors.textPrimary,
+                          ),
                           decoration: InputDecoration(
                             hintText: 'أنشئ كلمة مرور',
                             prefixIcon: const Icon(
@@ -628,24 +399,19 @@ class _CreateAccountScreenState
                               return 'يرجى إدخال كلمة المرور';
                             }
 
-                            if (value.characters.length < 8 ||
-                                value.characters.length > 10) {
+                            if (value.runes.length < 8 ||
+                                value.runes.length > 10) {
                               return 'كلمة المرور من 8 إلى 10 خانات';
                             }
 
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 20),
-
-                        // تأكيد كلمة المرور
                         const _RequiredLabel(
                           text: 'تأكيد كلمة المرور',
                         ),
-
                         const SizedBox(height: 8),
-
                         TextFormField(
                           controller: _confirmPasswordController,
                           enabled: !_isLoading,
@@ -660,7 +426,11 @@ class _CreateAccountScreenState
                           onFieldSubmitted: (_) {
                             _createAccount();
                           },
-                          style: _fieldStyle,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 15,
+                            color: MasarColors.textPrimary,
+                          ),
                           decoration: InputDecoration(
                             hintText: 'أعد إدخال كلمة المرور',
                             prefixIcon: const Icon(
@@ -696,21 +466,16 @@ class _CreateAccountScreenState
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 30),
-
-                        // زر إنشاء الحساب
                         SizedBox(
                           height: 54,
                           child: FilledButton(
                             onPressed:
                                 _isLoading ? null : _createAccount,
                             style: FilledButton.styleFrom(
-                              backgroundColor:
-                                  MasarColors.primaryBlue,
+                              backgroundColor: MasarColors.primaryBlue,
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                             child: _isLoading
@@ -733,13 +498,9 @@ class _CreateAccountScreenState
                                   ),
                           ),
                         ),
-
                         const SizedBox(height: 20),
-
-                        // تسجيل الدخول
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
                               'لديك حساب بالفعل؟',
@@ -767,7 +528,6 @@ class _CreateAccountScreenState
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 20),
                       ],
                     ),
@@ -780,16 +540,6 @@ class _CreateAccountScreenState
       ),
     );
   }
-}
-
-class _UniversityOption {
-  final String name;
-  final String category;
-
-  const _UniversityOption({
-    required this.name,
-    required this.category,
-  });
 }
 
 class _RequiredLabel extends StatelessWidget {

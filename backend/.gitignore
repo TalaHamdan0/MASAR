@@ -4,3 +4,11 @@ __pycache__/
 *.pyc
 instance/
 uploads/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+masar_api.zip

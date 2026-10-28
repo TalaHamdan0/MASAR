@@ -8,66 +8,121 @@ import 'api_service.dart';
 import 'auth_session.dart';
 
 class ProfileService {
-  // جلب الملف الشخصي للطالب المسجّل دخوله.
   static Future<Map<String, dynamic>> getMyProfile() {
-    return _request();
+    return _request(
+      path: '/api/v1/students/me',
+    );
   }
 
-  // حفظ البيانات الأكاديمية والمهارات والشهادات والمشاريع.
+  static Future<Map<String, dynamic>> getProfileOptions() {
+    return _request(
+      path: '/api/v1/students/profile-options',
+    );
+  }
+
   static Future<Map<String, dynamic>> saveMyProfile({
     required Student student,
     required int version,
+    String? programId,
   }) {
+    if (programId == null ||
+        !RegExp(r'^[1-9][0-9]*$').hasMatch(programId)) {
+      throw const ApiException(
+        'يرجى اختيار التخصص من قائمة تخصصات الجامعة.',
+      );
+    }
+
+    if (version < 0) {
+      throw const ApiException(
+        'نسخة الملف غير صالحة. سجّلي الدخول مجددًا.',
+      );
+    }
+
+    final nameEn = student.nameEn.trim();
+
+    if (nameEn.isNotEmpty) {
+      final validCharacters = RegExp(
+        r"^[A-Za-z][A-Za-z .'-]*$",
+      ).hasMatch(nameEn);
+
+      final letterCount = RegExp(
+        r'[A-Za-z]',
+      ).allMatches(nameEn).length;
+
+      if (!validCharacters ||
+          letterCount < 2 ||
+          nameEn.length > 200) {
+        throw const ApiException(
+          'أدخلي الاسم بالإنجليزي بحروف صحيحة، '
+          'وبحد أقصى 200 حرف.',
+        );
+      }
+    }
+
     return _request(
+      path: '/api/v1/students/me/profile',
+      method: 'PUT',
       payload: {
         'version': version,
-        'major': student.major,
-        'academicYear': student.academicYear,
-        'gpa': student.gpa,
+        if (nameEn.isNotEmpty) 'nameEn': nameEn,
+        'programId': programId,
+        'academicYear': student.academicYear.trim(),
         'skills': student.skills.map((skill) {
           return {
             'id': skill.id,
-            'name': skill.name,
             'level': skill.level,
-            'status': skill.status,
           };
         }).toList(),
         'softSkills': student.softSkills.map((skill) {
           return {
             'id': skill.id,
-            'name': skill.name,
             'level': skill.level,
           };
         }).toList(),
         'certificates': student.certificates.map((certificate) {
           return {
-            'id': certificate.id,
-            'title': certificate.title,
-            'issuer': certificate.issuer,
-            'date': certificate.date,
+            'id': _persistedId(certificate.id),
+            'title': certificate.title.trim(),
+            'issuer': certificate.issuer.trim(),
+            'date': certificate.date.trim(),
           };
         }).toList(),
         'projects': student.projects.map((project) {
           return {
-            'id': project.id,
-            'name': project.name,
-            'description': project.description,
-            'technologies': List<String>.of(
-              project.technologies,
-            ),
-            'githubUrl': project.githubUrl,
+            'id': _persistedId(project.id),
+            'name': project.name.trim(),
+            'description': project.description.trim(),
+            'technologies': project.technologies
+                .map((technology) => technology.trim())
+                .where((technology) => technology.isNotEmpty)
+                .toList(),
+            'githubUrl': project.githubUrl?.trim(),
           };
         }).toList(),
       },
     );
   }
 
+  static String? _persistedId(String id) {
+    if (id.startsWith('local_')) {
+      return null;
+    }
+
+    if (RegExp(r'^[1-9][0-9]*$').hasMatch(id)) {
+      return id;
+    }
+
+    return null;
+  }
+
   static Future<Map<String, dynamic>> _request({
+    required String path,
+    String method = 'GET',
     Map<String, dynamic>? payload,
   }) async {
     final token = AuthSession.accessToken;
 
-    if (token == null || token.isEmpty) {
+    if (token == null || token.trim().isEmpty) {
       throw const ApiException(
         'يرجى تسجيل الدخول للوصول إلى الملف الشخصي.',
       );
@@ -80,27 +135,34 @@ class ProfileService {
     };
 
     try {
+      final uri = Uri.parse('${ApiService.baseUrl}$path');
       final http.Response response;
 
-      if (payload == null) {
+      if (method == 'GET') {
         response = await http
             .get(
-              Uri.parse(
-                '${ApiService.baseUrl}/api/v1/students/me',
-              ),
+              uri,
               headers: headers,
             )
             .timeout(const Duration(seconds: 20));
-      } else {
+      } else if (method == 'PUT') {
         response = await http
             .put(
-              Uri.parse(
-                '${ApiService.baseUrl}/api/v1/students/me/profile',
-              ),
+              uri,
               headers: headers,
               body: jsonEncode(payload),
             )
             .timeout(const Duration(seconds: 20));
+      } else {
+        throw const ApiException(
+          'نوع طلب الملف الشخصي غير مدعوم.',
+        );
+      }
+
+      if (AuthSession.accessToken != token) {
+        throw const ApiException(
+          'تغيّرت جلسة الدخول. افتحي الملف من الحساب الحالي.',
+        );
       }
 
       Map<String, dynamic>? decoded;
@@ -114,53 +176,16 @@ class ProfileService {
           decoded = body;
         }
       } on FormatException {
-        // تتم معالجة الاستجابات غير الصالحة حسب حالة الطلب.
+        decoded = null;
       }
 
       if (response.statusCode != 200) {
-        final error = decoded?['error'];
-
-        if (error is Map<String, dynamic> &&
-            error['message'] is String &&
-            (error['message'] as String).trim().isNotEmpty) {
-          throw ApiException(error['message'] as String);
-        }
-
-        switch (response.statusCode) {
-          case 401:
-            throw const ApiException(
-              'الجلسة غير صالحة؛ سجّلي الدخول مجددًا.',
-            );
-
-          case 403:
-            throw const ApiException(
-              'غير مسموح بتعديل هذا الملف.',
-            );
-
-          case 409:
-            throw const ApiException(
-              'تغيّر الملف من جلسة أخرى. احتفظي بتعديلاتك '
-              'وراجعي أحدث نسخة قبل الحفظ.',
-            );
-
-          case 404:
-          case 405:
-          case 503:
-            throw const ApiException(
-              'خدمة الملف الشخصي غير جاهزة في الباكند بعد.',
-            );
-
-          case 400:
-          case 422:
-            throw const ApiException(
-              'راجعي بيانات الملف الشخصي.',
-            );
-
-          default:
-            throw const ApiException(
-              'تعذر إكمال طلب الملف الشخصي حاليًا.',
-            );
-        }
+        throw ApiException(
+          _errorMessage(
+            response.statusCode,
+            decoded,
+          ),
+        );
       }
 
       final data = decoded?['data'];
@@ -181,6 +206,50 @@ class ProfileService {
       throw const ApiException(
         'تعذر الوصول للباكند. لم يصل تأكيد لإتمام العملية.',
       );
+    }
+  }
+
+  static String _errorMessage(
+    int statusCode,
+    Map<String, dynamic>? body,
+  ) {
+    final error = body?['error'];
+
+    if (error is Map<String, dynamic>) {
+      final message = error['message'];
+
+      if (message is String && message.trim().isNotEmpty) {
+        return message;
+      }
+    }
+
+    switch (statusCode) {
+      case 400:
+      case 422:
+        return 'راجعي بيانات الملف الشخصي.';
+
+      case 401:
+        return 'الجلسة غير صالحة؛ سجّلي الدخول مجددًا.';
+
+      case 403:
+        return 'غير مسموح بالوصول إلى هذا الملف.';
+
+      case 404:
+      case 405:
+        return 'خدمة الملف الشخصي غير مجهّزة في الباكند.';
+
+      case 409:
+        return 'تغيّر الملف من جلسة أخرى. احتفظي بتعديلاتك '
+            'وراجعي أحدث نسخة قبل الحفظ.';
+
+      case 413:
+        return 'حجم بيانات الملف يتجاوز الحد المسموح.';
+
+      case 503:
+        return 'خدمة قاعدة البيانات غير متاحة حاليًا.';
+
+      default:
+        return 'تعذر إكمال طلب الملف الشخصي حاليًا.';
     }
   }
 }

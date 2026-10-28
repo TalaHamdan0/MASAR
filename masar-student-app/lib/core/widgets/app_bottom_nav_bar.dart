@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../theme/masar_theme.dart';
 import '../../screens/profile/home_screen.dart';
 import '../../screens/career/roadmap_screen.dart';
@@ -20,27 +21,22 @@ class AppBottomNavBar extends StatelessWidget {
     Widget screen;
 
     switch (index) {
-      // الرئيسية
       case 0:
         screen = const HomeScreen();
         break;
 
-      // خارطة الطريق
       case 1:
         screen = const RoadmapScreen();
         break;
 
-      // التدريب الميداني
       case 2:
         screen = const SelectCompanyScreen();
         break;
 
-      // الملف المهني
       case 3:
         screen = const MyCvScreen();
         break;
 
-      // الملف الشخصي
       case 4:
         screen = const ProfileScreen();
         break;
@@ -59,46 +55,44 @@ class AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: selectedIndex,
-      onDestinationSelected: (index) {
-        _onItemTapped(context, index);
-      },
-      backgroundColor: Colors.white,
-      indicatorColor: MasarColors.lightBlue,
-      elevation: 0,
-
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'الرئيسية',
-        ),
-
-        NavigationDestination(
-          icon: Icon(Icons.map_outlined),
-          selectedIcon: Icon(Icons.map),
-          label: 'خارطة الطريق',
-        ),
-
-        NavigationDestination(
-          icon: Icon(Icons.business_center_outlined),
-          selectedIcon: Icon(Icons.business_center),
-          label: 'التدريب الميداني',
-        ),
-
-        NavigationDestination(
-          icon: Icon(Icons.badge_outlined),
-          selectedIcon: Icon(Icons.badge),
-          label: 'الملف المهني',
-        ),
-
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'الملف الشخصي',
-        ),
-      ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: NavigationBar(
+        selectedIndex: selectedIndex,
+        onDestinationSelected: (index) {
+          _onItemTapped(context, index);
+        },
+        backgroundColor: Colors.white,
+        indicatorColor: MasarColors.lightBlue,
+        elevation: 0,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'الرئيسية',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.map_outlined),
+            selectedIcon: Icon(Icons.map),
+            label: 'خارطة الطريق',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.business_center_outlined),
+            selectedIcon: Icon(Icons.business_center),
+            label: 'التدريب الميداني',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.badge_outlined),
+            selectedIcon: Icon(Icons.badge),
+            label: 'الملف المهني',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'الملف الشخصي',
+          ),
+        ],
+      ),
     );
   }
 }

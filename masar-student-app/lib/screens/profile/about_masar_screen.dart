@@ -19,7 +19,6 @@ class AboutMasarScreen extends StatelessWidget {
         ),
         title: const Text('عن مسار'),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -41,9 +40,7 @@ class AboutMasarScreen extends StatelessWidget {
                       color: MasarColors.primaryBlue,
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   const Text(
                     'MASAR',
                     style: TextStyle(
@@ -54,7 +51,6 @@ class AboutMasarScreen extends StatelessWidget {
                       letterSpacing: 2,
                     ),
                   ),
-
                   const Text(
                     'Your Academic & Career Path',
                     style: TextStyle(
@@ -66,29 +62,28 @@ class AboutMasarScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
-
             const _AboutSection(
               title: 'ما هو مسار؟',
               text:
-                  'مسار هو منصة رقمية تساعد طلبة الجامعة على بناء وتطوير مسارهم الأكاديمي والمهني من خلال ربط مهاراتهم وتخصصهم بمتطلبات سوق العمل وفرص التدريب.',
+                  'مسار هو مشروع تخرج يهدف إلى دعم طلبة جامعة العلوم الإسلامية العالمية في تطوير مسارهم المهني وتنظيم التدريب الميداني، من خلال ربط الطالب والشركات والجامعة في منصة واحدة.',
             ),
-
             const _AboutSection(
               title: 'ماذا يقدم مسار؟',
               text:
-                  'يوفر مسار مجموعة من الخدمات التي تساعد الطالب على تقييم مهاراته، استكشاف المسارات المهنية، تحديد المهارات التي تحتاج إلى تطوير، بناء خطة تطوير شخصية، والوصول إلى فرص التدريب المناسبة.',
+                  'يساعد مسار الطالب على إنشاء ملف مهني وسيرة ذاتية، واختيار مسار مهني في مجال تكنولوجيا المعلومات، ومقارنة المهارات الموثّقة في ملفه بمتطلبات المسار، والاطلاع على خارطة طريق لتطوير مهاراته.',
             ),
-
+            const _AboutSection(
+              title: 'التدريب الميداني',
+              text:
+                  'يتيح مسار للطالب تصفّح فرص التدريب التي تنشرها الشركات والتقديم عليها ومتابعة طلباته. كما يهدف إلى اقتراح فرص مرتبطة بالمسار المهني المختار، ومتابعة ساعات التدريب والتقارير والتقييمات.',
+            ),
             const _AboutSection(
               title: 'هدفنا',
               text:
-                  'مساعدة الطالب على الانتقال من المرحلة الأكاديمية إلى الحياة المهنية بطريقة أوضح وأكثر تنظيمًا.',
+                  'مساعدة الطالب على الربط بين تطوير مهاراته والتدريب الميداني، والاستعداد للانتقال من المرحلة الأكاديمية إلى الحياة المهنية.',
             ),
-
             const SizedBox(height: 25),
-
             const Center(
               child: Text(
                 'الإصدار 1.0.0',
@@ -126,9 +121,7 @@ class _AboutSection extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-
           const SizedBox(height: 8),
-
           Text(
             text,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(

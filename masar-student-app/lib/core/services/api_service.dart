@@ -13,10 +13,7 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:5001',
-  );
+  static const String baseUrl = 'http://127.0.0.1:5003';
 
   static Future<String> checkConnection() async {
     try {
@@ -275,24 +272,43 @@ class ApiService {
         }
       }
     } on ApiException {
-      // نستخدم رسالة مناسبة إذا لم تكن الاستجابة JSON.
+      return _fallbackError(
+        response.statusCode,
+        operation,
+      );
     }
 
-    switch (response.statusCode) {
+    return _fallbackError(
+      response.statusCode,
+      operation,
+    );
+  }
+
+  static String _fallbackError(
+    int statusCode,
+    String operation,
+  ) {
+    switch (statusCode) {
       case 400:
       case 422:
         return 'راجعي البيانات المدخلة.';
+
       case 401:
         return 'بيانات تسجيل الدخول غير صحيحة.';
+
       case 403:
         return 'هذه العملية غير مسموحة لهذا الحساب.';
+
       case 404:
       case 405:
         return 'خدمة $operation لسه غير مجهّزة في الباكند.';
+
       case 409:
         return 'البريد أو الرقم الجامعي مستخدم في هذه الجامعة.';
+
       case 429:
         return 'محاولات كثيرة. انتظري قليلًا وحاولي مجددًا.';
+
       default:
         return 'تعذر إكمال $operation حاليًا.';
     }

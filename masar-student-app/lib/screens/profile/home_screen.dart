@@ -45,8 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _analysisFingerprint == _fingerprint;
   }
 
-  List<String> get _missingSkills => _analysis.missingSkills;
-
   int? get _coverageScore {
     return _hasAnalysis ? _analysis.coverageScore : null;
   }
@@ -107,6 +105,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _openCompanies() {
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SelectCompanyScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final student = MasarMockData.currentStudent;
@@ -160,146 +167,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'ابدأ رحلتك المهنية وطوّر مهاراتك للوصول إلى هدفك.',
+                    'اختر مسارك، وطوّر مهاراتك، واكتشف فرص التدريب المرتبطة بمجالك.',
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium
                         ?.copyWith(
                           color: MasarColors.textSecondary,
+                          height: 1.5,
                         ),
                   ),
                   const SizedBox(height: 26),
-
-                  // اختيار المسار المهني.
-                  Text(
+                  _sectionTitle(
+                    context,
                     'اختر مسارك المهني',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: MasarColors.textPrimary,
-                        ),
                   ),
                   const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: MasarColors.border,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedPath?.id,
-                        hint: const Text('اختر مسارك المهني'),
-                        isExpanded: true,
-                        icon: const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                        ),
-                        items: MasarMockData.careerPaths.map((path) {
-                          return DropdownMenuItem<String>(
-                            value: path.id,
-                            child: Text(
-                              path.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value == null) return;
-
-                          setState(() {
-                            _selectedCareerPathId = value;
-                            _analysisFingerprint = null;
-                          });
-
-                          final currentStudent =
-                              MasarMockData.currentStudent;
-
-                          if (currentStudent != null) {
-                            MasarMockData.currentStudent =
-                                currentStudent.copyWith(
-                              careerPathId: value,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ),
+                  _buildCareerPathSelector(),
                   const SizedBox(height: 10),
                   Text(
                     _selectedPath?.description ??
-                        'اختر المسار الذي ترغب بتطوير مهاراتك فيه.',
+                        'اختر المجال الذي ترغب بالعمل والتطور فيه بعد التخرج.',
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
                         ?.copyWith(
                           color: MasarColors.textSecondary,
+                          height: 1.5,
                         ),
                   ),
                   const SizedBox(height: 24),
-
                   _buildAssessmentCard(context),
                   const SizedBox(height: 22),
-
-                  Text(
-                    'جاهزيتك للمسار',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                  _sectionTitle(
+                    context,
+                    'تغطية مهارات المسار',
                   ),
                   const SizedBox(height: 12),
-                  _buildReadinessCard(context),
+                  _buildReadinessCard(),
                   const SizedBox(height: 26),
-
-                  Text(
-                    'تقدمك في المسار',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildProgressCard(context),
-                  const SizedBox(height: 26),
-
-                  Text(
-                    'خطوتك التالية',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildNextStepCard(context),
-                  const SizedBox(height: 26),
-
-                  Text(
+                  _sectionTitle(
+                    context,
                     'التدريب الميداني',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
                   ),
                   const SizedBox(height: 12),
-                  _buildInternshipCard(context),
+                  _buildInternshipCard(),
                   const SizedBox(height: 20),
                 ],
               ),
@@ -309,6 +220,74 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: const AppBottomNavBar(
         selectedIndex: 0,
+      ),
+    );
+  }
+
+  Widget _sectionTitle(
+    BuildContext context,
+    String title,
+  ) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: MasarColors.textPrimary,
+          ),
+    );
+  }
+
+  Widget _buildCareerPathSelector() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedPath?.id,
+          hint: const Text('اختر مسارك المهني'),
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+          ),
+          items: MasarMockData.careerPaths.map((path) {
+            return DropdownMenuItem<String>(
+              value: path.id,
+              child: Text(
+                path.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value == null) return;
+
+            setState(() {
+              _selectedCareerPathId = value;
+              _analysisFingerprint = null;
+            });
+
+            final currentStudent =
+                MasarMockData.currentStudent;
+
+            if (currentStudent != null) {
+              MasarMockData.currentStudent =
+                  currentStudent.copyWith(
+                careerPathId: value,
+              );
+            }
+          },
+        ),
       ),
     );
   }
@@ -354,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'قارن مهاراتك وتقنيات مشاريعك بمتطلبات المسار المختار.',
+                  'قارن مهاراتك وتقنيات مشاريعك بمتطلبات المسار المختار، وتعرّف على المهارات التي يمكنك تطويرها.',
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
@@ -387,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildReadinessCard(BuildContext context) {
+  Widget _buildReadinessCard() {
     final score = _coverageScore;
 
     return Container(
@@ -419,8 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: (score ?? 0) / 100,
                     strokeWidth: 8,
                     backgroundColor: Colors.white24,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(
+                    valueColor: const AlwaysStoppedAnimation<Color>(
                       Colors.white,
                     ),
                   ),
@@ -461,10 +439,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   score == null
                       ? 'حلّل ملفك لعرض المؤشر.'
-                      : 'مؤشر تغطية وليس قياسًا للإتقان.',
+                      : 'نسبة المهارات الموثّقة، وليست قياسًا للإتقان.',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 12,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -475,180 +454,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProgressCard(BuildContext context) {
-    final score = _coverageScore;
-    final progress = (score ?? 0) / 100;
+  Widget _buildInternshipCard() {
+    final selectedPath = _selectedPath;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  color: MasarColors.lightGreen,
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: const Icon(
-                  Icons.trending_up_rounded,
-                  color: MasarColors.primaryGreen,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'تغطية مهارات المسار',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      score == null
-                          ? 'لم يُحلّل الملف بعد'
-                          : '$score% من المهارات مسجّلة',
-                      style: const TextStyle(
-                        color: MasarColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                score == null ? '—' : '$score%',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: MasarColors.primaryGreen,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 9,
-              backgroundColor: MasarColors.lightGreen,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(
-                MasarColors.primaryGreen,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'تغطية الملف لا تعني إنجاز خارطة الطريق أو إتقان المهارات.',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(
-                  color: MasarColors.textSecondary,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _showProfileAnalysis(context),
-              child: const Text('عرض تفاصيل التحليل'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNextStepCard(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: () => _showProfileAnalysis(context),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: MasarColors.border,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: MasarColors.lightBlue,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(
-                Icons.code_rounded,
-                color: MasarColors.primaryBlue,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    !_hasAnalysis
-                        ? 'حلّل ملفك المهني'
-                        : _missingSkills.isEmpty
-                            ? 'طبّق مهاراتك بمشروع عملي'
-                            : 'طوّر مهارة ${_missingSkills.first}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    !_hasAnalysis
-                        ? 'ابدأ بمقارنة ملفك بمتطلبات المسار.'
-                        : _missingSkills.isEmpty
-                            ? 'توثيق جميع المهارات لا يغني عن الممارسة.'
-                            : 'مهارة غير موثّقة؛ اقتراح حسب ترتيب قائمة المتطلبات.',
-                    style: const TextStyle(
-                      color: MasarColors.textSecondary,
-                      fontSize: 12,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: MasarColors.textSecondary,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInternshipCard(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -663,6 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 48,
@@ -677,24 +486,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'التدريب الميداني',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'ابحث عن شركة للتدريب الميداني وقدّم طلبك.',
+                      selectedPath == null
+                          ? 'اختر مسارك المهني، ثم تصفّح فرص التدريب المتاحة.'
+                          : 'مسارك المختار: ${selectedPath.title}. تصفّح فرص التدريب وابحث عن فرصة مناسبة لمجالك.',
+                      style: const TextStyle(
+                        color: MasarColors.textSecondary,
+                        fontSize: 12,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'اطّلع على تفاصيل كل فرصة وما ستتعلّمه خلالها.',
                       style: TextStyle(
                         color: MasarColors.textSecondary,
                         fontSize: 12,
-                        height: 1.4,
+                        height: 1.5,
                       ),
                     ),
                   ],
@@ -706,14 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SelectCompanyScreen(),
-                  ),
-                );
-              },
+              onPressed: _openCompanies,
               style: ElevatedButton.styleFrom(
                 backgroundColor: MasarColors.primaryGreen,
                 foregroundColor: Colors.white,

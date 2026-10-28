@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/models/student_model.dart';
 import '../../../theme/masar_theme.dart';
-import '../../../core/widgets/app_bottom_nav_bar.dart';
-import 'application_success_screen.dart';
 
 class ApplyTrainingApplicationScreen extends StatefulWidget {
   final Map<String, dynamic> company;
+  final Student? student;
+  final List<String>? requiredDocuments;
 
   const ApplyTrainingApplicationScreen({
     super.key,
     required this.company,
+    this.student,
+    this.requiredDocuments,
   });
 
   @override
@@ -18,33 +22,23 @@ class ApplyTrainingApplicationScreen extends StatefulWidget {
 
 class _ApplyTrainingApplicationScreenState
     extends State<ApplyTrainingApplicationScreen> {
-  String? cvFileName;
-  String? additionalFileName;
+  String _displayValue(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'غير متوفر حاليًا';
+    }
 
-  // ============================================================
-  // بيانات الطالب - لاحقًا تأتي من Student Account / API
-  // ============================================================
+    return value.trim();
+  }
 
-  final String studentName = 'شهد أحمد';
-  final String university = 'جامعة العلوم والتكنولوجيا الأردنية';
-  final String major = 'علوم الحاسوب';
-  final String email = 'shahd@example.com';
-  final String phone = '+962 7 9123 4567';
+  String _companyValue(String key) {
+    final value = widget.company[key];
 
-  // المسار يأتي من فرصة التدريب التي اختارها الطالب
-  final String trainingPath = 'تحليل البيانات';
+    if (value == null || value.toString().trim().isEmpty) {
+      return 'غير متوفر حاليًا';
+    }
 
-  // ============================================================
-  // متطلبات الشركة
-  // لاحقًا هذه القيم تأتي من بيانات فرصة التدريب
-  //
-  // true  = الشركة تطلب المستند
-  // false = الشركة لا تطلبه
-  // ============================================================
-
-  final bool requiresAcademicRecord = true;
-  final bool requiresCV = true;
-  final bool requiresAdditionalDocument = false;
+    return value.toString().trim();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +89,6 @@ class _ApplyTrainingApplicationScreenState
     );
   }
 
-  // ============================================================
-  // Header
-  // ============================================================
-
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
@@ -116,8 +106,9 @@ class _ApplyTrainingApplicationScreenState
       ),
       child: Row(
         children: [
-          GestureDetector(
+          InkWell(
             onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(12),
             child: Container(
               width: 40,
               height: 40,
@@ -125,7 +116,7 @@ class _ApplyTrainingApplicationScreenState
                 color: MasarColors.lightBlue,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_forward_ios,
                 size: 18,
                 color: MasarColors.primaryBlue,
@@ -133,22 +124,20 @@ class _ApplyTrainingApplicationScreenState
             ),
           ),
           const SizedBox(width: 14),
-          Text(
-            'تقديم طلب التدريب',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: MasarColors.primaryBlue,
+          const Expanded(
+            child: Text(
+              'تقديم طلب التدريب',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: MasarColors.primaryBlue,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-  // ============================================================
-  // Steps
-  // ============================================================
 
   Widget _buildSteps() {
     return Row(
@@ -194,13 +183,13 @@ class _ApplyTrainingApplicationScreenState
         Container(
           width: 34,
           height: 34,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: active
                 ? MasarColors.primaryBlue
                 : MasarColors.lightBlue,
           ),
-          alignment: Alignment.center,
           child: Text(
             number,
             style: TextStyle(
@@ -227,17 +216,7 @@ class _ApplyTrainingApplicationScreenState
     );
   }
 
-  // ============================================================
-  // Company Card
-  // ============================================================
-
   Widget _buildCompanyCard() {
-    final String companyName =
-        widget.company['name']?.toString() ?? 'اسم الشركة';
-
-    final String slogan =
-        widget.company['slogan']?.toString() ?? 'فرصة تدريبية';
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -257,7 +236,7 @@ class _ApplyTrainingApplicationScreenState
               color: MasarColors.lightBlue,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.business_rounded,
               color: MasarColors.primaryBlue,
               size: 28,
@@ -269,8 +248,8 @@ class _ApplyTrainingApplicationScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  companyName,
-                  style: TextStyle(
+                  _companyValue('name'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: MasarColors.primaryBlue,
@@ -278,7 +257,7 @@ class _ApplyTrainingApplicationScreenState
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  slogan,
+                  _companyValue('slogan'),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade600,
@@ -292,15 +271,13 @@ class _ApplyTrainingApplicationScreenState
     );
   }
 
-  // ============================================================
-  // Student Information
-  // ============================================================
-
   Widget _buildStudentInformation() {
+    final student = widget.student;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'معلومات الطالب',
           style: TextStyle(
             fontSize: 18,
@@ -310,59 +287,42 @@ class _ApplyTrainingApplicationScreenState
         ),
         const SizedBox(height: 8),
         Text(
-          'سيتم تعبئة معلوماتك تلقائيًا من حسابك.',
+          'تظهر هنا المعلومات المرتبطة بحسابك.',
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey.shade600,
           ),
         ),
         const SizedBox(height: 18),
-
         _buildInfoField(
           label: 'الاسم الكامل',
-          value: studentName,
+          value: _displayValue(student?.name),
           icon: Icons.person_outline,
         ),
-
         const SizedBox(height: 12),
-
         _buildInfoField(
           label: 'الجامعة',
-          value: university,
+          value: _displayValue(student?.university),
           icon: Icons.school_outlined,
         ),
-
         const SizedBox(height: 12),
-
         _buildInfoField(
           label: 'التخصص',
-          value: major,
+          value: _displayValue(student?.major),
           icon: Icons.menu_book_outlined,
         ),
-
         const SizedBox(height: 12),
-
         _buildInfoField(
           label: 'المسار التدريبي',
-          value: trainingPath,
+          value: _companyValue('trainingPath'),
           icon: Icons.route_outlined,
           highlighted: true,
         ),
-
         const SizedBox(height: 12),
-
         _buildInfoField(
           label: 'البريد الإلكتروني',
-          value: email,
+          value: _displayValue(student?.email),
           icon: Icons.email_outlined,
-        ),
-
-        const SizedBox(height: 12),
-
-        _buildInfoField(
-          label: 'رقم الهاتف',
-          value: phone,
-          icon: Icons.phone_outlined,
         ),
       ],
     );
@@ -392,7 +352,7 @@ class _ApplyTrainingApplicationScreenState
         children: [
           Icon(
             icon,
-            size: 20,
+            size: 22,
             color: highlighted
                 ? MasarColors.primaryGreen
                 : MasarColors.primaryBlue,
@@ -412,35 +372,28 @@ class _ApplyTrainingApplicationScreenState
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: MasarColors.primaryBlue,
+                    color: MasarColors.textPrimary,
                   ),
                 ),
               ],
             ),
-          ),
-          Icon(
-            Icons.lock_outline,
-            size: 16,
-            color: Colors.grey.shade400,
           ),
         ],
       ),
     );
   }
 
-  // ============================================================
-  // Application Requirements
-  // ============================================================
-
   Widget _buildApplicationRequirements() {
+    final documents = widget.requiredDocuments;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'متطلبات التقديم',
+        const Text(
+          'المستندات المطلوبة',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -449,57 +402,53 @@ class _ApplyTrainingApplicationScreenState
         ),
         const SizedBox(height: 8),
         Text(
-          'المستندات المطلوبة يتم تحديدها من قبل الشركة.',
+          'تحدد الشركة المستندات المطلوبة لكل فرصة تدريب.',
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey.shade600,
           ),
         ),
         const SizedBox(height: 18),
-
-        if (requiresAcademicRecord)
-          _buildAcademicRecord(),
-
-        if (requiresAcademicRecord && requiresCV)
-          const SizedBox(height: 14),
-
-        if (requiresCV)
-          _buildFileUpload(
-            title: 'السيرة الذاتية (CV)',
-            subtitle: 'يرجى رفع السيرة الذاتية بصيغة PDF',
-            fileName: cvFileName,
+        if (documents == null)
+          _buildDocumentCard(
+            title: 'المستندات المطلوبة',
+            subtitle: 'لم يتم تحميل متطلبات هذه الفرصة بعد.',
             icon: Icons.description_outlined,
-            onTap: _pickCV,
-          ),
-
-        if (requiresCV && requiresAdditionalDocument)
-          const SizedBox(height: 14),
-
-        if (requiresAdditionalDocument)
-          _buildFileUpload(
-            title: 'المستند الإضافي',
-            subtitle: 'يرجى رفع المستند المطلوب بصيغة PDF',
-            fileName: additionalFileName,
-            icon: Icons.attach_file_rounded,
-            onTap: _pickAdditionalDocument,
+          )
+        else if (documents.isEmpty)
+          _buildDocumentCard(
+            title: 'المستندات المطلوبة',
+            subtitle: 'لا توجد مستندات مطلوبة لهذه الفرصة.',
+            icon: Icons.description_outlined,
+          )
+        else
+          ...documents.map(
+            (document) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildDocumentCard(
+                title: document,
+                subtitle: 'سيتم تجهيز المستند عند ربط الخدمة.',
+                icon: Icons.description_outlined,
+              ),
+            ),
           ),
       ],
     );
   }
 
-  // ============================================================
-  // Academic Record
-  // ============================================================
-
-  Widget _buildAcademicRecord() {
+  Widget _buildDocumentCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: MasarColors.lightGreen,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: MasarColors.primaryGreen,
+          color: MasarColors.border,
         ),
       ),
       child: Row(
@@ -509,12 +458,12 @@ class _ApplyTrainingApplicationScreenState
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: MasarColors.lightBlue,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              Icons.school_outlined,
-              color: MasarColors.primaryGreen,
+              icon,
+              color: MasarColors.primaryBlue,
             ),
           ),
           const SizedBox(width: 12),
@@ -523,8 +472,8 @@ class _ApplyTrainingApplicationScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'السجل الأكاديمي',
-                  style: TextStyle(
+                  title,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: MasarColors.primaryBlue,
@@ -532,31 +481,12 @@ class _ApplyTrainingApplicationScreenState
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'يتم إنشاء السجل الأكاديمي تلقائيًا من بياناتك الأكاديمية.',
+                  subtitle,
                   style: TextStyle(
                     fontSize: 11,
                     height: 1.5,
                     color: Colors.grey.shade700,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 17,
-                      color: MasarColors.primaryGreen,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'جاهز للإرفاق',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: MasarColors.primaryGreen,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -566,99 +496,6 @@ class _ApplyTrainingApplicationScreenState
     );
   }
 
-  // ============================================================
-  // File Upload
-  // ============================================================
-
-  Widget _buildFileUpload({
-    required String title,
-    required String subtitle,
-    required String? fileName,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    final bool uploaded = fileName != null;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: uploaded
-                ? MasarColors.primaryGreen
-                : MasarColors.border,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: uploaded
-                    ? MasarColors.lightGreen
-                    : MasarColors.lightBlue,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                uploaded
-                    ? Icons.check_circle_outline
-                    : icon,
-                color: uploaded
-                    ? MasarColors.primaryGreen
-                    : MasarColors.primaryBlue,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: MasarColors.primaryBlue,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    uploaded ? fileName : subtitle,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: uploaded
-                          ? MasarColors.primaryGreen
-                          : Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              uploaded
-                  ? Icons.check_circle
-                  : Icons.upload_file_outlined,
-              color: uploaded
-                  ? MasarColors.primaryGreen
-                  : MasarColors.primaryBlue,
-              size: 22,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // Note
-  // ============================================================
-
   Widget _buildNoteBox() {
     return Container(
       width: double.infinity,
@@ -666,26 +503,23 @@ class _ApplyTrainingApplicationScreenState
       decoration: BoxDecoration(
         color: MasarColors.lightBlue,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: MasarColors.border,
-        ),
       ),
-      child: Row(
+      child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.info_outline,
+            Icons.info_outline_rounded,
             color: MasarColors.primaryBlue,
-            size: 21,
+            size: 20,
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
-              'بعد إرسال الطلب، ستقوم الشركة بمراجعته والتواصل معك عند قبولك في فرصة التدريب.',
+              'راجِع معلوماتك والمستندات المطلوبة قبل إرسال طلب التدريب.',
               style: TextStyle(
                 fontSize: 12,
-                height: 1.6,
-                color: MasarColors.primaryBlue,
+                height: 1.5,
+                color: MasarColors.textPrimary,
               ),
             ),
           ),
@@ -694,19 +528,17 @@ class _ApplyTrainingApplicationScreenState
     );
   }
 
-  // ============================================================
-  // Submit Button
-  // ============================================================
-
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
-      height: 54,
+      height: 52,
       child: ElevatedButton(
-        onPressed: _submitApplication,
+        onPressed: null,
         style: ElevatedButton.styleFrom(
           backgroundColor: MasarColors.primaryBlue,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: Colors.grey.shade300,
+          disabledForegroundColor: Colors.grey.shade700,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -718,66 +550,6 @@ class _ApplyTrainingApplicationScreenState
             fontSize: 15,
             fontWeight: FontWeight.bold,
           ),
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // Pick CV
-  // ============================================================
-
-  void _pickCV() {
-    setState(() {
-      cvFileName = 'CV_Shahd_Ahmed.pdf';
-    });
-  }
-
-  // ============================================================
-  // Pick Additional Document
-  // ============================================================
-
-  void _pickAdditionalDocument() {
-    setState(() {
-      additionalFileName = 'Additional_Document.pdf';
-    });
-  }
-
-  // ============================================================
-  // Submit Application
-  // ============================================================
-
-  void _submitApplication() {
-    if (requiresCV && cvFileName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'يرجى رفع السيرة الذاتية قبل إرسال الطلب.',
-          ),
-          backgroundColor: MasarColors.primaryBlue,
-        ),
-      );
-      return;
-    }
-
-    if (requiresAdditionalDocument &&
-        additionalFileName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'يرجى رفع المستند الإضافي قبل إرسال الطلب.',
-          ),
-          backgroundColor: MasarColors.primaryBlue,
-        ),
-      );
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ApplicationSuccessScreen(
-          company: widget.company,
         ),
       ),
     );

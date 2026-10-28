@@ -1,1131 +1,1075 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-import 'package:masar_student_app/theme/masar_theme.dart';
-import 'package:masar_student_app/data/masar_mock_data.dart';
-import 'package:masar_student_app/core/widgets/app_bottom_nav_bar.dart';
+import '../../core/models/student_model.dart';
+import '../../core/services/auth_session.dart';
+import '../../core/services/profile_service.dart';
+import '../../core/widgets/app_bottom_nav_bar.dart';
+import '../../data/masar_mock_data.dart';
+import '../../theme/masar_theme.dart';
+import '../auth/complete_profile_screen.dart';
 
-class MyCvScreen extends StatelessWidget {
+class MyCvScreen extends StatefulWidget {
   const MyCvScreen({super.key});
 
-  // ============================================================
-  // Save CV as PDF - English Version
-  // ============================================================
+  @override
+  State<MyCvScreen> createState() => _MyCvScreenState();
+}
 
-  Future<void> _saveCvAsPdf(BuildContext context) async {
-    final student = MasarMockData.currentStudent;
+class _MyCvScreenState extends State<MyCvScreen> {
+  Student? _student;
+  bool _loading = true;
+  bool _savingPdf = false;
+  String? _error;
 
-    if (student == null) return;
+  static const Map<String, String> _translations = {
+    'جامعة العلوم الإسلامية العالمية':
+        'The World Islamic Sciences and Education University',
+    'علم الحاسوب': 'Computer Science',
+    'علوم الحاسوب': 'Computer Science',
+    'هندسة البرمجيات': 'Software Engineering',
+    'نظم شبكات الحاسوب': 'Computer Network Systems',
+    'أمن وسرية المعلومات والشبكات':
+        'Information and Network Security',
+    'السنة الأولى': 'First Year',
+    'السنة الثانية': 'Second Year',
+    'السنة الثالثة': 'Third Year',
+    'السنة الرابعة': 'Fourth Year',
+    'تطوير تطبيقات الموبايل': 'Mobile Application Development',
+    'تطوير الواجهات الأمامية': 'Front-End Development',
+    'تطوير الباكند': 'Back-End Development',
+    'تطوير الويب المتكامل': 'Full-Stack Web Development',
+    'تحليل البيانات': 'Data Analysis',
+    'علم البيانات': 'Data Science',
+    'الذكاء الاصطناعي وتعلم الآلة':
+        'Artificial Intelligence and Machine Learning',
+    'الأمن السيبراني': 'Cybersecurity',
+    'الشبكات': 'Networking',
+    'الحوسبة السحابية وDevOps': 'Cloud Computing and DevOps',
+    'ضمان الجودة واختبار البرمجيات':
+        'Quality Assurance and Software Testing',
+    'تصميم UI/UX': 'UI/UX Design',
+    'إدارة قواعد البيانات': 'Database Administration',
+    'الإحصاء': 'Statistics',
+    'التواصل': 'Communication',
+    'العمل الجماعي': 'Teamwork',
+    'حل المشكلات': 'Problem Solving',
+    'التفكير النقدي': 'Critical Thinking',
+    'إدارة الوقت': 'Time Management',
+    'القيادة': 'Leadership',
+    'التكيف': 'Adaptability',
+    'الإبداع': 'Creativity',
+  };
 
-    final careerPath = MasarMockData.selectedCareerPath;
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
 
-    final pdf = pw.Document();
+  Future<void> _loadProfile() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
 
-    pdf.addPage(
-      pw.MultiPage(
-        margin: const pw.EdgeInsets.all(40),
+    try {
+      final data = await ProfileService.getMyProfile();
 
-        build: (context) => [
-          // ======================================================
-          // HEADER
-          // ======================================================
+      if (!mounted) return;
 
-          pw.Center(
-            child: pw.Text(
-              'CURRICULUM VITAE',
-              style: pw.TextStyle(
-                fontSize: 24,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-          ),
+      final student = AuthSession.updateProfile(data);
 
-          pw.SizedBox(height: 8),
+      MasarMockData.currentStudent = student;
+      MasarMockData.student = student;
 
-          pw.Center(
-            child: pw.Text(
-              'MASAR - Student Career Profile',
-              style: const pw.TextStyle(
-                fontSize: 11,
-              ),
-            ),
-          ),
+      setState(() {
+        _student = student;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
 
-          pw.SizedBox(height: 25),
+      setState(() {
+        _loading = false;
+        _error = error.toString();
+      });
+    }
+  }
 
-          // ======================================================
-          // PERSONAL INFORMATION
-          // ======================================================
+  String? _careerPathTitle(Student student) {
+    final id = student.careerPathId;
 
-          _pdfSectionTitle('PERSONAL INFORMATION'),
+    if (id == null || id.trim().isEmpty) {
+      return null;
+    }
 
-          pw.SizedBox(height: 8),
+    for (final path in MasarMockData.careerPaths) {
+      if (path.id == id) {
+        return path.title;
+      }
+    }
 
-          _pdfInfoRow(
-            'Name',
-            _translateStudentName(student.name),
-          ),
+    return null;
+  }
 
-          _pdfInfoRow(
-            'Email',
-            student.email,
-          ),
-
-          pw.SizedBox(height: 18),
-
-          // ======================================================
-          // EDUCATION
-          // ======================================================
-
-          _pdfSectionTitle('EDUCATION'),
-
-          pw.SizedBox(height: 8),
-
-          _pdfInfoRow(
-            'University',
-            _translateUniversity(student.university),
-          ),
-
-          _pdfInfoRow(
-            'Major',
-            _translateMajor(student.major),
-          ),
-
-          _pdfInfoRow(
-            'Academic Year',
-            _translateAcademicYear(student.academicYear),
-          ),
-
-          _pdfInfoRow(
-            'GPA',
-            student.gpa,
-          ),
-
-          pw.SizedBox(height: 18),
-
-          // ======================================================
-          // CAREER PATH
-          // ======================================================
-
-          _pdfSectionTitle('CAREER PATH'),
-
-          pw.SizedBox(height: 8),
-
-          pw.Text(
-            _translateCareerPath(careerPath.title),
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
-          ),
-
-          pw.SizedBox(height: 18),
-
-          // ======================================================
-          // TECHNICAL SKILLS
-          // ======================================================
-
-          _pdfSectionTitle('TECHNICAL SKILLS'),
-
-          pw.SizedBox(height: 8),
-
-          ...student.skills.map(
-            (skill) => pw.Padding(
-              padding: const pw.EdgeInsets.only(
-                bottom: 5,
-              ),
-              child: pw.Text(
-                '• ${skill.name} - ${skill.level}%',
-                style: const pw.TextStyle(
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-
-          pw.SizedBox(height: 18),
-
-          // ======================================================
-          // SOFT SKILLS
-          // ======================================================
-
-          _pdfSectionTitle('SOFT SKILLS'),
-
-          pw.SizedBox(height: 8),
-
-          ...student.softSkills.map(
-            (skill) => pw.Padding(
-              padding: const pw.EdgeInsets.only(
-                bottom: 5,
-              ),
-              child: pw.Text(
-                '• ${_translateSoftSkill(skill.name)} - ${skill.level}%',
-                style: const pw.TextStyle(
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-
-          pw.SizedBox(height: 18),
-
-          // ======================================================
-          // CERTIFICATES
-          // ======================================================
-
-          _pdfSectionTitle('CERTIFICATES'),
-
-          pw.SizedBox(height: 8),
-
-          if (student.certificates.isEmpty)
-            pw.Text(
-              'No certificates added.',
-              style: const pw.TextStyle(
-                fontSize: 11,
-              ),
-            ),
-
-          ...student.certificates.map(
-            (certificate) => pw.Padding(
-              padding: const pw.EdgeInsets.only(
-                bottom: 7,
-              ),
-              child: pw.Column(
-                crossAxisAlignment:
-                    pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    '• ${certificate.title}',
-                    style: pw.TextStyle(
-                      fontSize: 11,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-
-                  pw.SizedBox(height: 2),
-
-                  pw.Text(
-                    '  Issued by: ${certificate.issuer}',
-                    style: const pw.TextStyle(
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          pw.SizedBox(height: 18),
-
-          // ======================================================
-          // PROJECTS
-          // ======================================================
-
-          _pdfSectionTitle('PROJECTS'),
-
-          pw.SizedBox(height: 8),
-
-          if (student.projects.isEmpty)
-            pw.Text(
-              'No projects added.',
-              style: const pw.TextStyle(
-                fontSize: 11,
-              ),
-            ),
-
-          ...student.projects.map(
-            (project) => pw.Padding(
-              padding: const pw.EdgeInsets.only(
-                bottom: 10,
-              ),
-              child: pw.Column(
-                crossAxisAlignment:
-                    pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    '• ${project.name}',
-                    style: pw.TextStyle(
-                      fontSize: 11,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-
-                  pw.SizedBox(height: 3),
-
-                  pw.Text(
-                    project.description,
-                    style: const pw.TextStyle(
-                      fontSize: 10,
-                    ),
-                  ),
-
-                  if (project.technologies.isNotEmpty) ...[
-                    pw.SizedBox(height: 3),
-
-                    pw.Text(
-                      'Technologies: ${project.technologies.join(', ')}',
-                      style: const pw.TextStyle(
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
+  Future<void> _editProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CompleteProfileScreen(),
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (format) async {
-        return pdf.save();
-      },
+    if (mounted) {
+      await _loadProfile();
+    }
+  }
+
+  bool _isEnglishText(String value) {
+    return value.runes.every(
+      (rune) =>
+          rune == 9 ||
+          rune == 10 ||
+          rune == 13 ||
+          (rune >= 32 && rune <= 126),
     );
   }
 
-  // ============================================================
-  // PDF Section Title
-  // ============================================================
+  String _englishValue(String value) {
+    final trimmed = value.trim();
+    return _translations[trimmed] ?? trimmed;
+  }
 
-  pw.Widget _pdfSectionTitle(String title) {
+  Map<String, String> _prepareEnglishFields(Student student) {
+    final values = <String, String>{};
+
+    void add(String key, String label, String original) {
+      final text = _englishValue(original);
+
+      if (!_isEnglishText(text)) {
+        throw FormatException(
+          '$label يحتاج بيانات إنجليزية. '
+          'عدّليه من بيانات الملف قبل التنزيل.',
+        );
+      }
+
+      values[key] = text;
+    }
+
+    final name = student.nameEn.trim();
+
+    if (name.isEmpty) {
+      throw const FormatException(
+        'أضيفي اسمك بالإنجليزي من تعديل بيانات الملف '
+        'واحفظيه مرة واحدة.',
+      );
+    }
+
+    if (!RegExp(r"^[A-Za-z][A-Za-z .'-]*$").hasMatch(name) ||
+        RegExp(r'[A-Za-z]').allMatches(name).length < 2 ||
+        name.length > 200) {
+      throw const FormatException(
+        'صحّحي الاسم الإنجليزي من بيانات الملف.',
+      );
+    }
+
+    values['name'] = name;
+
+    add('email', 'البريد', student.email);
+    add('university', 'الجامعة', student.university);
+    add('major', 'التخصص', student.major);
+    add(
+      'academicYear',
+      'السنة الدراسية',
+      student.academicYear,
+    );
+
+    final careerPath = _careerPathTitle(student);
+
+    if (careerPath != null) {
+      add('careerPath', 'المسار المهني', careerPath);
+    }
+
+    for (var i = 0; i < student.skills.length; i++) {
+      add(
+        'skill_$i',
+        'المهارة ${student.skills[i].name}',
+        student.skills[i].name,
+      );
+    }
+
+    for (var i = 0; i < student.softSkills.length; i++) {
+      add(
+        'softSkill_$i',
+        'المهارة ${student.softSkills[i].name}',
+        student.softSkills[i].name,
+      );
+    }
+
+    for (var i = 0; i < student.certificates.length; i++) {
+      final item = student.certificates[i];
+
+      add(
+        'certificateTitle_$i',
+        'اسم الشهادة ${i + 1}',
+        item.title,
+      );
+
+      add(
+        'certificateIssuer_$i',
+        'جهة الشهادة ${i + 1}',
+        item.issuer,
+      );
+
+      add(
+        'certificateDate_$i',
+        'تاريخ الشهادة ${i + 1}',
+        item.date,
+      );
+    }
+
+    for (var i = 0; i < student.projects.length; i++) {
+      final item = student.projects[i];
+
+      add(
+        'projectName_$i',
+        'اسم المشروع ${i + 1}',
+        item.name,
+      );
+
+      add(
+        'projectDescription_$i',
+        'وصف المشروع ${i + 1}',
+        item.description,
+      );
+
+      add(
+        'github_$i',
+        'رابط المشروع ${i + 1}',
+        item.githubUrl ?? '',
+      );
+
+      for (var j = 0; j < item.technologies.length; j++) {
+        add(
+          'technology_${i}_$j',
+          'تقنيات المشروع ${i + 1}',
+          item.technologies[j],
+        );
+      }
+    }
+
+    return values;
+  }
+
+  String _pdfFilename(String name) {
+    final safeName = name
+        .trim()
+        .replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+
+    return '${safeName}_CV.pdf';
+  }
+
+  pw.Widget _pdfTitle(String title) {
     return pw.Container(
       width: double.infinity,
-      padding: const pw.EdgeInsets.only(
-        bottom: 6,
+      margin: const pw.EdgeInsets.only(
+        top: 18,
+        bottom: 8,
       ),
+      padding: const pw.EdgeInsets.only(bottom: 5),
       decoration: const pw.BoxDecoration(
         border: pw.Border(
           bottom: pw.BorderSide(
-            width: 1,
+            color: PdfColors.blueGrey300,
           ),
         ),
       ),
       child: pw.Text(
         title,
         style: pw.TextStyle(
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: pw.FontWeight.bold,
         ),
       ),
     );
   }
 
-  // ============================================================
-  // PDF Info Row
-  // ============================================================
-
-  pw.Widget _pdfInfoRow(
-    String label,
-    String value,
-  ) {
+  pw.Widget _pdfLine(String label, String value) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.only(
-        bottom: 5,
-      ),
-      child: pw.Row(
-        crossAxisAlignment:
-            pw.CrossAxisAlignment.start,
-        children: [
-          pw.SizedBox(
-            width: 100,
-            child: pw.Text(
-              '$label:',
-              style: pw.TextStyle(
-                fontSize: 11,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-          ),
-          pw.Expanded(
-            child: pw.Text(
-              value,
-              style: const pw.TextStyle(
-                fontSize: 11,
-              ),
-            ),
-          ),
-        ],
+      padding: const pw.EdgeInsets.only(bottom: 6),
+      child: pw.Text(
+        '$label: ${value.isEmpty ? "Not provided" : value}',
+        style: const pw.TextStyle(fontSize: 11),
       ),
     );
   }
 
-  // ============================================================
-  // Add To CV Bottom Sheet
-  // ============================================================
-
-  void _showAddToCvSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              12,
-              20,
-              20,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Text(
-                  'Add to CV',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                _buildAddOption(
-                  context,
-                  Icons.psychology_outlined,
-                  'Skill',
-                ),
-
-                _buildAddOption(
-                  context,
-                  Icons.workspace_premium_outlined,
-                  'Certificate',
-                ),
-
-                _buildAddOption(
-                  context,
-                  Icons.school_outlined,
-                  'Course',
-                ),
-
-                _buildAddOption(
-                  context,
-                  Icons.folder_outlined,
-                  'Project',
-                ),
-
-                _buildAddOption(
-                  context,
-                  Icons.work_outline,
-                  'Experience',
-                ),
-
-                _buildAddOption(
-                  context,
-                  Icons.menu_book_outlined,
-                  'Education',
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ============================================================
-  // Add Option
-  // ============================================================
-
-  Widget _buildAddOption(
-    BuildContext context,
-    IconData icon,
-    String title,
+  void _addPdfParagraph(
+    List<pw.Widget> content,
+    String text,
   ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
+    final words = text.split(RegExp(r'\s+'));
+    var chunk = '';
 
-      leading: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: MasarColors.lightBlue,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(
-          icon,
-          color: MasarColors.primaryBlue,
-        ),
-      ),
+    void appendChunk() {
+      if (chunk.isEmpty) return;
 
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-
-      trailing: const Icon(
-        Icons.arrow_forward_ios,
-        size: 15,
-      ),
-
-      onTap: () async {
-        Navigator.pop(context);
-
-        if (title == 'Certificate' ||
-            title == 'Course' ||
-            title == 'Project' ||
-            title == 'Experience') {
-          await FilePicker.platform.pickFiles(
-            allowMultiple: false,
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '$title added to your CV',
-              ),
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  // ============================================================
-  // Build
-  // ============================================================
-
-  @override
-  Widget build(BuildContext context) {
-    final student = MasarMockData.currentStudent;
-    final careerPath = MasarMockData.selectedCareerPath;
-
-    if (student == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text(
-            'No student data available',
+      content.add(
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 4),
+          child: pw.Text(
+            chunk,
+            style: const pw.TextStyle(fontSize: 10),
           ),
         ),
       );
+
+      chunk = '';
     }
 
+    for (final word in words) {
+      if (chunk.isNotEmpty &&
+          chunk.length + word.length > 350) {
+        appendChunk();
+      }
+
+      chunk = chunk.isEmpty ? word : '$chunk $word';
+    }
+
+    appendChunk();
+  }
+
+  Future<void> _saveCvAsPdf() async {
+    final student = _student;
+
+    if (student == null || _savingPdf || _loading) {
+      return;
+    }
+
+    setState(() {
+      _savingPdf = true;
+    });
+
+    try {
+      final english = _prepareEnglishFields(student);
+
+      final regularFont =
+          await PdfGoogleFonts.notoSansRegular();
+
+      final boldFont =
+          await PdfGoogleFonts.notoSansBold();
+
+      if (!mounted) return;
+
+      final pdf = pw.Document(
+        theme: pw.ThemeData.withFont(
+          base: regularFont,
+          bold: boldFont,
+        ),
+      );
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          maxPages: 100,
+          margin: const pw.EdgeInsets.all(36),
+          textDirection: pw.TextDirection.ltr,
+          build: (_) {
+            final content = <pw.Widget>[
+              pw.Text(
+                english['name']!,
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Text(
+                english['email']!,
+                style: const pw.TextStyle(
+                  fontSize: 11,
+                ),
+              ),
+              _pdfTitle('EDUCATION'),
+              _pdfLine(
+                'University',
+                english['university']!,
+              ),
+              _pdfLine(
+                'Major',
+                english['major']!,
+              ),
+              _pdfLine(
+                'Academic Year',
+                english['academicYear']!,
+              ),
+            ];
+
+            final careerPath = english['careerPath'];
+
+            if (careerPath != null &&
+                careerPath.isNotEmpty) {
+              content.addAll([
+                _pdfTitle('CAREER INTEREST'),
+                pw.Text(careerPath),
+              ]);
+            }
+
+            if (student.skills.isNotEmpty) {
+              content.add(
+                _pdfTitle('TECHNICAL SKILLS'),
+              );
+
+              content.add(
+                pw.Wrap(
+                  spacing: 12,
+                  runSpacing: 6,
+                  children: [
+                    for (
+                      var i = 0;
+                      i < student.skills.length;
+                      i++
+                    )
+                      pw.Text(
+                        english['skill_$i']!,
+                        style: const pw.TextStyle(
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }
+
+            if (student.softSkills.isNotEmpty) {
+              content.add(
+                _pdfTitle('SOFT SKILLS'),
+              );
+
+              content.add(
+                pw.Wrap(
+                  spacing: 12,
+                  runSpacing: 6,
+                  children: [
+                    for (
+                      var i = 0;
+                      i < student.softSkills.length;
+                      i++
+                    )
+                      pw.Text(
+                        english['softSkill_$i']!,
+                        style: const pw.TextStyle(
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }
+
+            if (student.certificates.isNotEmpty) {
+              content.add(
+                _pdfTitle('CERTIFICATES'),
+              );
+
+              for (
+                var i = 0;
+                i < student.certificates.length;
+                i++
+              ) {
+                content.addAll([
+                  pw.Text(
+                    english['certificateTitle_$i']!,
+                    style: pw.TextStyle(
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Text(
+                    english['certificateIssuer_$i']!,
+                    style: const pw.TextStyle(
+                      fontSize: 11,
+                    ),
+                  ),
+                ]);
+
+                final date =
+                    english['certificateDate_$i']!;
+
+                if (date.isNotEmpty) {
+                  content.add(
+                    pw.Text(
+                      date,
+                      style: const pw.TextStyle(
+                        fontSize: 10,
+                      ),
+                    ),
+                  );
+                }
+
+                content.add(
+                  pw.SizedBox(height: 12),
+                );
+              }
+            }
+
+            if (student.projects.isNotEmpty) {
+              content.add(
+                _pdfTitle('PROJECTS'),
+              );
+
+              for (
+                var i = 0;
+                i < student.projects.length;
+                i++
+              ) {
+                final project = student.projects[i];
+
+                content.addAll([
+                  pw.Text(
+                    english['projectName_$i']!,
+                    style: pw.TextStyle(
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 5),
+                ]);
+
+                _addPdfParagraph(
+                  content,
+                  english['projectDescription_$i']!,
+                );
+
+                if (project.technologies.isNotEmpty) {
+                  content.add(
+                    pw.SizedBox(height: 4),
+                  );
+
+                  content.add(
+                    pw.Wrap(
+                      spacing: 10,
+                      runSpacing: 5,
+                      children: [
+                        for (
+                          var j = 0;
+                          j < project.technologies.length;
+                          j++
+                        )
+                          pw.Text(
+                            english['technology_${i}_$j']!,
+                            style: const pw.TextStyle(
+                              fontSize: 10,
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }
+
+                final githubUrl = english['github_$i']!;
+
+                if (githubUrl.isNotEmpty) {
+                  content.addAll([
+                    pw.SizedBox(height: 5),
+                    pw.Text(
+                      githubUrl,
+                      style: const pw.TextStyle(
+                        fontSize: 9,
+                      ),
+                    ),
+                  ]);
+                }
+
+                content.add(
+                  pw.SizedBox(height: 14),
+                );
+              }
+            }
+
+            return content;
+          },
+          footer: (pdfContext) {
+            return pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: pw.Text(
+                '${pdfContext.pageNumber} / '
+                '${pdfContext.pagesCount}',
+                style: const pw.TextStyle(
+                  fontSize: 9,
+                  color: PdfColors.grey600,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      final bytes = await pdf.save();
+
+      if (!mounted) return;
+
+      final result = await Printing.sharePdf(
+        bytes: bytes,
+        filename: _pdfFilename(student.nameEn),
+      );
+
+      if (!mounted) return;
+
+      if (!result) {
+        _showMessage(
+          'لم يتم تأكيد حفظ الملف.',
+        );
+      }
+    } on FormatException catch (error) {
+      if (mounted) {
+        _showMessage(error.message);
+      }
+    } catch (error) {
+      debugPrint('MASAR PDF: $error');
+
+      if (mounted) {
+        _showMessage(
+          'تعذر تجهيز ملف PDF. '
+          'تأكدي من اتصال الإنترنت لتحميل الخط '
+          'ثم حاولي مجددًا.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingPdf = false;
+        });
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MasarColors.background,
-
-      // ========================================================
-      // App Bar
-      // ========================================================
-
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
         centerTitle: true,
-        title: const Text(
-          'My CV',
-          style: TextStyle(
-            fontSize: 19,
-            fontWeight: FontWeight.bold,
+        backgroundColor: Colors.white,
+        title: const Text('الملف المهني'),
+        actions: [
+          IconButton(
+            onPressed: _loading || _savingPdf
+                ? null
+                : _loadProfile,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'تحديث البيانات',
           ),
-        ),
+        ],
       ),
-
-      // ========================================================
-      // Body
-      // ========================================================
-
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 390,
-          ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              18,
-              16,
-              24,
-            ),
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.stretch,
-              children: [
-
-                // ==================================================
-                // CV HEADER
-                // ==================================================
-
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                        BorderRadius.circular(22),
-                    border: Border.all(
-                      color: MasarColors.border,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color:
-                              MasarColors.lightBlue,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.person_outline,
-                          size: 38,
-                          color:
-                              MasarColors.primaryBlue,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      Text(
-                        student.name,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 21,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 5),
-
-                      Text(
-                        careerPath.title,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color:
-                              MasarColors.primaryBlue,
-                          fontWeight:
-                              FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      Text(
-                        student.email,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color:
-                              Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ==================================================
-                // ADD TO CV
-                // ==================================================
-
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      _showAddToCvSheet(context);
-                    },
-                    icon: const Icon(
-                      Icons.add,
-                      size: 20,
-                    ),
-                    label: const Text(
-                      'Add to CV',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight:
-                            FontWeight.w600,
-                      ),
-                    ),
-                    style:
-                        ElevatedButton.styleFrom(
-                      backgroundColor:
-                          MasarColors.primaryBlue,
-                      foregroundColor:
-                          Colors.white,
-                      elevation: 0,
-                      shape:
-                          RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                          15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 22),
-
-                // ==================================================
-                // PERSONAL INFORMATION
-                // ==================================================
-
-                _buildSectionCard(
-                  icon: Icons.person_outline,
-                  title: 'Personal Information',
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                        'Name',
-                        student.name,
-                      ),
-                      _buildInfoRow(
-                        'Email',
-                        student.email,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // ==================================================
-                // EDUCATION
-                // ==================================================
-
-                _buildSectionCard(
-                  icon: Icons.school_outlined,
-                  title: 'Education',
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                        'University',
-                        student.university,
-                      ),
-                      _buildInfoRow(
-                        'Major',
-                        student.major,
-                      ),
-                      _buildInfoRow(
-                        'Academic Year',
-                        student.academicYear,
-                      ),
-                      _buildInfoRow(
-                        'GPA',
-                        student.gpa,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // ==================================================
-                // CAREER PATH
-                // ==================================================
-
-                _buildSectionCard(
-                  icon: Icons.route_outlined,
-                  title: 'Career Path',
-                  child: Text(
-                    careerPath.title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight:
-                          FontWeight.w600,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // ==================================================
-                // TECHNICAL SKILLS
-                // ==================================================
-
-                _buildSectionCard(
-                  icon: Icons.code_outlined,
-                  title: 'Technical Skills',
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: student.skills
-                        .map(
-                          (skill) =>
-                              _buildSkillChip(
-                            skill.name,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // ==================================================
-                // SOFT SKILLS
-                // ==================================================
-
-                _buildSectionCard(
-                  icon:
-                      Icons.psychology_outlined,
-                  title: 'Soft Skills',
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: student.softSkills
-                        .map(
-                          (skill) =>
-                              _buildSkillChip(
-                            skill.name,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // ==================================================
-                // CERTIFICATES
-                // ==================================================
-
-                _buildSectionCard(
-                  icon: Icons
-                      .workspace_premium_outlined,
-                  title: 'Certificates',
-                  child:
-                      student.certificates.isEmpty
-                          ? Text(
-                              'No certificates added yet.',
-                              style: TextStyle(
-                                color: Colors
-                                    .grey.shade600,
-                                fontSize: 14,
-                              ),
-                            )
-                          : Column(
-                              children: student
-                                  .certificates
-                                  .map(
-                                (certificate) {
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets
-                                            .only(
-                                      bottom: 10,
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
-                                      children: [
-                                        Icon(
-                                          Icons
-                                              .workspace_premium_outlined,
-                                          size: 18,
-                                          color:
-                                              MasarColors
-                                                  .primaryBlue,
-                                        ),
-
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-
-                                        Expanded(
-                                          child:
-                                              Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .start,
-                                            children: [
-                                              Text(
-                                                certificate
-                                                    .title,
-                                                style:
-                                                    const TextStyle(
-                                                  fontSize:
-                                                      14,
-                                                  fontWeight:
-                                                      FontWeight
-                                                          .w600,
-                                                ),
-                                              ),
-
-                                              const SizedBox(
-                                                height: 3,
-                                              ),
-
-                                              Text(
-                                                certificate
-                                                    .issuer,
-                                                style:
-                                                    TextStyle(
-                                                  fontSize:
-                                                      12,
-                                                  color: Colors
-                                                      .grey
-                                                      .shade600,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ).toList(),
-                            ),
-                ),
-
-                const SizedBox(height: 14),
-
-                // ==================================================
-                // PROJECTS
-                // ==================================================
-
-                _buildSectionCard(
-                  icon:
-                      Icons.folder_outlined,
-                  title: 'Projects',
-                  child:
-                      student.projects.isEmpty
-                          ? Text(
-                              'No projects added yet.',
-                              style: TextStyle(
-                                color: Colors
-                                    .grey.shade600,
-                                fontSize: 14,
-                              ),
-                            )
-                          : Column(
-                              children: student
-                                  .projects
-                                  .map(
-                                (project) {
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets
-                                            .only(
-                                      bottom: 12,
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
-                                      children: [
-                                        Icon(
-                                          Icons
-                                              .folder_outlined,
-                                          size: 18,
-                                          color:
-                                              MasarColors
-                                                  .primaryBlue,
-                                        ),
-
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-
-                                        Expanded(
-                                          child:
-                                              Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .start,
-                                            children: [
-                                              Text(
-                                                project
-                                                    .name,
-                                                style:
-                                                    const TextStyle(
-                                                  fontSize:
-                                                      14,
-                                                  fontWeight:
-                                                      FontWeight
-                                                          .w600,
-                                                ),
-                                              ),
-
-                                              const SizedBox(
-                                                height: 4,
-                                              ),
-
-                                              Text(
-                                                project
-                                                    .description,
-                                                style:
-                                                    TextStyle(
-                                                  fontSize:
-                                                      12,
-                                                  color: Colors
-                                                      .grey
-                                                      .shade600,
-                                                  height:
-                                                      1.4,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ).toList(),
-                            ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // ==================================================
-                // SAVE AS PDF
-                // ==================================================
-
-                SizedBox(
-                  height: 50,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      _saveCvAsPdf(context);
-                    },
-                    icon: const Icon(
-                      Icons
-                          .picture_as_pdf_outlined,
-                    ),
-                    label: const Text(
-                      'Save as PDF',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight:
-                            FontWeight.w600,
-                      ),
-                    ),
-                    style:
-                        OutlinedButton.styleFrom(
-                      foregroundColor:
-                          MasarColors.primaryBlue,
-                      side: BorderSide(
-                        color:
-                            MasarColors.primaryBlue,
-                      ),
-                      shape:
-                          RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                          15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-              ],
-            ),
-          ),
-        ),
-      ),
-
-      // ==========================================================
-      // Bottom Navigation
-      // ==========================================================
-
-      bottomNavigationBar:
-          const AppBottomNavBar(
+      body: _buildBody(),
+      bottomNavigationBar: const AppBottomNavBar(
         selectedIndex: 3,
       ),
     );
   }
 
-  // ============================================================
-  // Section Card
-  // ============================================================
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
-  Widget _buildSectionCard({
-    required IconData icon,
-    required String title,
-    required Widget child,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(17),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(18),
-        border: Border.all(
-          color: MasarColors.border,
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadProfile,
+                child: const Text('إعادة المحاولة'),
+              ),
+            ],
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          Row(
+      );
+    }
+
+    final student = _student;
+
+    if (student == null) {
+      return const Center(
+        child: Text('لا توجد بيانات لعرضها.'),
+      );
+    }
+
+    final careerPath = _careerPathTitle(student);
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 390,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            18,
+            16,
+            24,
+          ),
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.stretch,
             children: [
               Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color:
-                      MasarColors.lightBlue,
-                  borderRadius:
-                      BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  size: 19,
-                  color:
-                      MasarColors.primaryBlue,
+                padding: const EdgeInsets.all(20),
+                decoration: _decoration(22),
+                child: Column(
+                  children: [
+                    const CircleAvatar(
+                      radius: 36,
+                      backgroundColor:
+                          MasarColors.lightBlue,
+                      child: Icon(
+                        Icons.person_outline,
+                        size: 38,
+                        color: MasarColors.primaryBlue,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      student.nameEn.trim().isNotEmpty
+                          ? student.nameEn
+                          : student.name,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (careerPath != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        careerPath,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: MasarColors.primaryBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Text(
+                      student.email,
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
-
-              const SizedBox(width: 10),
-
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight:
-                      FontWeight.bold,
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed:
+                    _savingPdf ? null : _editProfile,
+                icon: const Icon(
+                  Icons.edit_outlined,
+                ),
+                label: const Text(
+                  'إضافة أو تعديل بيانات الملف',
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(
+                    double.infinity,
+                    50,
+                  ),
+                  backgroundColor:
+                      MasarColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _section(
+                'المعلومات الشخصية',
+                Icons.person_outline,
+                Column(
+                  children: [
+                    _info(
+                      'الاسم',
+                      student.nameEn,
+                    ),
+                    _info(
+                      'البريد',
+                      student.email,
+                    ),
+                  ],
+                ),
+              ),
+              _section(
+                'البيانات الأكاديمية',
+                Icons.school_outlined,
+                Column(
+                  children: [
+                    _info(
+                      'الجامعة',
+                      student.university,
+                    ),
+                    _info(
+                      'التخصص',
+                      student.major,
+                    ),
+                    _info(
+                      'السنة الدراسية',
+                      student.academicYear,
+                    ),
+                  ],
+                ),
+              ),
+              if (careerPath != null)
+                _section(
+                  'المسار المهني',
+                  Icons.route_outlined,
+                  Text(careerPath),
+                ),
+              _section(
+                'المهارات التقنية',
+                Icons.code_outlined,
+                _skills(
+                  student.skills
+                      .map((item) => item.name)
+                      .toList(),
+                ),
+              ),
+              _section(
+                'المهارات الشخصية',
+                Icons.psychology_outlined,
+                _skills(
+                  student.softSkills
+                      .map((item) => item.name)
+                      .toList(),
+                ),
+              ),
+              _section(
+                'الشهادات',
+                Icons.workspace_premium_outlined,
+                student.certificates.isEmpty
+                    ? const Text(
+                        'لم تتم إضافة شهادات.',
+                      )
+                    : Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.stretch,
+                        children: [
+                          for (
+                            final item
+                                in student.certificates
+                          )
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(
+                                bottom: 12,
+                              ),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.title,
+                                    style: const TextStyle(
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(item.issuer),
+                                  if (item.date.isNotEmpty)
+                                    Text(item.date),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+              ),
+              _section(
+                'المشاريع',
+                Icons.folder_outlined,
+                student.projects.isEmpty
+                    ? const Text(
+                        'لم تتم إضافة مشاريع.',
+                      )
+                    : Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.stretch,
+                        children: [
+                          for (
+                            final item in student.projects
+                          )
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(
+                                bottom: 16,
+                              ),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.name,
+                                    style: const TextStyle(
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(item.description),
+                                  if (
+                                    item.technologies
+                                        .isNotEmpty
+                                  ) ...[
+                                    const SizedBox(
+                                      height: 8,
+                                    ),
+                                    _skills(
+                                      item.technologies,
+                                    ),
+                                  ],
+                                  if (
+                                    item.githubUrl != null &&
+                                    item.githubUrl!.isNotEmpty
+                                  ) ...[
+                                    const SizedBox(
+                                      height: 8,
+                                    ),
+                                    SelectableText(
+                                      item.githubUrl!,
+                                      textDirection:
+                                          TextDirection.ltr,
+                                      style:
+                                          const TextStyle(
+                                        color: MasarColors
+                                            .primaryBlue,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+              ),
+              const SizedBox(height: 6),
+              OutlinedButton.icon(
+                onPressed:
+                    _savingPdf ? null : _saveCvAsPdf,
+                icon: _savingPdf
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child:
+                            CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.picture_as_pdf_outlined,
+                      ),
+                label: Text(
+                  _savingPdf
+                      ? 'جارٍ تجهيز الملف...'
+                      : 'تنزيل CV',
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(
+                    double.infinity,
+                    50,
+                  ),
+                  foregroundColor:
+                      MasarColors.primaryBlue,
+                  side: const BorderSide(
+                    color: MasarColors.primaryBlue,
+                  ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
 
+  BoxDecoration _decoration(double radius) {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: MasarColors.border,
+      ),
+    );
+  }
+
+  Widget _section(
+    String title,
+    IconData icon,
+    Widget child,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(17),
+      decoration: _decoration(18),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: MasarColors.primaryBlue,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 14),
-
           child,
         ],
       ),
     );
   }
 
-  // ============================================================
-  // Info Row
-  // ============================================================
-
-  Widget _buildInfoRow(
-    String label,
-    String value,
-  ) {
+  Widget _info(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 10,
-      ),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment:
             CrossAxisAlignment.start,
@@ -1134,21 +1078,17 @@ class MyCvScreen extends StatelessWidget {
             width: 90,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
+                color: MasarColors.textSecondary,
                 fontSize: 13,
-                color:
-                    Colors.grey.shade600,
               ),
             ),
           ),
-
           Expanded(
             child: Text(
-              value,
+              value.isEmpty ? 'غير محدد' : value,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight:
-                    FontWeight.w600,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1157,164 +1097,37 @@ class MyCvScreen extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Skill Chip
-  // ============================================================
+  Widget _skills(List<String> names) {
+    if (names.isEmpty) {
+      return const Text(
+        'لم تتم إضافة مهارات.',
+      );
+    }
 
-  Widget _buildSkillChip(
-    String skill,
-  ) {
-    return Container(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      decoration: BoxDecoration(
-        color: MasarColors.lightBlue,
-        borderRadius:
-            BorderRadius.circular(10),
-      ),
-      child: Text(
-        skill,
-        style: TextStyle(
-          color:
-              MasarColors.primaryBlue,
-          fontSize: 12,
-          fontWeight:
-              FontWeight.w600,
-        ),
-      ),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: names.map((name) {
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: MasarColors.lightBlue,
+            borderRadius:
+                BorderRadius.circular(10),
+          ),
+          child: Text(
+            name,
+            style: const TextStyle(
+              color: MasarColors.primaryBlue,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+      }).toList(),
     );
-  }
-
-  // ============================================================
-  // English Translations For PDF
-  // ============================================================
-
-  String _translateStudentName(String name) {
-    switch (name) {
-      case 'ليان أحمد':
-        return 'Layan Ahmad';
-
-      default:
-        return name;
-    }
-  }
-
-  String _translateUniversity(String university) {
-    switch (university) {
-      case 'جامعة الأردن':
-        return 'The University of Jordan';
-
-      case 'الجامعة الهاشمية':
-        return 'The Hashemite University';
-
-      case 'جامعة اليرموك':
-        return 'Yarmouk University';
-
-      case 'جامعة العلوم والتكنولوجيا الأردنية':
-        return 'Jordan University of Science and Technology';
-
-      case 'جامعة الأميرة سمية للتكنولوجيا':
-        return 'Princess Sumaya University for Technology';
-
-      case 'جامعة مؤتة':
-        return 'Mutah University';
-
-      case 'جامعة البلقاء التطبيقية':
-        return 'Al-Balqa Applied University';
-
-      default:
-        return university;
-    }
-  }
-
-  String _translateMajor(String major) {
-    switch (major) {
-      case 'علم البيانات':
-        return 'Data Science';
-
-      case 'علوم الحاسوب':
-        return 'Computer Science';
-
-      case 'هندسة البرمجيات':
-        return 'Software Engineering';
-
-      case 'نظم المعلومات':
-        return 'Information Systems';
-
-      case 'الذكاء الاصطناعي':
-        return 'Artificial Intelligence';
-
-      case 'هندسة الحاسوب':
-        return 'Computer Engineering';
-
-      case 'الأمن السيبراني':
-        return 'Cybersecurity';
-
-      default:
-        return major;
-    }
-  }
-
-  String _translateAcademicYear(String year) {
-    switch (year) {
-      case 'السنة الأولى':
-        return 'First Year';
-
-      case 'السنة الثانية':
-        return 'Second Year';
-
-      case 'السنة الثالثة':
-        return 'Third Year';
-
-      case 'السنة الرابعة':
-        return 'Fourth Year';
-
-      case 'خريجة':
-        return 'Graduate';
-
-      default:
-        return year;
-    }
-  }
-
-  String _translateCareerPath(String title) {
-    switch (title) {
-      case 'محللة بيانات':
-        return 'Data Analyst';
-
-      case 'عالمة بيانات':
-        return 'Data Scientist';
-
-      case 'مهندسة تعلم آلي':
-        return 'Machine Learning Engineer';
-
-      default:
-        return title;
-    }
-  }
-
-  String _translateSoftSkill(String skill) {
-    switch (skill) {
-      case 'التواصل':
-        return 'Communication';
-
-      case 'العمل الجماعي':
-        return 'Teamwork';
-
-      case 'حل المشكلات':
-        return 'Problem Solving';
-
-      case 'إدارة الوقت':
-        return 'Time Management';
-
-      case 'القيادة':
-        return 'Leadership';
-
-      default:
-        return skill;
-    }
   }
 }
