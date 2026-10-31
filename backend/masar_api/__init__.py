@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 import oracledb
@@ -12,6 +13,9 @@ from .database import (
 )
 from .features import register_feature_blueprints
 from .registration import registration_bp
+
+
+BUILD_ID = "masar-career-live-v1"
 
 
 def create_app():
@@ -73,11 +77,16 @@ def create_app():
 
         response.vary.add("Origin")
         response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Masar-Build"] = BUILD_ID
+        response.headers["X-Masar-Process"] = str(os.getpid())
 
         app.logger.info(
-            "%s %s -> %s",
+            "build=%s pid=%s %s path=%r host=%s -> %s",
+            BUILD_ID,
+            os.getpid(),
             request.method,
             request.path,
+            request.host,
             response.status_code,
         )
 
@@ -125,10 +134,18 @@ def create_app():
 
     @app.get("/api/v1/health")
     def health():
+        career_routes = sorted({
+            rule.rule
+            for rule in app.url_map.iter_rules()
+            if "career" in rule.rule
+        })
+
         return jsonify({
             "status": "ok",
             "message": "MASAR backend is running",
-            "build": "masar-profile-save-v2",
+            "build": BUILD_ID,
+            "processId": os.getpid(),
+            "careerRoutes": career_routes,
         })
 
     @app.get("/api/v1/health/database")
@@ -160,9 +177,9 @@ def create_app():
                         university_type
                     FROM universities
                     WHERE is_active = 1
-                      AND university_id = 12
+                      AND university_id = :university_id
                     ORDER BY university_name
-                """)
+                """, university_id=12)
 
                 rows = cursor.fetchall()
 
@@ -176,5 +193,16 @@ def create_app():
                 for row in rows
             ],
         })
+
+    app.logger.info(
+        "START build=%s pid=%s career_routes=%s",
+        BUILD_ID,
+        os.getpid(),
+        sorted({
+            rule.rule
+            for rule in app.url_map.iter_rules()
+            if "career" in rule.rule
+        }),
+    )
 
     return app

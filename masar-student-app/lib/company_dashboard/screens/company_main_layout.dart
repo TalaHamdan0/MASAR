@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../core/widgets/company_dashboard_sidebar.dart';
@@ -11,7 +10,6 @@ import 'smart_matching_screen.dart';
 import 'interviews_screen.dart';
 import 'trainees_screen.dart';
 import 'evaluations_screen.dart';
-import 'company_reports_screen.dart';
 import 'company_settings_screen.dart';
 
 class CompanyMainLayout extends StatefulWidget {
@@ -33,7 +31,6 @@ class _CompanyMainLayoutState extends State<CompanyMainLayout> {
     const InterviewsScreen(),
     const TraineesScreen(),
     const EvaluationsScreen(),
-    const CompanyReportsScreen(),
     const CompanySettingsScreen(),
   ];
 
@@ -53,18 +50,14 @@ class _CompanyMainLayoutState extends State<CompanyMainLayout> {
         textDirection: TextDirection.rtl,
         child: Row(
           children: [
-            // القائمة الجانبية ثابتة
             CompanyDashboardSidebar(
               selectedIndex: _selectedIndex,
               onItemSelected: _openScreen,
             ),
-
-            // محتوى الشاشة يتغير حسب الزر المختار
             Expanded(
               child: Column(
                 children: [
                   const CompanyDashboardHeader(),
-
                   Expanded(
                     child: IndexedStack(
                       index: _selectedIndex,

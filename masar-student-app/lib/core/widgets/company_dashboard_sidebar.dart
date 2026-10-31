@@ -2,24 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../theme/masar_theme.dart';
 
-// ============================================================
-// الشاشات
-// ============================================================
-
-import '../../company_dashboard/screens/company_home_screen.dart';
 import '../../company_dashboard/screens/internships_screen.dart';
 import '../../company_dashboard/screens/applicants_screen.dart';
 import '../../company_dashboard/screens/smart_matching_screen.dart';
 import '../../company_dashboard/screens/interviews_screen.dart';
 import '../../company_dashboard/screens/trainees_screen.dart';
 import '../../company_dashboard/screens/evaluations_screen.dart';
-import '../../company_dashboard/screens/company_reports_screen.dart';
 import '../../company_dashboard/screens/company_settings_screen.dart';
 import '../../company_dashboard/screens/company_login_screen.dart';
-
-// ============================================================
-// Company Dashboard Sidebar
-// ============================================================
 
 class CompanyDashboardSidebar extends StatelessWidget {
   final int selectedIndex;
@@ -31,17 +21,14 @@ class CompanyDashboardSidebar extends StatelessWidget {
     this.onItemSelected,
   });
 
-  // ============================================================
-  // فتح شاشة بشكل مستقل
-  // ============================================================
-
   void _openScreen(BuildContext context, Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => screen,
+      ),
+    );
   }
-
-  // ============================================================
-  // نافذة تأكيد تسجيل الخروج
-  // ============================================================
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
@@ -56,9 +43,24 @@ class CompanyDashboardSidebar extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(22),
             ),
-            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-            contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 10),
-            actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            titlePadding: const EdgeInsets.fromLTRB(
+              24,
+              24,
+              24,
+              8,
+            ),
+            contentPadding: const EdgeInsets.fromLTRB(
+              24,
+              8,
+              24,
+              10,
+            ),
+            actionsPadding: const EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              20,
+            ),
             title: Row(
               children: [
                 Container(
@@ -110,7 +112,9 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: MasarColors.textPrimary,
-                          side: const BorderSide(color: MasarColors.border),
+                          side: const BorderSide(
+                            color: MasarColors.border,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -136,7 +140,8 @@ class CompanyDashboardSidebar extends StatelessWidget {
 
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                              builder: (context) => const CompanyLoginScreen(),
+                              builder: (context) =>
+                                  const CompanyLoginScreen(),
                             ),
                             (route) => false,
                           );
@@ -169,10 +174,6 @@ class CompanyDashboardSidebar extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Build
-  // ============================================================
-
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -181,22 +182,22 @@ class CompanyDashboardSidebar extends StatelessWidget {
         width: 285,
         decoration: const BoxDecoration(
           color: MasarColors.white,
-          border: Border(left: BorderSide(color: MasarColors.border, width: 1)),
+          border: Border(
+            left: BorderSide(
+              color: MasarColors.border,
+              width: 1,
+            ),
+          ),
         ),
         child: Column(
           children: [
-            // ======================================================
-            // الشعار
-            // ======================================================
-
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 24,
+              ),
               child: Row(
                 children: [
-                  // ==================================================
-                  // شعار MASAR الحقيقي
-                  // ==================================================
-
                   Container(
                     width: 52,
                     height: 52,
@@ -219,9 +220,7 @@ class CompanyDashboardSidebar extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,22 +249,13 @@ class CompanyDashboardSidebar extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 5),
-
-            // ======================================================
-            // القائمة
-            // ======================================================
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Column(
                   children: [
-                    // ------------------------------------------------
-                    // الرئيسية
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 0,
                       icon: Icons.grid_view_rounded,
                       title: 'الرئيسية',
@@ -275,12 +265,7 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // الفرص التدريبية
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 1,
                       icon: Icons.business_center_rounded,
                       title: 'الفرص التدريبية',
@@ -288,16 +273,14 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         if (onItemSelected != null) {
                           onItemSelected!(1);
                         } else {
-                          _openScreen(context, const InternshipsScreen());
+                          _openScreen(
+                            context,
+                            const InternshipsScreen(),
+                          );
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // إدارة المتقدمين
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 2,
                       icon: Icons.groups_rounded,
                       title: 'إدارة المتقدمين',
@@ -305,16 +288,14 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         if (onItemSelected != null) {
                           onItemSelected!(2);
                         } else {
-                          _openScreen(context, const ApplicantsScreen());
+                          _openScreen(
+                            context,
+                            const ApplicantsScreen(),
+                          );
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // المطابقة الذكية
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 3,
                       icon: Icons.auto_awesome_rounded,
                       title: 'المطابقة الذكية',
@@ -322,16 +303,14 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         if (onItemSelected != null) {
                           onItemSelected!(3);
                         } else {
-                          _openScreen(context, const SmartMatchingScreen());
+                          _openScreen(
+                            context,
+                            const SmartMatchingScreen(),
+                          );
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // المقابلات
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 4,
                       icon: Icons.calendar_month_rounded,
                       title: 'المقابلات',
@@ -339,16 +318,14 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         if (onItemSelected != null) {
                           onItemSelected!(4);
                         } else {
-                          _openScreen(context, const InterviewsScreen());
+                          _openScreen(
+                            context,
+                            const InterviewsScreen(),
+                          );
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // المتدربين
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 5,
                       icon: Icons.groups_2_rounded,
                       title: 'المتدربين',
@@ -356,16 +333,14 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         if (onItemSelected != null) {
                           onItemSelected!(5);
                         } else {
-                          _openScreen(context, const TraineesScreen());
+                          _openScreen(
+                            context,
+                            const TraineesScreen(),
+                          );
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // التقييمات
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 6,
                       icon: Icons.rate_review_rounded,
                       title: 'التقييمات',
@@ -373,41 +348,25 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         if (onItemSelected != null) {
                           onItemSelected!(6);
                         } else {
-                          _openScreen(context, const EvaluationsScreen());
+                          _openScreen(
+                            context,
+                            const EvaluationsScreen(),
+                          );
                         }
                       },
                     ),
-
-                    // ------------------------------------------------
-                    // التقارير
-                    // ------------------------------------------------
                     _buildMenuItem(
-                      context: context,
                       index: 7,
-                      icon: Icons.bar_chart_rounded,
-                      title: 'التقارير',
-                      onTap: () {
-                        if (onItemSelected != null) {
-                          onItemSelected!(7);
-                        } else {
-                          _openScreen(context, const CompanyReportsScreen());
-                        }
-                      },
-                    ),
-
-                    // ------------------------------------------------
-                    // إعدادات الشركة
-                    // ------------------------------------------------
-                    _buildMenuItem(
-                      context: context,
-                      index: 8,
                       icon: Icons.settings_rounded,
                       title: 'إعدادات الشركة',
                       onTap: () {
                         if (onItemSelected != null) {
-                          onItemSelected!(8);
+                          onItemSelected!(7);
                         } else {
-                          _openScreen(context, const CompanySettingsScreen());
+                          _openScreen(
+                            context,
+                            const CompanySettingsScreen(),
+                          );
                         }
                       },
                     ),
@@ -415,23 +374,25 @@ class CompanyDashboardSidebar extends StatelessWidget {
                 ),
               ),
             ),
-
-            // ======================================================
-            // اسم الشركة فقط (بدون زر أو رابط)
-            // ======================================================
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+              padding: const EdgeInsets.fromLTRB(
+                14,
+                10,
+                14,
+                10,
+              ),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xfff8fafc),
+                  color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: MasarColors.border),
+                  border: Border.all(
+                    color: MasarColors.border,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    // أيقونة الشركة
                     Container(
                       width: 44,
                       height: 44,
@@ -445,9 +406,7 @@ class CompanyDashboardSidebar extends StatelessWidget {
                         size: 23,
                       ),
                     ),
-
                     const SizedBox(width: 10),
-
                     const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,12 +436,13 @@ class CompanyDashboardSidebar extends StatelessWidget {
                 ),
               ),
             ),
-
-            // ======================================================
-            // تسجيل الخروج
-            // ======================================================
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+              padding: const EdgeInsets.fromLTRB(
+                14,
+                0,
+                14,
+                18,
+              ),
               child: SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -490,7 +450,10 @@ class CompanyDashboardSidebar extends StatelessWidget {
                   onPressed: () {
                     _showLogoutDialog(context);
                   },
-                  icon: const Icon(Icons.logout_rounded, size: 20),
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    size: 20,
+                  ),
                   label: const Text(
                     'تسجيل الخروج',
                     style: TextStyle(
@@ -500,8 +463,8 @@ class CompanyDashboardSidebar extends StatelessWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffe9f9f1),
-                    foregroundColor: const Color(0xff159947),
+                    backgroundColor: const Color(0xFFE9F9F1),
+                    foregroundColor: const Color(0xFF159947),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -516,18 +479,13 @@ class CompanyDashboardSidebar extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // عنصر القائمة
-  // ============================================================
-
   Widget _buildMenuItem({
-    required BuildContext context,
     required int index,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
   }) {
-    final bool isSelected = selectedIndex == index;
+    final isSelected = selectedIndex == index;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
@@ -542,7 +500,9 @@ class CompanyDashboardSidebar extends StatelessWidget {
             height: 50,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: isSelected ? MasarColors.lightBlue : Colors.transparent,
+              color: isSelected
+                  ? MasarColors.lightBlue
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
@@ -554,9 +514,7 @@ class CompanyDashboardSidebar extends StatelessWidget {
                       ? MasarColors.primaryBlue
                       : MasarColors.textSecondary,
                 ),
-
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: Text(
                     title,
@@ -572,7 +530,6 @@ class CompanyDashboardSidebar extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 if (isSelected)
                   Container(
                     width: 6,

@@ -13,7 +13,10 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:5003';
+  static const String baseUrl = String.fromEnvironment(
+  'API_BASE_URL',
+  defaultValue: 'http://127.0.0.1:5010',
+);
 
   static Future<String> checkConnection() async {
     try {
@@ -77,6 +80,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> register({
     required String name,
+    required String nameEn,
     required String studentNumber,
     required String universityName,
     required String email,
@@ -91,7 +95,8 @@ class ApiService {
       expectedStatus: 201,
       operation: 'إنشاء الحساب',
       payload: {
-        'name': name.trim(),
+        'name': name.trim().replaceAll(RegExp(r'\s+'), ' '),
+        'nameEn': nameEn.trim().replaceAll(RegExp(r'\s+'), ' '),
         'studentNumber': studentNumber.trim(),
         'universityId': universityId,
         'email': email.trim().toLowerCase(),
@@ -158,7 +163,8 @@ class ApiService {
 
       if (matchingIds.length != 1) {
         throw const ApiException(
-          'تعذر تحديد الجامعة المعروضة. يلزم مراجعة قائمة الجامعات في الباكند.',
+          'تعذر تحديد الجامعة المعروضة. '
+          'يلزم مراجعة قائمة الجامعات في الباكند.',
         );
       }
 

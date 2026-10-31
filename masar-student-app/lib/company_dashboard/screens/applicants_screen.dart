@@ -194,10 +194,6 @@ class ApplicantsScreen extends StatefulWidget {
 }
 
 class _ApplicantsScreenState extends State<ApplicantsScreen> {
-  // ============================================================
-  // الإعدادات
-  // ============================================================
-
   static const int rowsPerPage = 10;
 
   int currentPage = 1;
@@ -210,25 +206,13 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
 
   final TextEditingController searchController = TextEditingController();
 
-  // ============================================================
-  // البيانات
-  // ============================================================
-
   List<Applicant> get applicants => ApplicantsScreen.sharedApplicants;
-
-  // ============================================================
-  // Lifecycle
-  // ============================================================
 
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
   }
-
-  // ============================================================
-  // تنظيف البحث
-  // ============================================================
 
   String _normalizeText(String value) {
     return value
@@ -242,14 +226,9 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         .replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  // ============================================================
-  // الفلترة والبحث
-  // ============================================================
-
   List<Applicant> get filteredApplicants {
     List<Applicant> result = List<Applicant>.from(applicants);
 
-    // البحث
     final query = _normalizeText(searchQuery);
 
     if (query.isNotEmpty) {
@@ -268,21 +247,18 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       }).toList();
     }
 
-    // الفرصة التدريبية
     if (selectedOpportunity != 'جميع الفرص التدريبية') {
       result = result.where((applicant) {
         return applicant.opportunity == selectedOpportunity;
       }).toList();
     }
 
-    // التخصص
     if (selectedSpecialization != 'جميع التخصصات') {
       result = result.where((applicant) {
         return applicant.specialization == selectedSpecialization;
       }).toList();
     }
 
-    // الحالة
     if (selectedStatus != 'الكل') {
       result = result.where((applicant) {
         return getStatusText(applicant.status) == selectedStatus;
@@ -295,32 +271,23 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
   int get totalPages {
     final total = filteredApplicants.length;
 
-    if (total == 0) {
-      return 1;
-    }
+    if (total == 0) return 1;
 
     return (total / rowsPerPage).ceil();
   }
 
   List<Applicant> get currentApplicants {
     final data = filteredApplicants;
-
     final start = (currentPage - 1) * rowsPerPage;
 
-    if (start >= data.length) {
-      return [];
-    }
+    if (start >= data.length) return [];
 
-    final end = (start + rowsPerPage > data.length)
+    final end = start + rowsPerPage > data.length
         ? data.length
         : start + rowsPerPage;
 
     return data.sublist(start, end);
   }
-
-  // ============================================================
-  // البحث
-  // ============================================================
 
   void _onSearchChanged(String value) {
     setState(() {
@@ -338,23 +305,14 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     });
   }
 
-  // ============================================================
-  // العودة
-  // ============================================================
-
   void _goBack() {
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     }
   }
 
-  // ============================================================
-  // تصدير التقرير
-  // ============================================================
-
   void exportReport() {
     final data = filteredApplicants;
-
     final buffer = StringBuffer();
 
     buffer.writeln(
@@ -373,12 +331,10 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     }
 
     final bytes = utf8.encode('\uFEFF$buffer');
-
     final blob = html.Blob([bytes], 'text/csv;charset=utf-8');
-
     final url = html.Url.createObjectUrlFromBlob(blob);
 
-    final anchor = html.AnchorElement(href: url)
+    html.AnchorElement(href: url)
       ..setAttribute('download', 'تقرير_المتقدمين.csv')
       ..click();
 
@@ -390,10 +346,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
   String _csv(String value) {
     return '"${value.replaceAll('"', '""')}"';
   }
-
-  // ============================================================
-  // Build
-  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -425,10 +377,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     );
   }
 
-  // ============================================================
-  // Header
-  // ============================================================
-
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
@@ -438,12 +386,11 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // زر الرجوع على الجهة اليسرى
           InkWell(
             onTap: _goBack,
             borderRadius: BorderRadius.circular(8),
             child: const Padding(
-              padding: EdgeInsets.all(4.0),
+              padding: EdgeInsets.all(4),
               child: Icon(
                 Icons.chevron_left,
                 size: 30,
@@ -451,14 +398,11 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
               ),
             ),
           ),
-
           const SizedBox(width: 16),
-
-          // العنوان والعنوان الفرعي على الجهة اليسرى
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Text(
                 'إدارة المتقدمين',
                 style: TextStyle(
@@ -469,9 +413,7 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                   height: 1.2,
                 ),
               ),
-
               SizedBox(height: 4),
-
               Text(
                 'متابعة وإدارة جميع طلبات المتقدمين للفرص التدريبية',
                 style: TextStyle(
@@ -488,16 +430,13 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       ),
     );
   }
-  // ============================================================
-  // Statistics
-  // ============================================================
 
   Widget _buildStatistics() {
     return Row(
       children: [
         Expanded(
           child: _statCard(
-            number: '248',
+            number: '${applicants.length}',
             title: 'إجمالي المتقدمين',
             icon: Icons.groups_rounded,
             iconColor: const Color(0xFF0D6EFD),
@@ -507,7 +446,8 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         const SizedBox(width: 14),
         Expanded(
           child: _statCard(
-            number: '98',
+            number:
+                '${applicants.where((a) => a.status == ApplicantStatus.review).length}',
             title: 'قيد المراجعة',
             icon: Icons.access_time_rounded,
             iconColor: const Color(0xFFFFA000),
@@ -517,7 +457,8 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         const SizedBox(width: 14),
         Expanded(
           child: _statCard(
-            number: '45',
+            number:
+                '${applicants.where((a) => a.status == ApplicantStatus.interview).length}',
             title: 'في المقابلة',
             icon: Icons.groups_rounded,
             iconColor: const Color(0xFF0D6EFD),
@@ -527,7 +468,8 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         const SizedBox(width: 14),
         Expanded(
           child: _statCard(
-            number: '30',
+            number:
+                '${applicants.where((a) => a.status == ApplicantStatus.accepted).length}',
             title: 'مقبول',
             icon: Icons.check_circle_rounded,
             iconColor: const Color(0xFF16A765),
@@ -537,7 +479,8 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         const SizedBox(width: 14),
         Expanded(
           child: _statCard(
-            number: '75',
+            number:
+                '${applicants.where((a) => a.status == ApplicantStatus.rejected).length}',
             title: 'مرفوض',
             icon: Icons.cancel_rounded,
             iconColor: const Color(0xFFF04444),
@@ -561,9 +504,7 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: const Color(0xFFE1E8F2),
-        ), // لون الحدود المطابق لكود التقييمات
+        border: Border.all(color: const Color(0xFFE1E8F2)),
       ),
       child: Row(
         children: [
@@ -581,25 +522,23 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // الرقم بالخط والألوان المطابقة لشاشة التقييمات
               Text(
                 number,
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF17243A), // لون النصوص الداكن في التقييمات
+                  color: Color(0xFF17243A),
                 ),
               ),
               const SizedBox(height: 2),
-              // العنوان الفرعي بالخط والألوان المطابقة
               Text(
                 title,
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF596579), // لون النصوص الفرعية في التقييمات
+                  color: Color(0xFF596579),
                 ),
               ),
             ],
@@ -608,9 +547,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       ),
     );
   }
-  // ============================================================
-  // Filters
-  // ============================================================
 
   Widget _buildFilters() {
     return Container(
@@ -746,10 +682,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     );
   }
 
-  // ============================================================
-  // Search
-  // ============================================================
-
   Widget _searchField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -814,10 +746,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       ],
     );
   }
-
-  // ============================================================
-  // Dropdown
-  // ============================================================
 
   Widget _filterDropdown({
     required String label,
@@ -884,10 +812,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     );
   }
 
-  // ============================================================
-  // Table
-  // ============================================================
-
   Widget _buildTable() {
     final data = currentApplicants;
 
@@ -902,7 +826,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         child: Column(
           children: [
             _tableHeader(),
-
             if (data.isEmpty)
               _emptyState()
             else
@@ -920,7 +843,11 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off_rounded, size: 45, color: Color(0xFF9AABC0)),
+            Icon(
+              Icons.search_off_rounded,
+              size: 45,
+              color: Color(0xFF9AABC0),
+            ),
             SizedBox(height: 10),
             Text(
               'لا توجد نتائج مطابقة',
@@ -969,11 +896,12 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       height: 78,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE8EEF6))),
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFE8EEF6)),
+        ),
       ),
       child: Row(
         children: [
-          // الطالب
           Expanded(
             flex: 3,
             child: Row(
@@ -1023,8 +951,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
               ],
             ),
           ),
-
-          // التخصص
           Expanded(
             flex: 2,
             child: Text(
@@ -1037,8 +963,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
               ),
             ),
           ),
-
-          // الفرصة
           Expanded(
             flex: 2,
             child: Row(
@@ -1063,8 +987,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
               ],
             ),
           ),
-
-          // التاريخ
           Expanded(
             flex: 2,
             child: Text(
@@ -1076,8 +998,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
               ),
             ),
           ),
-
-          // الحالة
           Expanded(
             flex: 2,
             child: Align(
@@ -1085,8 +1005,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
               child: _statusBadge(applicant.status),
             ),
           ),
-
-          // الإجراءات
           Expanded(
             flex: 2,
             child: Row(
@@ -1095,25 +1013,13 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                 _actionButton(
                   icon: Icons.more_horiz_rounded,
                   tooltip: 'المزيد',
-                  onPressed: () {
-                    _showMoreOptions(applicant);
-                  },
+                  onPressed: () => _showMoreOptions(applicant),
                 ),
                 const SizedBox(width: 7),
                 _actionButton(
                   icon: Icons.visibility_outlined,
                   tooltip: 'عرض بيانات الطالب',
-                  onPressed: () {
-                    _openApplicantDetails(applicant);
-                  },
-                ),
-                const SizedBox(width: 7),
-                _actionButton(
-                  icon: Icons.edit_outlined,
-                  tooltip: 'تعديل الطالب',
-                  onPressed: () {
-                    _openEditApplicant(applicant);
-                  },
+                  onPressed: () => _openApplicantDetails(applicant),
                 ),
               ],
             ),
@@ -1122,10 +1028,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       ),
     );
   }
-
-  // ============================================================
-  // Action Button
-  // ============================================================
 
   Widget _actionButton({
     required IconData icon,
@@ -1145,15 +1047,15 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
             borderRadius: BorderRadius.circular(9),
             border: Border.all(color: const Color(0xFFD8E5F5)),
           ),
-          child: Icon(icon, color: const Color(0xFF0D6EFD), size: 19),
+          child: Icon(
+            icon,
+            color: const Color(0xFF0D6EFD),
+            size: 19,
+          ),
         ),
       ),
     );
   }
-
-  // ============================================================
-  // Status
-  // ============================================================
 
   Widget _statusBadge(ApplicantStatus status) {
     Color background;
@@ -1168,21 +1070,18 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         icon = Icons.access_time_rounded;
         text = 'قيد المراجعة';
         break;
-
       case ApplicantStatus.interview:
         background = const Color(0xFFE8F1FF);
         foreground = const Color(0xFF0D6EFD);
         icon = Icons.groups_rounded;
         text = 'في المقابلة';
         break;
-
       case ApplicantStatus.accepted:
         background = const Color(0xFFE1F7ED);
         foreground = const Color(0xFF16A765);
         icon = Icons.check_circle_rounded;
         text = 'مقبول';
         break;
-
       case ApplicantStatus.rejected:
         background = const Color(0xFFFFE4E4);
         foreground = const Color(0xFFF04444);
@@ -1216,20 +1115,14 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     );
   }
 
-  // ============================================================
-  // Pagination
-  // ============================================================
-
   Widget _buildPagination() {
     final total = filteredApplicants.length;
-
     final start = total == 0 ? 0 : ((currentPage - 1) * rowsPerPage) + 1;
-
     final end = total == 0
         ? 0
-        : ((currentPage * rowsPerPage) > total
-              ? total
-              : currentPage * rowsPerPage);
+        : currentPage * rowsPerPage > total
+            ? total
+            : currentPage * rowsPerPage;
 
     return Row(
       children: [
@@ -1243,8 +1136,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
           ),
         ),
         const Spacer(),
-
-        // السابق
         _pageButton(
           icon: Icons.chevron_right_rounded,
           enabled: currentPage > 1,
@@ -1256,14 +1147,9 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                 }
               : null,
         ),
-
         const SizedBox(width: 7),
-
         ..._buildPageNumbers(),
-
         const SizedBox(width: 7),
-
-        // التالي
         _pageButton(
           icon: Icons.chevron_left_rounded,
           enabled: currentPage < totalPages,
@@ -1280,32 +1166,30 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
   }
 
   List<Widget> _buildPageNumbers() {
-    final List<int> pages = [];
+    final pages = <int>[];
 
     if (totalPages <= 5) {
-      for (int i = 1; i <= totalPages; i++) {
+      for (var i = 1; i <= totalPages; i++) {
         pages.add(i);
       }
+    } else if (currentPage <= 3) {
+      pages.addAll([1, 2, 3, 4, 5]);
+    } else if (currentPage >= totalPages - 2) {
+      pages.addAll([
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ]);
     } else {
-      if (currentPage <= 3) {
-        pages.addAll([1, 2, 3, 4, 5]);
-      } else if (currentPage >= totalPages - 2) {
-        pages.addAll([
-          totalPages - 4,
-          totalPages - 3,
-          totalPages - 2,
-          totalPages - 1,
-          totalPages,
-        ]);
-      } else {
-        pages.addAll([
-          currentPage - 2,
-          currentPage - 1,
-          currentPage,
-          currentPage + 1,
-          currentPage + 2,
-        ]);
-      }
+      pages.addAll([
+        currentPage - 2,
+        currentPage - 1,
+        currentPage,
+        currentPage + 1,
+        currentPage + 2,
+      ]);
     }
 
     return pages.map((page) {
@@ -1366,45 +1250,96 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         ),
         child: Icon(
           icon,
-          color: enabled ? const Color(0xFF31567F) : const Color(0xFFB5C0CD),
+          color: enabled
+              ? const Color(0xFF31567F)
+              : const Color(0xFFB5C0CD),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Details
-  // ============================================================
-
-  void _openApplicantDetails(Applicant applicant) {
-    Navigator.push(
+  Future<void> _openApplicantDetails(Applicant applicant) async {
+    final decision = await Navigator.push<ApplicantStatus>(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<ApplicantStatus>(
         builder: (_) => ApplicantDetailsScreen(applicant: applicant),
       ),
     );
+
+    if (!mounted || decision == null) return;
+
+    await _confirmDecision(applicant, decision);
   }
 
-  // ============================================================
-  // Edit
-  // ============================================================
+  bool _canDecide(Applicant applicant) {
+    return applicant.status == ApplicantStatus.review ||
+        applicant.status == ApplicantStatus.interview;
+  }
 
-  void _openEditApplicant(Applicant applicant) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditApplicantScreen(applicant: applicant),
+  Future<void> _confirmDecision(
+    Applicant applicant,
+    ApplicantStatus decision,
+  ) async {
+    if (!_canDecide(applicant)) return;
+
+    if (decision != ApplicantStatus.accepted &&
+        decision != ApplicantStatus.rejected) {
+      return;
+    }
+
+    final accepted = decision == ApplicantStatus.accepted;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: Text(accepted ? 'قبول الطلب' : 'رفض الطلب'),
+          content: Text(
+            accepted
+                ? 'هل تريد قبول طلب ${applicant.name} لفرصة ${applicant.opportunity}؟ قبول الطلب لا يعني بدء التدريب؛ يلزم أن يختار الطالب المتابعة.'
+                : 'هل تريد رفض طلب ${applicant.name} لفرصة ${applicant.opportunity}؟',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accepted
+                    ? const Color(0xFF16A765)
+                    : const Color(0xFFF04444),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(accepted ? 'تأكيد القبول' : 'تأكيد الرفض'),
+            ),
+          ],
+        ),
       ),
-    ).then((_) {
-      if (mounted) {
-        setState(() {});
+    );
+
+    if (!mounted || confirmed != true) return;
+
+    if (!applicants.contains(applicant) || !_canDecide(applicant)) {
+      return;
+    }
+
+    setState(() {
+      applicant.status = decision;
+
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
       }
     });
-  }
 
-  // ============================================================
-  // More
-  // ============================================================
+    _showMessage(
+      accepted
+          ? 'تم تحديث الطلب إلى مقبول في الواجهة'
+          : 'تم تحديث الطلب إلى مرفوض في الواجهة',
+    );
+  }
 
   void _showMoreOptions(Applicant applicant) {
     showModalBottomSheet(
@@ -1413,7 +1348,7 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (context) {
+      builder: (sheetContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: SafeArea(
@@ -1441,60 +1376,53 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                     ),
                   ),
                   const SizedBox(height: 18),
-
                   _moreOption(
                     icon: Icons.visibility_outlined,
                     title: 'عرض بيانات الطالب',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                       _openApplicantDetails(applicant);
                     },
                   ),
-
-                  _moreOption(
-                    icon: Icons.edit_outlined,
-                    title: 'تعديل بيانات الطالب',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _openEditApplicant(applicant);
-                    },
-                  ),
-
-                  _moreOption(
-                    icon: Icons.email_outlined,
-                    title: 'إرسال رسالة للطالب',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showMessage(
-                        'سيتم فتح إرسال رسالة إلى ${applicant.name}',
-                      );
-                    },
-                  ),
-
+                  if (_canDecide(applicant)) ...[
+                    _moreOption(
+                      icon: Icons.check_circle_outline,
+                      title: 'قبول الطلب',
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        _confirmDecision(
+                          applicant,
+                          ApplicantStatus.accepted,
+                        );
+                      },
+                    ),
+                    _moreOption(
+                      icon: Icons.cancel_outlined,
+                      title: 'رفض الطلب',
+                      danger: true,
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        _confirmDecision(
+                          applicant,
+                          ApplicantStatus.rejected,
+                        );
+                      },
+                    ),
+                  ],
                   _moreOption(
                     icon: Icons.calendar_month_outlined,
                     title: 'جدولة مقابلة',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                       _showMessage('تم تجهيز جدولة مقابلة للطالب');
                     },
                   ),
-
-                  _moreOption(
-                    icon: Icons.download_outlined,
-                    title: 'تحميل بيانات الطالب',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _downloadApplicant(applicant);
-                    },
-                  ),
-
                   _moreOption(
                     icon: Icons.delete_outline_rounded,
                     title: 'حذف الطلب',
                     danger: true,
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                       _confirmDelete(applicant);
                     },
                   ),
@@ -1521,14 +1449,18 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
         margin: const EdgeInsets.only(bottom: 7),
         decoration: BoxDecoration(
-          color: danger ? const Color(0xFFFFF1F1) : const Color(0xFFF7F9FC),
+          color: danger
+              ? const Color(0xFFFFF1F1)
+              : const Color(0xFFF7F9FC),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: danger ? const Color(0xFFF04444) : const Color(0xFF0D6EFD),
+              color: danger
+                  ? const Color(0xFFF04444)
+                  : const Color(0xFF0D6EFD),
               size: 21,
             ),
             const SizedBox(width: 12),
@@ -1549,40 +1481,6 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     );
   }
 
-  // ============================================================
-  // Download Applicant
-  // ============================================================
-
-  void _downloadApplicant(Applicant applicant) {
-    final content =
-        '''
-الاسم: ${applicant.name}
-البريد الإلكتروني: ${applicant.email}
-التخصص: ${applicant.specialization}
-الفرصة التدريبية: ${applicant.opportunity}
-تاريخ التقديم: ${applicant.date}
-الحالة: ${getStatusText(applicant.status)}
-''';
-
-    final bytes = utf8.encode('\uFEFF$content');
-
-    final blob = html.Blob([bytes], 'text/plain;charset=utf-8');
-
-    final url = html.Url.createObjectUrlFromBlob(blob);
-
-    html.AnchorElement(href: url)
-      ..setAttribute('download', '${applicant.name}_بيانات.txt')
-      ..click();
-
-    html.Url.revokeObjectUrl(url);
-
-    _showMessage('تم تنزيل بيانات الطالب');
-  }
-
-  // ============================================================
-  // Delete
-  // ============================================================
-
   void _confirmDelete(Applicant applicant) {
     showDialog(
       context: context,
@@ -1599,13 +1497,14 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
             ),
             content: Text(
               'هل أنت متأكد من حذف طلب ${applicant.name}؟',
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 13),
+              style: const TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 13,
+              ),
             ),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.pop(dialogContext);
-                },
+                onPressed: () => Navigator.pop(dialogContext),
                 child: const Text(
                   'إلغاء',
                   style: TextStyle(fontFamily: 'Cairo'),
@@ -1616,7 +1515,9 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                   Navigator.pop(dialogContext);
 
                   setState(() {
-                    applicants.removeWhere((item) => item.id == applicant.id);
+                    applicants.removeWhere(
+                      (item) => item.id == applicant.id,
+                    );
 
                     if (currentPage > totalPages) {
                       currentPage = totalPages;
@@ -1629,7 +1530,10 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
                   backgroundColor: const Color(0xFFF04444),
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('حذف', style: TextStyle(fontFamily: 'Cairo')),
+                child: const Text(
+                  'حذف',
+                  style: TextStyle(fontFamily: 'Cairo'),
+                ),
               ),
             ],
           ),
@@ -1638,29 +1542,27 @@ class _ApplicantsScreenState extends State<ApplicantsScreen> {
     );
   }
 
-  // ============================================================
-  // Message
-  // ============================================================
-
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(fontFamily: 'Cairo')),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+        ),
+      );
   }
 }
-
-// ==================================================================
-// شاشة تفاصيل الطالب
-// ==================================================================
 
 class ApplicantDetailsScreen extends StatelessWidget {
   final Applicant applicant;
 
-  const ApplicantDetailsScreen({super.key, required this.applicant});
+  const ApplicantDetailsScreen({
+    super.key,
+    required this.applicant,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1744,6 +1646,37 @@ class ApplicantDetailsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              if (applicant.status == ApplicantStatus.review ||
+                  applicant.status == ApplicantStatus.interview) ...[
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context, ApplicantStatus.accepted);
+                      },
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('قبول الطلب'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF16A765),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context, ApplicantStatus.rejected);
+                      },
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('رفض الطلب'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFF04444),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -1752,14 +1685,6 @@ class ApplicantDetailsScreen extends StatelessWidget {
                       icon: Icons.school_outlined,
                       title: 'المؤهل العلمي',
                       value: 'بكالوريوس',
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: _infoCard(
-                      icon: Icons.work_outline_rounded,
-                      title: 'الخبرة',
-                      value: 'سنتان',
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -1783,7 +1708,9 @@ class ApplicantDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 15),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE8EEF6))),
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFE8EEF6)),
+        ),
       ),
       child: Row(
         children: [
@@ -1829,7 +1756,11 @@ class ApplicantDetailsScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF0D6EFD), size: 26),
+          Icon(
+            icon,
+            color: const Color(0xFF0D6EFD),
+            size: 26,
+          ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1860,334 +1791,12 @@ class ApplicantDetailsScreen extends StatelessWidget {
   }
 }
 
-// ==================================================================
-// شاشة تعديل الطالب
-// ==================================================================
-
-class EditApplicantScreen extends StatefulWidget {
-  final Applicant applicant;
-
-  const EditApplicantScreen({super.key, required this.applicant});
-
-  @override
-  State<EditApplicantScreen> createState() => _EditApplicantScreenState();
+enum ApplicantStatus {
+  review,
+  interview,
+  accepted,
+  rejected,
 }
-
-class _EditApplicantScreenState extends State<EditApplicantScreen> {
-  late TextEditingController nameController;
-  late TextEditingController emailController;
-
-  late String specialization;
-  late String opportunity;
-  late ApplicantStatus status;
-
-  @override
-  void initState() {
-    super.initState();
-
-    nameController = TextEditingController(text: widget.applicant.name);
-
-    emailController = TextEditingController(text: widget.applicant.email);
-
-    specialization = widget.applicant.specialization;
-    opportunity = widget.applicant.opportunity;
-    status = widget.applicant.status;
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    super.dispose();
-  }
-
-  void _saveChanges() {
-    final name = nameController.text.trim();
-    final email = emailController.text.trim();
-
-    if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'يرجى تعبئة اسم الطالب والبريد الإلكتروني',
-            style: TextStyle(fontFamily: 'Cairo'),
-          ),
-        ),
-      );
-      return;
-    }
-
-    widget.applicant.name = name;
-    widget.applicant.email = email;
-    widget.applicant.specialization = specialization;
-    widget.applicant.opportunity = opportunity;
-    widget.applicant.status = status;
-
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(30),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.arrow_forward_rounded,
-                          color: Color(0xFF173B73),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'تعديل بيانات الطالب',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF173B73),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  Container(
-                    padding: const EdgeInsets.all(25),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFDCE7F5)),
-                    ),
-                    child: Column(
-                      children: [
-                        _input(label: 'اسم الطالب', controller: nameController),
-                        const SizedBox(height: 18),
-                        _input(
-                          label: 'البريد الإلكتروني',
-                          controller: emailController,
-                        ),
-                        const SizedBox(height: 18),
-                        _dropdown(
-                          label: 'التخصص',
-                          value: specialization,
-                          items: const [
-                            'علوم الحاسوب',
-                            'هندسة برمجيات',
-                            'إدارة أعمال',
-                            'هندسة الشبكات',
-                            'هندسة شبكات',
-                            'علوم البيانات',
-                            'التسويق',
-                          ],
-                          onChanged: (value) {
-                            if (value == null) return;
-
-                            setState(() {
-                              specialization = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 18),
-                        _dropdown(
-                          label: 'الفرصة التدريبية',
-                          value: opportunity,
-                          items: const [
-                            'تطوير البرمجيات',
-                            'التسويق',
-                            'شبكات',
-                            'تحليل البيانات',
-                            'إدارة المشاريع',
-                          ],
-                          onChanged: (value) {
-                            if (value == null) return;
-
-                            setState(() {
-                              opportunity = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 18),
-                        _dropdown(
-                          label: 'الحالة',
-                          value: getStatusText(status),
-                          items: const [
-                            'قيد المراجعة',
-                            'في المقابلة',
-                            'مقبول',
-                            'مرفوض',
-                          ],
-                          onChanged: (value) {
-                            if (value == null) return;
-
-                            setState(() {
-                              status = getStatusFromText(value);
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(52),
-                                  side: const BorderSide(
-                                    color: Color(0xFFD6E2F2),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'إلغاء',
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    color: Color(0xFF516984),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: _saveChanges,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0D6EFD),
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size.fromHeight(52),
-                                ),
-                                child: const Text(
-                                  'حفظ التعديلات',
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _input({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF526A87),
-          ),
-        ),
-        const SizedBox(height: 7),
-        TextField(
-          controller: controller,
-          textDirection: TextDirection.rtl,
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 13,
-            color: Color(0xFF173B73),
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFFF9FBFD),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(11),
-              borderSide: const BorderSide(color: Color(0xFFDCE7F5)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(11),
-              borderSide: const BorderSide(color: Color(0xFFDCE7F5)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _dropdown({
-    required String label,
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF526A87),
-          ),
-        ),
-        const SizedBox(height: 7),
-        Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF9FBFD),
-            borderRadius: BorderRadius.circular(11),
-            border: Border.all(color: const Color(0xFFDCE7F5)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              isExpanded: true,
-              dropdownColor: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              items: items.map((item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
-                  ),
-                );
-              }).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ==================================================================
-// Model
-// ==================================================================
-
-enum ApplicantStatus { review, interview, accepted, rejected }
 
 class Applicant {
   final int id;
@@ -2210,21 +1819,14 @@ class Applicant {
   });
 }
 
-// ==================================================================
-// Helpers
-// ==================================================================
-
 String getStatusText(ApplicantStatus status) {
   switch (status) {
     case ApplicantStatus.review:
       return 'قيد المراجعة';
-
     case ApplicantStatus.interview:
       return 'في المقابلة';
-
     case ApplicantStatus.accepted:
       return 'مقبول';
-
     case ApplicantStatus.rejected:
       return 'مرفوض';
   }
@@ -2234,21 +1836,14 @@ ApplicantStatus getStatusFromText(String text) {
   switch (text) {
     case 'في المقابلة':
       return ApplicantStatus.interview;
-
     case 'مقبول':
       return ApplicantStatus.accepted;
-
     case 'مرفوض':
       return ApplicantStatus.rejected;
-
     default:
       return ApplicantStatus.review;
   }
 }
-
-// ==================================================================
-// Header Cell
-// ==================================================================
 
 class _HeaderCell extends StatelessWidget {
   final String text;

@@ -18,80 +18,161 @@ class AppBottomNavBar extends StatelessWidget {
   void _onItemTapped(BuildContext context, int index) {
     if (index == selectedIndex) return;
 
-    Widget screen;
+    final Widget screen;
 
     switch (index) {
       case 0:
         screen = const HomeScreen();
         break;
-
       case 1:
         screen = const RoadmapScreen();
         break;
-
       case 2:
         screen = const SelectCompanyScreen();
         break;
-
       case 3:
         screen = const MyCvScreen();
         break;
-
       case 4:
         screen = const ProfileScreen();
         break;
-
       default:
-        screen = const HomeScreen();
+        return;
     }
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => screen,
-      ),
+      MaterialPageRoute(builder: (_) => screen),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    const labels = [
+      'الرئيسية',
+      'خارطة\nالطريق',
+      'التدريب\nالميداني',
+      'الملف\nالمهني',
+      'الملف\nالشخصي',
+    ];
+
+    const semanticLabels = [
+      'الرئيسية',
+      'خارطة الطريق',
+      'التدريب الميداني',
+      'الملف المهني',
+      'الملف الشخصي',
+    ];
+
+    const icons = [
+      Icons.home_outlined,
+      Icons.map_outlined,
+      Icons.business_center_outlined,
+      Icons.badge_outlined,
+      Icons.person_outline,
+    ];
+
+    const selectedIcons = [
+      Icons.home,
+      Icons.map,
+      Icons.business_center,
+      Icons.badge,
+      Icons.person,
+    ];
+
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) {
-          _onItemTapped(context, index);
-        },
-        backgroundColor: Colors.white,
-        indicatorColor: MasarColors.lightBlue,
-        elevation: 0,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'الرئيسية',
+      child: Material(
+        color: Colors.white,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: MasarColors.border),
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.map_outlined),
-            selectedIcon: Icon(Icons.map),
-            label: 'خارطة الطريق',
+          child: SafeArea(
+            top: false,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final fontSize =
+                    constraints.maxWidth < 360 ? 10.5 : 11.5;
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(labels.length, (index) {
+                    final selected = index == selectedIndex;
+                    final color = selected
+                        ? MasarColors.primaryBlue
+                        : MasarColors.textSecondary;
+
+                    return Expanded(
+                      child: Semantics(
+                        selected: selected,
+                        button: true,
+                        label: semanticLabels[index],
+                        excludeSemantics: true,
+                        child: Tooltip(
+                          message: semanticLabels[index],
+                          child: InkWell(
+                            onTap: () => _onItemTapped(context, index),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                                vertical: 10,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AnimatedContainer(
+                                    duration:
+                                        const Duration(milliseconds: 180),
+                                    width: 48,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? MasarColors.lightBlue
+                                          : Colors.transparent,
+                                      borderRadius:
+                                          BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(
+                                      selected
+                                          ? selectedIcons[index]
+                                          : icons[index],
+                                      color: color,
+                                      size: 23,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    index == 0
+                                        ? '${labels[index]}\n'
+                                        : labels[index],
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: fontSize,
+                                      height: 1.35,
+                                      color: color,
+                                      fontWeight: selected
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.business_center_outlined),
-            selectedIcon: Icon(Icons.business_center),
-            label: 'التدريب الميداني',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.badge_outlined),
-            selectedIcon: Icon(Icons.badge),
-            label: 'الملف المهني',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'الملف الشخصي',
-          ),
-        ],
+        ),
       ),
     );
   }

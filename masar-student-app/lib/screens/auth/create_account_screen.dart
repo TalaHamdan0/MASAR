@@ -14,13 +14,15 @@ class CreateAccountScreen extends StatefulWidget {
       _CreateAccountScreenState();
 }
 
-class _CreateAccountScreenState extends State<CreateAccountScreen> {
+class _CreateAccountScreenState
+    extends State<CreateAccountScreen> {
   static const String _universityName =
       'جامعة العلوم الإسلامية العالمية';
 
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
+  final _nameEnController = TextEditingController();
   final _studentNumberController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -33,6 +35,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _nameEnController.dispose();
     _studentNumberController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -48,18 +51,47 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           content: Text(
             message,
             textDirection: TextDirection.rtl,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-            ),
+            style: const TextStyle(fontFamily: 'Cairo'),
           ),
         ),
       );
   }
 
-  Future<void> _createAccount() async {
-    if (_isLoading) {
-      return;
+  String? _validateName(String? value) {
+    final name = value?.trim() ?? '';
+
+    if (name.isEmpty) {
+      return 'يرجى إدخال الاسم الكامل بالعربي';
     }
+
+    if (name.runes.length < 2 || name.runes.length > 200) {
+      return 'الاسم من حرفين إلى 200 حرف';
+    }
+
+    return null;
+  }
+
+  String? _validateEnglishName(String? value) {
+    final name = value?.trim() ?? '';
+
+    if (name.isEmpty) {
+      return 'يرجى إدخال الاسم الكامل بالإنجليزي';
+    }
+
+    if (name.length > 200) {
+      return 'الحد الأقصى للاسم 200 حرف';
+    }
+
+    if (!RegExp(r"^[A-Za-z][A-Za-z .'-]*$").hasMatch(name) ||
+        RegExp(r'[A-Za-z]').allMatches(name).length < 2) {
+      return 'اكتبي الاسم باستخدام الحروف الإنجليزية';
+    }
+
+    return null;
+  }
+
+  Future<void> _createAccount() async {
+    if (_isLoading) return;
 
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
@@ -74,15 +106,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     try {
       final data = await ApiService.register(
         name: _nameController.text.trim(),
+        nameEn: _nameEnController.text.trim(),
         studentNumber: _studentNumberController.text.trim(),
         universityName: _universityName,
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       final student = AuthSession.start(data);
 
@@ -92,6 +123,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
       MasarMockData.profileMockData.addAll({
         'name': student.name,
+        'nameEn': student.nameEn,
         'major': student.major,
         'university': student.university,
         'academicYear': student.academicYear,
@@ -132,6 +164,106 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
   }
 
+  InputDecoration _decoration(
+    String hint,
+    IconData icon,
+  ) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(
+        icon,
+        color: MasarColors.primaryBlue,
+      ),
+    );
+  }
+
+  Widget _passwordField({required bool confirmation}) {
+    final controller = confirmation
+        ? _confirmPasswordController
+        : _passwordController;
+
+    final obscure = confirmation
+        ? _obscureConfirmPassword
+        : _obscurePassword;
+
+    return TextFormField(
+      controller: controller,
+      enabled: !_isLoading,
+      obscureText: obscure,
+      textDirection: TextDirection.ltr,
+      textInputAction: confirmation
+          ? TextInputAction.done
+          : TextInputAction.next,
+      autocorrect: false,
+      enableSuggestions: false,
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(10),
+      ],
+      onFieldSubmitted: confirmation
+          ? (_) {
+              _createAccount();
+            }
+          : null,
+      style: const TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 15,
+        color: MasarColors.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: confirmation
+            ? 'أعد إدخال كلمة المرور'
+            : 'أنشئ كلمة مرور',
+        prefixIcon: Icon(
+          confirmation ? Icons.lock_reset_outlined : Icons.lock_outline,
+          color: MasarColors.primaryBlue,
+        ),
+        suffixIcon: IconButton(
+          onPressed: _isLoading
+              ? null
+              : () {
+                  setState(() {
+                    if (confirmation) {
+                      _obscureConfirmPassword =
+                          !_obscureConfirmPassword;
+                    } else {
+                      _obscurePassword = !_obscurePassword;
+                    }
+                  });
+                },
+          icon: Icon(
+            obscure
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            color: MasarColors.primaryGreen,
+          ),
+        ),
+      ),
+      validator: (value) {
+        if (confirmation) {
+          if (value == null || value.isEmpty) {
+            return 'يرجى تأكيد كلمة المرور';
+          }
+
+          if (value != _passwordController.text) {
+            return 'كلمتا المرور غير متطابقتين';
+          }
+
+          return null;
+        }
+
+        if (value == null || value.trim().isEmpty) {
+          return 'يرجى إدخال كلمة المرور';
+        }
+
+        if (value.runes.length < 8 || value.runes.length > 10) {
+          return 'كلمة المرور من 8 إلى 10 خانات';
+        }
+
+        return null;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,9 +271,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 430,
-            ),
+            constraints: const BoxConstraints(maxWidth: 430),
             child: Container(
               width: double.infinity,
               color: MasarColors.background,
@@ -196,7 +326,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ),
                         const SizedBox(height: 32),
                         const _RequiredLabel(
-                          text: 'الاسم الكامل',
+                          text: 'الاسم الكامل بالعربي',
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
@@ -209,27 +339,36 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             fontSize: 15,
                             color: MasarColors.textPrimary,
                           ),
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل اسمك الكامل',
-                            prefixIcon: Icon(
-                              Icons.person_outline,
-                              color: MasarColors.primaryBlue,
-                            ),
+                          decoration: _decoration(
+                            'أدخل اسمك الكامل بالعربي',
+                            Icons.person_outline,
                           ),
-                          validator: (value) {
-                            final name = value?.trim() ?? '';
-
-                            if (name.isEmpty) {
-                              return 'يرجى إدخال الاسم الكامل';
-                            }
-
-                            if (name.runes.length < 2 ||
-                                name.runes.length > 200) {
-                              return 'الاسم من حرفين إلى 200 حرف';
-                            }
-
-                            return null;
-                          },
+                          validator: _validateName,
+                        ),
+                        const SizedBox(height: 20),
+                        const _RequiredLabel(
+                          text: 'الاسم الكامل بالإنجليزي',
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameEnController,
+                          enabled: !_isLoading,
+                          textDirection: TextDirection.ltr,
+                          textCapitalization: TextCapitalization.words,
+                          keyboardType: TextInputType.name,
+                          textInputAction: TextInputAction.next,
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 15,
+                            color: MasarColors.textPrimary,
+                          ),
+                          decoration: _decoration(
+                            'أدخل اسمك الكامل بالإنجليزي',
+                            Icons.person_outline,
+                          ),
+                          validator: _validateEnglishName,
                         ),
                         const SizedBox(height: 20),
                         const _RequiredLabel(
@@ -252,12 +391,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             fontSize: 15,
                             color: MasarColors.textPrimary,
                           ),
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل الرقم الجامعي',
-                            prefixIcon: Icon(
-                              Icons.badge_outlined,
-                              color: MasarColors.primaryBlue,
-                            ),
+                          decoration: _decoration(
+                            'أدخل الرقم الجامعي',
+                            Icons.badge_outlined,
                           ),
                           validator: (value) {
                             final number = value?.trim() ?? '';
@@ -266,8 +402,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               return 'يرجى إدخال الرقم الجامعي';
                             }
 
-                            if (!RegExp(r'^[0-9]{1,40}$')
-                                .hasMatch(number)) {
+                            if (!RegExp(
+                              r'^[0-9]{1,40}$',
+                            ).hasMatch(number)) {
                               return 'يرجى إدخال رقم جامعي صحيح';
                             }
 
@@ -323,12 +460,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             fontSize: 15,
                             color: MasarColors.textPrimary,
                           ),
-                          decoration: const InputDecoration(
-                            hintText: 'example@gmail.com',
-                            prefixIcon: Icon(
-                              Icons.email_outlined,
-                              color: MasarColors.primaryBlue,
-                            ),
+                          decoration: _decoration(
+                            'example@gmail.com',
+                            Icons.email_outlined,
                           ),
                           validator: (value) {
                             final email = value?.trim() ?? '';
@@ -337,12 +471,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               return 'يرجى إدخال البريد الإلكتروني الشخصي';
                             }
 
-                            final pattern = RegExp(
-                              r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                            );
-
                             if (email.length > 254 ||
-                                !pattern.hasMatch(email)) {
+                                !RegExp(
+                                  r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                                ).hasMatch(email)) {
                               return 'يرجى إدخال بريد إلكتروني صحيح';
                             }
 
@@ -354,118 +486,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           text: 'كلمة المرور',
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _passwordController,
-                          enabled: !_isLoading,
-                          obscureText: _obscurePassword,
-                          textDirection: TextDirection.ltr,
-                          textInputAction: TextInputAction.next,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 15,
-                            color: MasarColors.textPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'أنشئ كلمة مرور',
-                            prefixIcon: const Icon(
-                              Icons.lock_outline,
-                              color: MasarColors.primaryBlue,
-                            ),
-                            suffixIcon: IconButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () {
-                                      setState(() {
-                                        _obscurePassword =
-                                            !_obscurePassword;
-                                      });
-                                    },
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: MasarColors.primaryGreen,
-                              ),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null ||
-                                value.trim().isEmpty) {
-                              return 'يرجى إدخال كلمة المرور';
-                            }
-
-                            if (value.runes.length < 8 ||
-                                value.runes.length > 10) {
-                              return 'كلمة المرور من 8 إلى 10 خانات';
-                            }
-
-                            return null;
-                          },
-                        ),
+                        _passwordField(confirmation: false),
                         const SizedBox(height: 20),
                         const _RequiredLabel(
                           text: 'تأكيد كلمة المرور',
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          enabled: !_isLoading,
-                          obscureText: _obscureConfirmPassword,
-                          textDirection: TextDirection.ltr,
-                          textInputAction: TextInputAction.done,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                          onFieldSubmitted: (_) {
-                            _createAccount();
-                          },
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 15,
-                            color: MasarColors.textPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'أعد إدخال كلمة المرور',
-                            prefixIcon: const Icon(
-                              Icons.lock_reset_outlined,
-                              color: MasarColors.primaryBlue,
-                            ),
-                            suffixIcon: IconButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () {
-                                      setState(() {
-                                        _obscureConfirmPassword =
-                                            !_obscureConfirmPassword;
-                                      });
-                                    },
-                              icon: Icon(
-                                _obscureConfirmPassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: MasarColors.primaryGreen,
-                              ),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يرجى تأكيد كلمة المرور';
-                            }
-
-                            if (value != _passwordController.text) {
-                              return 'كلمتا المرور غير متطابقتين';
-                            }
-
-                            return null;
-                          },
-                        ),
+                        _passwordField(confirmation: true),
                         const SizedBox(height: 30),
                         SizedBox(
                           height: 54,

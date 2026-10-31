@@ -9,3 +9,4 @@ student_bp = Blueprint(
 
 
 from . import profile
+from . import roadmap

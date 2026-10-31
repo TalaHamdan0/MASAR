@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/models/certificate_model.dart';
 import '../../core/models/project_model.dart';
 import '../../core/models/skill_model.dart';
+import '../../core/models/soft_skill_model.dart';
 import '../../core/models/student_model.dart';
 import '../../core/services/api_service.dart';
 import '../../core/services/auth_session.dart';
@@ -21,7 +22,6 @@ class CompleteProfileScreen extends StatefulWidget {
 class _CompleteProfileScreenState
     extends State<CompleteProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameEnController = TextEditingController();
 
   String? _selectedMajor;
   String? _selectedAcademicYear;
@@ -35,7 +35,8 @@ class _CompleteProfileScreenState
 
   final Map<String, String> _programIdByName = {};
   final List<Skill> _availableSkills = [];
-  final List<String> _selectedSkills = [];
+  final Set<String> _selectedSkills = {};
+  final Map<String, String> _skillTypes = {};
   final List<Certificate> _selectedCertificates = [];
   final List<Project> _selectedProjects = [];
 
@@ -50,12 +51,6 @@ class _CompleteProfileScreenState
   void initState() {
     super.initState();
     _loadProfile();
-  }
-
-  @override
-  void dispose() {
-    _nameEnController.dispose();
-    super.dispose();
   }
 
   List<Map<String, dynamic>> _rows(
@@ -122,10 +117,15 @@ class _CompleteProfileScreenState
 
       final skills = <Skill>[];
       final skillIds = <String>{};
+      final skillTypes = <String, String>{};
       final skillNames = <String>{};
 
       for (final item in _rows(options, 'skills')) {
-        if (item['type'] != 'TECHNICAL') continue;
+        final type = item['type'];
+
+        if (type != 'TECHNICAL' && type != 'SOFT') {
+          continue;
+        }
 
         final id = item['id'];
         final name = item['name'];
@@ -139,6 +139,8 @@ class _CompleteProfileScreenState
           throw const FormatException('Invalid skill data.');
         }
 
+        skillTypes[id] = type as String;
+
         skills.add(
           Skill(
             id: id,
@@ -151,6 +153,11 @@ class _CompleteProfileScreenState
 
       final student = AuthSession.updateProfile(data);
       final programId = data['programId'];
+      final version = data['version'];
+
+      if (version is! int || version < 0) {
+        throw const FormatException('Invalid profile version.');
+      }
 
       String? major;
 
@@ -168,13 +175,12 @@ class _CompleteProfileScreenState
       final academicYear = student.academicYear.trim();
 
       _student = student;
-      _profileVersion = AuthSession.profileVersion;
-      _nameEnController.text = student.nameEn;
+      _profileVersion = version;
       _selectedMajor = major;
-
-      _selectedAcademicYear = _academicYears.contains(academicYear)
-          ? academicYear
-          : null;
+      _selectedAcademicYear =
+          _academicYears.contains(academicYear)
+              ? academicYear
+              : null;
 
       _programIdByName
         ..clear()
@@ -186,7 +192,12 @@ class _CompleteProfileScreenState
 
       _selectedSkills
         ..clear()
-        ..addAll(student.skills.map((skill) => skill.name));
+        ..addAll(student.skills.map((skill) => skill.id))
+        ..addAll(student.softSkills.map((skill) => skill.id));
+
+      _skillTypes
+        ..clear()
+        ..addAll(skillTypes);
 
       _selectedCertificates
         ..clear()
@@ -225,7 +236,8 @@ class _CompleteProfileScreenState
   ) {
     MasarMockData.currentStudent = student;
     MasarMockData.student = student;
-    MasarMockData.isFirstLogin = data['profileCompleted'] != true;
+    MasarMockData.isFirstLogin =
+        data['profileCompleted'] != true;
 
     MasarMockData.profileMockData.addAll({
       'name': student.name,
@@ -260,25 +272,6 @@ class _CompleteProfileScreenState
           rune == 13 ||
           (rune >= 32 && rune <= 126),
     );
-  }
-
-  String? _validateEnglishName(String? value) {
-    final text = value?.trim() ?? '';
-
-    if (text.isEmpty) {
-      return 'أدخلي اسمك الكامل بالإنجليزي';
-    }
-
-    if (text.length > 200) {
-      return 'الحد الأقصى 200 حرف';
-    }
-
-    if (!RegExp(r"^[A-Za-z][A-Za-z .'-]*$").hasMatch(text) ||
-        RegExp(r'[A-Za-z]').allMatches(text).length < 2) {
-      return 'استخدمي الحروف الإنجليزية في كتابة الاسم';
-    }
-
-    return null;
   }
 
   String? _requiredEnglish(
@@ -354,81 +347,34 @@ class _CompleteProfileScreenState
     return null;
   }
 
+  String _skillName(String id) {
+    for (final skill in _availableSkills) {
+      if (skill.id == id) return skill.name;
+    }
+
+    for (final skill in _student?.skills ?? <Skill>[]) {
+      if (skill.id == id) return skill.name;
+    }
+
+    for (final skill in _student?.softSkills ?? <SoftSkill>[]) {
+      if (skill.id == id) return skill.name;
+    }
+
+    return 'Unavailable skill ($id)';
+  }
+
   Future<void> _showAddSkillDialog() async {
     if (_availableSkills.isEmpty) {
       _showMessage('لا توجد مهارات متاحة حاليًا.');
       return;
     }
 
-    final selected = Set<String>.from(_selectedSkills);
-
     final result = await showDialog<Set<String>>(
       context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (context, updateDialog) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                title: const Text('اختر مهاراتك الحالية'),
-                content: SizedBox(
-                  width: double.maxFinite,
-                  height:
-                      MediaQuery.of(dialogContext).size.height * 0.45,
-                  child: ListView.builder(
-                    itemCount: _availableSkills.length,
-                    itemBuilder: (context, index) {
-                      final skill = _availableSkills[index];
-
-                      return Material(
-                        color: Colors.transparent,
-                        child: CheckboxListTile(
-                          value: selected.contains(skill.name),
-                          controlAffinity:
-                              ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
-                          activeColor: MasarColors.primaryBlue,
-                          title: Text(
-                            skill.name,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          onChanged: (checked) {
-                            updateDialog(() {
-                              if (checked == true) {
-                                selected.add(skill.name);
-                              } else {
-                                selected.remove(skill.name);
-                              }
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    child: const Text('إلغاء'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(
-                        dialogContext,
-                        Set<String>.from(selected),
-                      );
-                    },
-                    child: const Text('تأكيد الاختيار'),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
+      builder: (_) => _SkillPickerDialog(
+        skills: _availableSkills,
+        initialSelection: Set<String>.from(_selectedSkills),
+      ),
     );
 
     if (!mounted || result == null) return;
@@ -444,9 +390,11 @@ class _CompleteProfileScreenState
     Certificate? existing,
   }) async {
     final key = GlobalKey<FormState>();
+
     final title = TextEditingController(
       text: existing?.title ?? '',
     );
+
     final issuer = TextEditingController(
       text: existing?.issuer ?? '',
     );
@@ -461,7 +409,9 @@ class _CompleteProfileScreenState
               borderRadius: BorderRadius.circular(20),
             ),
             title: Text(
-              existing == null ? 'إضافة شهادة' : 'تعديل الشهادة',
+              existing == null
+                  ? 'إضافة شهادة'
+                  : 'تعديل الشهادة',
             ),
             content: Form(
               key: key,
@@ -560,12 +510,15 @@ class _CompleteProfileScreenState
     final name = TextEditingController(
       text: existing?.name ?? '',
     );
+
     final description = TextEditingController(
       text: existing?.description ?? '',
     );
+
     final technologies = TextEditingController(
       text: existing?.technologies.join(', ') ?? '',
     );
+
     final github = TextEditingController(
       text: existing?.githubUrl ?? '',
     );
@@ -580,7 +533,9 @@ class _CompleteProfileScreenState
               borderRadius: BorderRadius.circular(20),
             ),
             title: Text(
-              existing == null ? 'إضافة مشروع' : 'تعديل المشروع',
+              existing == null
+                  ? 'إضافة مشروع'
+                  : 'تعديل المشروع',
             ),
             content: Form(
               key: key,
@@ -707,7 +662,9 @@ class _CompleteProfileScreenState
     final programId = _programIdByName[_selectedMajor];
 
     if (programId == null) {
-      _showMessage('يرجى اختيار تخصص متاح من تخصصات الجامعة.');
+      _showMessage(
+        'يرجى اختيار تخصص متاح من تخصصات الجامعة.',
+      );
       return;
     }
 
@@ -775,23 +732,40 @@ class _CompleteProfileScreenState
     }
 
     final options = {
-      for (final skill in _availableSkills) skill.name: skill,
+      for (final skill in _availableSkills) skill.id: skill,
     };
 
     final previous = {
       for (final skill in oldStudent.skills) skill.id: skill,
     };
 
-    final skills = <Skill>[];
+    final previousSoft = {
+      for (final skill in oldStudent.softSkills) skill.id: skill,
+    };
 
-    for (final name in _selectedSkills) {
-      final source = options[name];
+    final skills = <Skill>[];
+    final softSkills = <SoftSkill>[];
+
+    for (final id in _selectedSkills) {
+      final source = options[id];
 
       if (source == null) {
         _showMessage(
-          'المهارة "$name" لم تعد متاحة. احذفيها قبل الحفظ.',
+          'المهارة "${_skillName(id)}" لم تعد متاحة. '
+          'احذفيها قبل الحفظ.',
         );
         return;
+      }
+
+      if (_skillTypes[id] == 'SOFT') {
+        softSkills.add(
+          SoftSkill(
+            id: source.id,
+            name: source.name,
+            level: previousSoft[id]?.level ?? 0,
+          ),
+        );
+        continue;
       }
 
       skills.add(
@@ -804,17 +778,12 @@ class _CompleteProfileScreenState
       );
     }
 
-    final nameEn = _nameEnController.text
-        .trim()
-        .replaceAll(RegExp(r'\s+'), ' ');
-
     final draft = oldStudent.copyWith(
-      nameEn: nameEn,
       major: _selectedMajor!,
       academicYear: _selectedAcademicYear!,
       gpa: '',
       skills: skills,
-      softSkills: List.of(oldStudent.softSkills),
+      softSkills: softSkills,
       certificates: List.of(_selectedCertificates),
       projects: List.of(_selectedProjects),
     );
@@ -842,8 +811,7 @@ class _CompleteProfileScreenState
 
       if (data['profileCompleted'] != true ||
           data['version'] is! int ||
-          (data['version'] as int) <= version ||
-          data['nameEn'] != nameEn) {
+          (data['version'] as int) <= version) {
         throw const FormatException(
           'لم يرجع تأكيد مكتمل للحفظ.',
         );
@@ -852,7 +820,7 @@ class _CompleteProfileScreenState
       final savedStudent = AuthSession.updateProfile(data);
 
       _student = savedStudent;
-      _profileVersion = AuthSession.profileVersion;
+      _profileVersion = data['version'] as int;
 
       _cacheStudent(savedStudent, data);
 
@@ -864,8 +832,8 @@ class _CompleteProfileScreenState
     } on FormatException {
       if (mounted) {
         _showMessage(
-          'لم يصل تأكيد كامل لحفظ البيانات والاسم الإنجليزي. '
-          'تحققي من تحديث ملفات الباكند.',
+          'لم يصل تأكيد كامل لحفظ البيانات. '
+          'راجعي أحدث نسخة من الملف قبل إعادة المحاولة.',
         );
       }
     } catch (_) {
@@ -899,31 +867,12 @@ class _CompleteProfileScreenState
             ),
             const SizedBox(height: 6),
             const Text(
-              'أضف معلوماتك الأساسية حتى نتمكن من تخصيص تجربتك في مسار.',
+              'أضف معلوماتك الأساسية حتى نتمكن '
+              'من تخصيص تجربتك في مسار.',
               style: TextStyle(
                 fontSize: 13,
                 color: MasarColors.textSecondary,
                 height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const _SectionTitle(
-              title: 'بيانات السيرة الذاتية',
-              icon: Icons.badge_outlined,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _nameEnController,
-              textDirection: TextDirection.ltr,
-              textCapitalization: TextCapitalization.words,
-              keyboardType: TextInputType.name,
-              maxLength: 200,
-              validator: _validateEnglishName,
-              decoration: const InputDecoration(
-                labelText: 'الاسم الكامل بالإنجليزي',
-                hintText: 'Tala Marwan Hamdan',
-                helperText: 'سيظهر بهذا الشكل في ملف CV.',
-                prefixIcon: Icon(Icons.person_outline),
               ),
             ),
             const SizedBox(height: 24),
@@ -950,7 +899,6 @@ class _CompleteProfileScreenState
                     !_programIdByName.containsKey(value)) {
                   return 'اختاري التخصص';
                 }
-
                 return null;
               },
               onChanged: (value) {
@@ -977,7 +925,6 @@ class _CompleteProfileScreenState
                 if (!_academicYears.contains(value)) {
                   return 'اختاري السنة الدراسية';
                 }
-
                 return null;
               },
               onChanged: (value) {
@@ -995,8 +942,8 @@ class _CompleteProfileScreenState
             ),
             const SizedBox(height: 6),
             const Text(
-              'أضف المهارات التي تمتلكها حاليًا، مع شهاداتك '
-              'ومشاريعك، لتوثيق خبراتك في ملفك المهني.',
+              'اختاري المهارات التي تعلّمتِ أساسياتها أو استخدمتِها '
+              'في مادة أو مشروع. الاختيار لا يعني إتقان المهارة.',
               style: TextStyle(
                 fontSize: 12,
                 color: MasarColors.textSecondary,
@@ -1013,7 +960,7 @@ class _CompleteProfileScreenState
               for (final skill in _selectedSkills)
                 _EntryCard(
                   icon: Icons.auto_awesome,
-                  title: skill,
+                  title: _skillName(skill),
                   onDelete: () {
                     setState(() {
                       _selectedSkills.remove(skill);
@@ -1405,7 +1352,8 @@ class _EntryCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: MasarColors.lightBlue,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius:
+                                    BorderRadius.circular(8),
                               ),
                               child: Text(
                                 name,
@@ -1477,6 +1425,482 @@ class _EmptySection extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SkillPickerDialog extends StatefulWidget {
+  final List<Skill> skills;
+  final Set<String> initialSelection;
+
+  const _SkillPickerDialog({
+    required this.skills,
+    required this.initialSelection,
+  });
+
+  @override
+  State<_SkillPickerDialog> createState() =>
+      _SkillPickerDialogState();
+}
+
+class _SkillPickerDialogState
+    extends State<_SkillPickerDialog> {
+  final _search = TextEditingController();
+
+  late final Set<String> _selected;
+
+  String _query = '';
+  String _category = 'All Skills';
+  bool _selectedOnly = false;
+
+  static const Map<String, List<String>> _groups = {
+    'Programming Fundamentals': [
+      'Programming Basics',
+      'Object-Oriented Programming',
+      'Data Structures',
+      'Algorithms',
+    ],
+    'Programming Languages': [
+      'Python',
+      'Java',
+      'JavaScript',
+      'TypeScript',
+      'Dart',
+      'Kotlin',
+      'Swift',
+      'C',
+      'C++',
+      'C#',
+    ],
+    'Mobile Development': [
+      'Dart',
+      'Flutter',
+      'Java',
+      'Kotlin',
+      'Swift',
+      'Android Development',
+      'iOS Development',
+      'Mobile UI Development',
+      'App Navigation',
+      'State Management',
+      'REST API Integration',
+      'Local Data Storage',
+      'Authentication',
+      'Push Notifications',
+      'Git',
+      'Unit Testing',
+      'Integration Testing',
+    ],
+    'Frontend Development': [
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'TypeScript',
+      'React',
+      'Responsive Web Design',
+      'REST API Integration',
+      'Accessibility',
+      'Git',
+      'Unit Testing',
+    ],
+    'Backend Development': [
+      'Python',
+      'Java',
+      'JavaScript',
+      'C#',
+      'Flask',
+      'Django',
+      'Node.js',
+      'ASP.NET Core',
+      'Server-Side Programming',
+      'REST API Development',
+      'Authentication',
+      'Authorization',
+      'Authentication and Authorization',
+      'Input Validation',
+      'Database Integration',
+      'Git',
+      'Unit Testing',
+      'Integration Testing',
+    ],
+    'Databases': [
+      'SQL',
+      'Database Design',
+      'MySQL',
+      'PostgreSQL',
+      'Oracle Database',
+      'SQLite',
+      'MongoDB',
+      'Database Administration',
+      'Query Optimization',
+      'Backup and Recovery',
+      'Database Security',
+    ],
+    'Data Analysis': [
+      'Excel',
+      'SQL',
+      'Python',
+      'Pandas',
+      'NumPy',
+      'Data Programming',
+      'Data Cleaning',
+      'Exploratory Data Analysis',
+      'Statistics',
+      'Data Visualization',
+      'Power BI',
+      'Data Interpretation',
+    ],
+    'AI & Machine Learning': [
+      'Python',
+      'NumPy',
+      'Pandas',
+      'Linear Algebra',
+      'Statistics',
+      'Data Preprocessing',
+      'Machine Learning',
+      'Model Evaluation',
+      'scikit-learn',
+      'Deep Learning',
+      'TensorFlow',
+      'PyTorch',
+    ],
+    'Cybersecurity': [
+      'Cybersecurity Fundamentals',
+      'Linux',
+      'Networking Fundamentals',
+      'Network Security',
+      'Vulnerability Assessment',
+      'Incident Response',
+      'Wireshark',
+      'Nmap',
+    ],
+    'Networking': [
+      'Networking Fundamentals',
+      'TCP/IP',
+      'IP Addressing and Subnetting',
+      'Routing',
+      'Switching',
+      'VLANs',
+      'DNS',
+      'DHCP',
+      'Cisco Packet Tracer',
+      'Wireshark',
+    ],
+    'Cloud & DevOps': [
+      'Linux',
+      'Cloud Computing',
+      'AWS',
+      'Microsoft Azure',
+      'Google Cloud',
+      'Docker',
+      'Containerization',
+      'Kubernetes',
+      'CI/CD',
+      'Infrastructure as Code',
+      'Terraform',
+      'Monitoring',
+      'Git',
+    ],
+    'Software Testing': [
+      'Manual Testing',
+      'Test Design',
+      'Bug Reporting',
+      'Unit Testing',
+      'Integration Testing',
+      'API Testing',
+      'Postman',
+      'Test Automation',
+      'Selenium',
+    ],
+    'UI/UX Design': [
+      'Figma',
+      'User Research',
+      'User Flows',
+      'Wireframing',
+      'Prototyping',
+      'Visual Design',
+      'Usability Testing',
+      'Accessibility',
+    ],
+    'Version Control & Collaboration': [
+      'Git',
+      'GitHub',
+    ],
+    'Soft Skills': [
+      'Communication',
+      'Teamwork',
+      'Problem Solving',
+      'Time Management',
+      'Critical Thinking',
+      'Continuous Learning',
+      'Technical Writing',
+      'Leadership',
+    ],
+    'Development Tools & Integration': [
+      'APIs',
+      'REST API Integration',
+      'REST API Development',
+      'Git',
+      'GitHub',
+      'Postman',
+    ],
+  };
+
+  String _key(String value) {
+    return value.trim().toLowerCase();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set<String>.from(widget.initialSelection);
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  bool _inGroup(Skill skill, String category) {
+    if (category == 'All Skills') return true;
+
+    if (category == 'Other Skills') {
+      return !_groups.values.any(
+        (names) => names.any(
+          (name) => _key(name) == _key(skill.name),
+        ),
+      );
+    }
+
+    return (_groups[category] ?? const <String>[]).any(
+      (name) => _key(name) == _key(skill.name),
+    );
+  }
+
+  List<String> get _categories {
+    return [
+      'All Skills',
+      ..._groups.keys.where(
+        (group) => widget.skills.any(
+          (skill) => _inGroup(skill, group),
+        ),
+      ),
+      if (widget.skills.any(
+        (skill) => _inGroup(skill, 'Other Skills'),
+      ))
+        'Other Skills',
+    ];
+  }
+
+  List<Skill> get _visible {
+    final query = _key(_query);
+
+    final result = widget.skills.where((skill) {
+      return _inGroup(skill, _category) &&
+          (!_selectedOnly || _selected.contains(skill.id)) &&
+          (query.isEmpty || _key(skill.name).contains(query));
+    }).toList();
+
+    result.sort(
+      (a, b) => _key(a.name).compareTo(_key(b.name)),
+    );
+
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = _visible;
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Dialog(
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 20,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SizedBox(
+          width: 560,
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Choose Your Skills',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _search,
+                  onChanged: (value) {
+                    setState(() {
+                      _query = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search skills...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Clear search',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              _search.clear();
+
+                              setState(() {
+                                _query = '';
+                              });
+                            },
+                          ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _category,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _categories.map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(
+                        category,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+
+                    setState(() {
+                      _category = value;
+                    });
+                  },
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: CheckboxListTile(
+                    value: _selectedOnly,
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity:
+                        ListTileControlAffinity.leading,
+                    title: Text(
+                      'Selected only (${_selected.length})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedOnly = value == true;
+                      });
+                    },
+                  ),
+                ),
+                Text(
+                  '${visible.length} skills',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: MasarColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: visible.isEmpty
+                      ? const Center(
+                          child: Text('No matching skills.'),
+                        )
+                      : ListView.builder(
+                          itemCount: visible.length,
+                          itemBuilder: (_, index) {
+                            final skill = visible[index];
+
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 8,
+                              ),
+                              child: Material(
+                                color: _selected.contains(skill.id)
+                                    ? MasarColors.lightBlue
+                                    : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(12),
+                                  side: const BorderSide(
+                                    color: MasarColors.border,
+                                  ),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: CheckboxListTile(
+                                  value:
+                                      _selected.contains(skill.id),
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  activeColor:
+                                      MasarColors.primaryBlue,
+                                  title: Text(
+                                    skill.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  onChanged: (checked) {
+                                    setState(() {
+                                      if (checked == true) {
+                                        _selected.add(skill.id);
+                                      } else {
+                                        _selected.remove(skill.id);
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 10,
+                  runSpacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('إلغاء'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          context,
+                          Set<String>.from(_selected),
+                        );
+                      },
+                      child: Text(
+                        'تأكيد الاختيار (${_selected.length})',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

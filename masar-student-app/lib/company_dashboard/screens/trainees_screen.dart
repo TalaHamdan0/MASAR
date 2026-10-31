@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-// ============================================================
-// Model المتدرب
-// ============================================================
-
 class Trainee {
   final int id;
   final String name;
@@ -13,7 +9,6 @@ class Trainee {
   final int totalHours;
   final int attendanceDays;
   final int absenceDays;
-  final List<String> weeklyReports;
 
   Trainee({
     required this.id,
@@ -24,7 +19,6 @@ class Trainee {
     required this.totalHours,
     required this.attendanceDays,
     required this.absenceDays,
-    required this.weeklyReports,
   });
 
   double get progressPercentage =>
@@ -32,10 +26,6 @@ class Trainee {
 
   int get remainingHours => totalHours - completedHours;
 }
-
-// ============================================================
-// الشاشة الرئيسية للمتدربين
-// ============================================================
 
 class TraineesScreen extends StatefulWidget {
   const TraineesScreen({super.key});
@@ -47,10 +37,6 @@ class TraineesScreen extends StatefulWidget {
 class _TraineesScreenState extends State<TraineesScreen> {
   String searchQuery = '';
 
-  // ============================================================
-  // بيانات المتدربين
-  // ============================================================
-
   final List<Trainee> trainees = [
     Trainee(
       id: 1,
@@ -61,11 +47,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
       totalHours: 280,
       attendanceDays: 22,
       absenceDays: 1,
-      weeklyReports: [
-        'الأسبوع الأول - مكتمل',
-        'الأسبوع الثاني - مكتمل',
-        'الأسبوع الثالث - قيد المراجعة',
-      ],
     ),
     Trainee(
       id: 2,
@@ -76,12 +57,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
       totalHours: 280,
       attendanceDays: 28,
       absenceDays: 0,
-      weeklyReports: [
-        'الأسبوع الأول - مكتمل',
-        'الأسبوع الثاني - مكتمل',
-        'الأسبوع الثالث - مكتمل',
-        'الأسبوع الرابع - مكتمل',
-      ],
     ),
     Trainee(
       id: 3,
@@ -92,7 +67,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
       totalHours: 280,
       attendanceDays: 12,
       absenceDays: 2,
-      weeklyReports: ['الأسبوع الأول - مكتمل'],
     ),
     Trainee(
       id: 4,
@@ -103,13 +77,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
       totalHours: 280,
       attendanceDays: 31,
       absenceDays: 0,
-      weeklyReports: [
-        'الأسبوع الأول - مكتمل',
-        'الأسبوع الثاني - مكتمل',
-        'الأسبوع الثالث - مكتمل',
-        'الأسبوع الرابع - مكتمل',
-        'الأسبوع الخامس - قيد المراجعة ',
-      ],
     ),
     Trainee(
       id: 5,
@@ -120,7 +87,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
       totalHours: 280,
       attendanceDays: 16,
       absenceDays: 1,
-      weeklyReports: ['الأسبوع الأول - مكتمل', 'الأسبوع الثاني - مكتمل'],
     ),
     Trainee(
       id: 6,
@@ -131,19 +97,16 @@ class _TraineesScreenState extends State<TraineesScreen> {
       totalHours: 280,
       attendanceDays: 10,
       absenceDays: 0,
-      weeklyReports: ['الأسبوع الأول - مكتمل'],
     ),
   ];
 
-  // ============================================================
-  // Build
-  // ============================================================
-
   @override
   Widget build(BuildContext context) {
-    final filteredTrainees = trainees.where((t) {
-      return t.name.contains(searchQuery) ||
-          t.track.toLowerCase().contains(searchQuery.toLowerCase());
+    final filteredTrainees = trainees.where((trainee) {
+      return trainee.name.contains(searchQuery) ||
+          trainee.track.toLowerCase().contains(
+                searchQuery.toLowerCase(),
+              );
     }).toList();
 
     return Directionality(
@@ -167,10 +130,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
     );
   }
 
-  // ============================================================
-  // Header الشاشة مع زر الرجوع
-  // ============================================================
-
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,7 +142,10 @@ class _TraineesScreenState extends State<TraineesScreen> {
                   Navigator.pop(context);
                 }
               },
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 8),
             const Column(
@@ -215,46 +177,52 @@ class _TraineesScreenState extends State<TraineesScreen> {
     );
   }
 
-  // ============================================================
-  // شريط البحث
-  // ============================================================
-
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFDCE7F5)),
+        border: Border.all(
+          color: const Color(0xFFDCE7F5),
+        ),
       ),
       child: TextField(
-        onChanged: (val) {
+        onChanged: (value) {
           setState(() {
-            searchQuery = val.trim();
+            searchQuery = value.trim();
           });
         },
         decoration: const InputDecoration(
           hintText: 'ابحث باسم المتدرب أو المسار التدريبي...',
-          hintStyle: TextStyle(fontFamily: 'Cairo', fontSize: 13),
-          prefixIcon: Icon(Icons.search, color: Color(0xFF0D6EFD)),
+          hintStyle: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            color: Color(0xFF0D6EFD),
+          ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // قائمة المتدربين
-  // ============================================================
-
   Widget _buildTraineesList(List<Trainee> list) {
     if (list.isEmpty) {
       return const Padding(
-        padding: EdgeInsets.all(40.0),
+        padding: EdgeInsets.all(40),
         child: Center(
           child: Text(
             'لا يوجد متدربون مطابقون للبحث',
-            style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              color: Colors.grey,
+            ),
           ),
         ),
       );
@@ -266,25 +234,23 @@ class _TraineesScreenState extends State<TraineesScreen> {
       itemCount: list.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final trainee = list[index];
-        return _buildTraineeCard(trainee);
+        return _buildTraineeCard(list[index]);
       },
     );
   }
 
-  // ============================================================
-  // بطاقة المتدرب
-  // ============================================================
-
   Widget _buildTraineeCard(Trainee trainee) {
-    final percentageInt = (trainee.progressPercentage * 100).round();
+    final percentageInt =
+        (trainee.progressPercentage * 100).round();
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFDCE7F5)),
+        border: Border.all(
+          color: const Color(0xFFDCE7F5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -357,17 +323,13 @@ class _TraineesScreenState extends State<TraineesScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // ==================================================
-          // الساعات
-          // ==================================================
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'الساعات: ${trainee.completedHours} / ${trainee.totalHours} ساعة',
+                'الساعات: ${trainee.completedHours} / '
+                '${trainee.totalHours} ساعة',
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12,
@@ -385,12 +347,7 @@ class _TraineesScreenState extends State<TraineesScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
-          // ==================================================
-          // شريط التقدم
-          // ==================================================
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Stack(
@@ -404,7 +361,8 @@ class _TraineesScreenState extends State<TraineesScreen> {
                   builder: (context, constraints) {
                     return Container(
                       height: 10,
-                      width: constraints.maxWidth * trainee.progressPercentage,
+                      width: constraints.maxWidth *
+                          trainee.progressPercentage,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         gradient: const LinearGradient(
@@ -423,17 +381,17 @@ class _TraineesScreenState extends State<TraineesScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // ==================================================
-          // زر التفاصيل
-          // ==================================================
           Align(
             alignment: Alignment.centerLeft,
             child: ElevatedButton.icon(
-              onPressed: () => _showTraineeDetailsDialog(trainee),
-              icon: const Icon(Icons.person_search, size: 18),
+              onPressed: () {
+                _showTraineeDetailsDialog(trainee);
+              },
+              icon: const Icon(
+                Icons.person_search,
+                size: 18,
+              ),
               label: const Text(
                 'عرض تفاصيل الطالب',
                 style: TextStyle(
@@ -459,10 +417,6 @@ class _TraineesScreenState extends State<TraineesScreen> {
       ),
     );
   }
-
-  // ============================================================
-  // Modal التفاصيل
-  // ============================================================
 
   void _showTraineeDetailsDialog(Trainee trainee) {
     showDialog(
@@ -502,38 +456,41 @@ class _TraineesScreenState extends State<TraineesScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Divider(),
-
-                    _buildSectionHeader('المعلومات والمسار'),
-
-                    _buildInfoRow('اسم الطالب:', trainee.name),
-
-                    _buildInfoRow('المسار التدريبي:', trainee.track),
-
-                    _buildInfoRow('تاريخ بداية التدريب:', trainee.startDate),
-
+                    _buildSectionHeader(
+                      'المعلومات والمسار',
+                    ),
+                    _buildInfoRow(
+                      'اسم الطالب:',
+                      trainee.name,
+                    ),
+                    _buildInfoRow(
+                      'المسار التدريبي:',
+                      trainee.track,
+                    ),
+                    _buildInfoRow(
+                      'تاريخ بداية التدريب:',
+                      trainee.startDate,
+                    ),
                     const SizedBox(height: 16),
-
-                    _buildSectionHeader('الساعات والتقدم'),
-
+                    _buildSectionHeader(
+                      'الساعات والتقدم',
+                    ),
                     _buildInfoRow(
                       'الساعات المنجزة:',
                       '${trainee.completedHours} ساعة',
                     ),
-
                     _buildInfoRow(
                       'الساعات المتبقية:',
                       '${trainee.remainingHours} ساعة',
                     ),
-
                     _buildInfoRow(
                       'الإجمالي المطلوبة:',
                       '${trainee.totalHours} ساعة',
                     ),
-
                     const SizedBox(height: 16),
-
-                    _buildSectionHeader('الحضور والغياب ⏱️'),
-
+                    _buildSectionHeader(
+                      'الحضور والغياب ⏱️',
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -553,51 +510,20 @@ class _TraineesScreenState extends State<TraineesScreen> {
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 16),
-
-                    _buildSectionHeader('التقارير الأسبوعية 📝'),
-
-                    ...trainee.weeklyReports.map(
-                      (report) => Container(
-                        margin: const EdgeInsets.only(bottom: 6),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0F5FB),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.description,
-                              size: 18,
-                              color: Color(0xFF0D6EFD),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                report,
-                                style: const TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
             ),
-
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
                 child: const Text(
                   'إغلاق',
-                  style: TextStyle(fontFamily: 'Cairo'),
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                  ),
                 ),
               ),
             ],
@@ -607,13 +533,11 @@ class _TraineesScreenState extends State<TraineesScreen> {
     );
   }
 
-  // ============================================================
-  // عناصر المساعدة للبناء (Helper Widgets)
-  // ============================================================
-
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(
+        vertical: 8,
+      ),
       child: Text(
         title,
         style: const TextStyle(
@@ -628,7 +552,9 @@ class _TraineesScreenState extends State<TraineesScreen> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(
+        vertical: 4,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -654,19 +580,29 @@ class _TraineesScreenState extends State<TraineesScreen> {
     );
   }
 
-  Widget _buildStatBadge(String label, String value, Color color) {
+  Widget _buildStatBadge(
+    String label,
+    String value,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+        ),
       ),
       child: Column(
         children: [
           Text(
             label,
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 11, color: color),
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 11,
+              color: color,
+            ),
           ),
           const SizedBox(height: 2),
           Text(

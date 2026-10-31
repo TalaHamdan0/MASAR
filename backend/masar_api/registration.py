@@ -30,6 +30,7 @@ def register():
 
     fields = (
         "name",
+        "nameEn",
         "studentNumber",
         "universityId",
         "email",
@@ -46,7 +47,8 @@ def register():
             422,
         )
 
-    name = payload["name"].strip()
+    name = " ".join(payload["name"].strip().split())
+    name_en = " ".join(payload["nameEn"].strip().split())
     student_number = payload["studentNumber"].strip()
     university_id = payload["universityId"].strip()
     email = payload["email"].strip().lower()
@@ -55,7 +57,19 @@ def register():
     if not 2 <= len(name) <= 200:
         return error_response(
             "invalid_name",
-            "الاسم يجب أن يكون بين حرفين و200 حرف.",
+            "الاسم العربي يجب أن يكون بين حرفين و200 حرف.",
+            422,
+        )
+
+    if (
+        not 2 <= len(name_en) <= 200
+        or not re.fullmatch(r"[A-Za-z][A-Za-z .'-]*", name_en)
+        or sum(character.isalpha() for character in name_en) < 2
+    ):
+        return error_response(
+            "invalid_english_name",
+            "أدخلي الاسم الكامل بحروف إنجليزية، "
+            "وبحد أقصى 200 حرف.",
             422,
         )
 
@@ -132,12 +146,14 @@ def register():
                 cursor.execute("""
                     INSERT INTO users (
                         full_name,
+                        full_name_en,
                         email,
                         password_hash,
                         role_id
                     )
                     VALUES (
                         :name,
+                        :name_en,
                         :email,
                         :password_hash,
                         :role_id
@@ -145,6 +161,7 @@ def register():
                     RETURNING user_id INTO :user_id_out
                 """,
                     name=name,
+                    name_en=name_en,
                     email=email,
                     password_hash=password_hash,
                     role_id=int(role[0]),
@@ -177,6 +194,7 @@ def register():
                 )
 
                 student = read_student(cursor, user_id)
+
                 token, expires_in = create_session(
                     cursor,
                     user_id,

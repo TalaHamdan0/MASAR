@@ -304,7 +304,10 @@ def _projects(items):
 
 
 def _payload():
-    if request.content_length and request.content_length > 2_000_000:
+    if (
+        request.content_length
+        and request.content_length > 2_000_000
+    ):
         raise ProfileError(
             "حجم بيانات الملف كبير جدًا.",
             413,
@@ -432,7 +435,8 @@ def get_profile_options():
                 SELECT
                     skill_id,
                     skill_name,
-                    skill_type
+                    skill_type,
+                    description
                 FROM skills
                 WHERE is_active = 1
                 ORDER BY skill_name
@@ -443,6 +447,7 @@ def get_profile_options():
                     "id": str(row[0]),
                     "name": row[1],
                     "type": row[2],
+                    "description": row[3] or "",
                 }
                 for row in cursor.fetchall()
             ]
@@ -453,6 +458,161 @@ def get_profile_options():
             "skills": skills,
         }
     })
+
+
+@student_bp.get("/career-paths")
+def get_career_paths():
+    token = _require_token()
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            _require_user(cursor, token)
+
+            cursor.execute("""
+                SELECT
+                    career_path_id,
+                    path_name,
+                    description
+                FROM career_paths
+                WHERE is_active = 1
+                ORDER BY career_path_id
+            """)
+
+            paths = []
+
+            for path_id, title, description in cursor.fetchall():
+                if hasattr(description, "read"):
+                    description = description.read()
+
+                paths.append({
+                    "id": str(path_id),
+                    "title": title,
+                    "description": description or "",
+                    "requiredSkills": [],
+                })
+
+            by_id = {
+                item["id"]: item
+                for item in paths
+            }
+
+            cursor.execute("""
+                SELECT
+                    cps.career_path_id,
+                    s.skill_name
+                FROM career_path_skills cps
+                JOIN skills s
+                    ON s.skill_id = cps.skill_id
+                JOIN career_paths cp
+                    ON cp.career_path_id = cps.career_path_id
+                WHERE cp.is_active = 1
+                  AND s.is_active = 1
+                ORDER BY
+                    cps.career_path_id,
+                    s.skill_name
+            """)
+
+            for path_id, name in cursor.fetchall():
+                item = by_id.get(str(path_id))
+
+                if item is not None:
+                    item["requiredSkills"].append(name)
+
+    return jsonify({
+        "data": {
+            "paths": paths,
+        }
+    })
+
+
+@student_bp.put("/me/career-path")
+def save_my_career_path():
+    token = _require_token()
+    payload = request.get_json(silent=True)
+
+    if not isinstance(payload, dict):
+        raise ProfileError(
+            "بيانات اختيار المسار غير صالحة."
+        )
+
+    path_id = _id(
+        payload.get("careerPathId"),
+        "المسار المهني",
+    )
+
+    submitted_version = payload.get("version")
+
+    if (
+        type(submitted_version) is not int
+        or submitted_version < 0
+    ):
+        raise ProfileError(
+            "نسخة الملف غير صالحة. حدّثي الصفحة."
+        )
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            user_id = _require_user(cursor, token)
+
+            cursor.execute("""
+                SELECT
+                    student_id,
+                    profile_version,
+                    career_path_id
+                FROM students
+                WHERE user_id = :user_id
+                  AND university_id = :university_id
+                FOR UPDATE
+            """,
+                user_id=user_id,
+                university_id=WISE_UNIVERSITY_ID,
+            )
+
+            row = cursor.fetchone()
+
+            if row is None:
+                raise ProfileError(
+                    "ملف الطالب غير موجود.",
+                    404,
+                )
+
+            if int(row[1]) != submitted_version:
+                raise ProfileError(
+                    "تغيّر الملف. حدّثي الصفحة "
+                    "ثم اختاري المسار مجددًا.",
+                    409,
+                    "profile_conflict",
+                )
+
+            cursor.execute("""
+                SELECT career_path_id
+                FROM career_paths
+                WHERE career_path_id = :path_id
+                  AND is_active = 1
+            """, path_id=path_id)
+
+            if cursor.fetchone() is None:
+                raise ProfileError(
+                    "المسار المهني غير متاح."
+                )
+
+            if row[2] is None or int(row[2]) != path_id:
+                cursor.execute("""
+                    UPDATE students
+                    SET career_path_id = :path_id,
+                        profile_version = profile_version + 1,
+                        updated_at = LOCALTIMESTAMP
+                    WHERE student_id = :student_id
+                """,
+                    path_id=path_id,
+                    student_id=int(row[0]),
+                )
+
+            student = read_student(cursor, user_id)
+
+        connection.commit()
+
+    return jsonify({"data": student})
 
 
 def _save_skills(cursor, student_id, data, skill_catalog):
@@ -838,3 +998,220 @@ def save_my_profile():
         connection.commit()
 
     return jsonify({"data": student})
+
+
+@student_bp.get("/me/career-analysis")
+def get_my_career_analysis():
+    token = _require_token()
+
+    requested_path_id = _id(
+        request.args.get("careerPathId"),
+        "المسار المهني",
+        optional=True,
+    )
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            user_id = _require_user(cursor, token)
+
+            cursor.execute("""
+                SELECT
+                    student_id,
+                    career_path_id,
+                    profile_version
+                FROM students
+                WHERE user_id = :user_id
+                  AND university_id = :university_id
+            """,
+                user_id=user_id,
+                university_id=WISE_UNIVERSITY_ID,
+            )
+
+            student = cursor.fetchone()
+
+            if student is None:
+                raise ProfileError(
+                    "ملف الطالب غير موجود.",
+                    404,
+                )
+
+            student_id = int(student[0])
+            profile_version = int(student[2])
+
+            path_id = requested_path_id or (
+                int(student[1])
+                if student[1] is not None
+                else None
+            )
+
+            if path_id is None:
+                raise ProfileError(
+                    "اختاري مسارك المهني أولًا.",
+                    422,
+                    "career_path_required",
+                )
+
+            cursor.execute("""
+                SELECT
+                    career_path_id,
+                    path_name,
+                    description
+                FROM career_paths
+                WHERE career_path_id = :path_id
+                  AND is_active = 1
+            """, path_id=path_id)
+
+            path = cursor.fetchone()
+
+            if path is None:
+                raise ProfileError(
+                    "المسار المهني غير متاح.",
+                    404,
+                )
+
+            description = path[2]
+
+            if hasattr(description, "read"):
+                description = description.read()
+
+            cursor.execute("""
+                SELECT
+                    s.skill_id,
+                    s.skill_name,
+                    cps.requirement_weight,
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM student_skills ss
+                            WHERE ss.student_id = :student_id
+                              AND ss.skill_id = s.skill_id
+                        )
+                        THEN 1
+                        ELSE 0
+                    END AS selected_in_profile,
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM projects p
+                            JOIN project_technologies pt
+                                ON pt.project_id = p.project_id
+                            WHERE p.student_id = :student_id
+                              AND pt.skill_id = s.skill_id
+                        )
+                        THEN 1
+                        ELSE 0
+                    END AS linked_to_project
+                FROM career_path_skills cps
+                JOIN skills s
+                    ON s.skill_id = cps.skill_id
+                WHERE cps.career_path_id = :path_id
+                  AND s.is_active = 1
+                ORDER BY
+                    s.skill_name,
+                    s.skill_id
+            """,
+                student_id=student_id,
+                path_id=path_id,
+            )
+
+            rows = cursor.fetchall()
+
+            if not rows:
+                raise ProfileError(
+                    "متطلبات هذا المسار غير متاحة بعد.",
+                    422,
+                    "path_requirements_missing",
+                )
+
+            results = []
+            total_weight = 0.0
+            covered_weight = 0.0
+
+            for (
+                skill_id,
+                name,
+                weight,
+                selected,
+                project,
+            ) in rows:
+                if weight is None or weight <= 0:
+                    raise ProfileError(
+                        "أوزان مهارات المسار غير صالحة.",
+                        500,
+                        "invalid_path_requirements",
+                    )
+
+                weight = float(weight)
+                covered = bool(selected or project)
+                evidence = []
+
+                if selected:
+                    evidence.append("SELF_REPORTED")
+
+                if project:
+                    evidence.append("PROJECT_TECHNOLOGY")
+
+                total_weight += weight
+
+                if covered:
+                    covered_weight += weight
+
+                results.append({
+                    "id": str(skill_id),
+                    "name": name,
+                    "weight": weight,
+                    "covered": covered,
+                    "evidence": evidence,
+                })
+
+            cursor.execute("""
+                SELECT
+                    profile_version,
+                    career_path_id
+                FROM students
+                WHERE student_id = :student_id
+            """, student_id=student_id)
+
+            latest = cursor.fetchone()
+
+            if (
+                latest is None
+                or int(latest[0]) != profile_version
+                or (
+                    requested_path_id is None
+                    and latest[1] != student[1]
+                )
+            ):
+                raise ProfileError(
+                    "تغيّر الملف أثناء التحليل. "
+                    "أعيدي التحليل للحصول على أحدث نتيجة.",
+                    409,
+                    "analysis_profile_changed",
+                )
+
+    return jsonify({
+        "data": {
+            "studentId": str(student_id),
+            "profileVersion": profile_version,
+            "path": {
+                "id": str(path[0]),
+                "title": path[1],
+                "description": description or "",
+            },
+            "skills": results,
+            "requiredCount": len(results),
+            "coveredCount": sum(
+                1
+                for item in results
+                if item["covered"]
+            ),
+            "totalWeight": total_weight,
+            "coveredWeight": covered_weight,
+            "coveragePercentage": round(
+                covered_weight / total_weight * 100,
+                2,
+            ),
+            "algorithmVersion": "skill-id-coverage-v1",
+            "isProficiencyAssessment": False,
+        }
+    })
