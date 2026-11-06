@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -28,6 +29,38 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
     'IN_PROGRESS': 'قيد التنفيذ',
     'COMPLETED': 'مكتملة',
   };
+
+  static const Map<String, Color> _statusColors = {
+    'NOT_STARTED': Color(0xFF64748B),
+    'IN_PROGRESS': Color(0xFFD97706),
+    'COMPLETED': Color(0xFF16834A),
+  };
+
+  static const Map<String, Color> _statusBackgrounds = {
+    'NOT_STARTED': Color(0xFFF1F5F9),
+    'IN_PROGRESS': Color(0xFFFFF7ED),
+    'COMPLETED': Color(0xFFECFDF3),
+  };
+
+  IconData _statusIcon(String status) {
+    switch (status) {
+      case 'COMPLETED':
+        return Icons.check_circle_outline;
+      case 'IN_PROGRESS':
+        return Icons.timelapse;
+      default:
+        return Icons.radio_button_unchecked;
+    }
+  }
+
+  Color _statusColor(String status) {
+    return _statusColors[status] ?? const Color(0xFF64748B);
+  }
+
+  Color _statusBackground(String status) {
+    return _statusBackgrounds[status] ??
+        const Color(0xFFF1F5F9);
+  }
 
   @override
   void initState() {
@@ -156,12 +189,15 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
       }
 
       for (final item in items) {
-        final resources = (item as Map<String, dynamic>)['resources'];
+        final resources =
+            (item as Map<String, dynamic>)['resources'];
 
         if (resources is! List ||
-            resources.any((resource) =>
-                resource is! Map<String, dynamic> ||
-                resource['title'] is! String)) {
+            resources.any(
+              (resource) =>
+                  resource is! Map<String, dynamic> ||
+                  resource['title'] is! String,
+            )) {
           throw const ApiException(
             'بيانات مصادر التعلّم غير صالحة.',
           );
@@ -190,7 +226,8 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
     });
 
     try {
-      final data = await _request('/api/v1/students/me/roadmap');
+      final data =
+          await _request('/api/v1/students/me/roadmap');
 
       if (!mounted) return;
 
@@ -277,44 +314,137 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
 
     final selected = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24),
+        ),
+      ),
       builder: (sheetContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 12),
-                const Text(
-                  'حالة التقدّم',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                for (final entry in _statusLabels.entries)
-                  ListTile(
-                    leading: Icon(
-                      entry.key == 'COMPLETED'
-                          ? Icons.check_circle_outline
-                          : entry.key == 'IN_PROGRESS'
-                              ? Icons.timelapse
-                              : Icons.radio_button_unchecked,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                18, 20, 18, 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    title: Text(entry.value),
-                    trailing: item['status'] == entry.key
-                        ? const Icon(
-                            Icons.check,
-                            color: MasarColors.primaryGreen,
-                          )
-                        : null,
-                    onTap: () {
-                      Navigator.pop(sheetContext, entry.key);
-                    },
                   ),
-                const SizedBox(height: 12),
-              ],
+                  const SizedBox(height: 18),
+                  const Text(
+                    'حالة التقدّم',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: MasarColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'اختر الحالة المناسبة لهذه الخطوة',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: MasarColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  for (final entry in _statusLabels.entries)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Builder(
+                        builder: (context) {
+                          final isSelected =
+                              item['status'] == entry.key;
+                          final color =
+                              _statusColor(entry.key);
+                          final background =
+                              _statusBackground(entry.key);
+
+                          return Material(
+                            color: background,
+                            borderRadius:
+                                BorderRadius.circular(15),
+                            child: InkWell(
+                              borderRadius:
+                                  BorderRadius.circular(15),
+                              onTap: () {
+                                Navigator.pop(
+                                  sheetContext,
+                                  entry.key,
+                                );
+                              },
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 17,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? color
+                                        : color.withOpacity(0.20),
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      _statusIcon(entry.key),
+                                      color: color,
+                                      size: 25,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        entry.value,
+                                        style: TextStyle(
+                                          color: color,
+                                          fontSize: 15,
+                                          fontWeight:
+                                              FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected) ...[
+                                      Text(
+                                        'المحددة',
+                                        style: TextStyle(
+                                          color: color,
+                                          fontSize: 12,
+                                          fontWeight:
+                                              FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Icon(
+                                        Icons.check,
+                                        color: color,
+                                        size: 22,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         );
@@ -366,7 +496,10 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
                 onPressed: () {
                   if (title.trim().isEmpty) return;
 
-                  Navigator.pop(dialogContext, title.trim());
+                  Navigator.pop(
+                    dialogContext,
+                    title.trim(),
+                  );
                 },
                 child: const Text('إضافة'),
               ),
@@ -431,7 +564,9 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
                 : _error != null
                     ? _buildError()
                     : RefreshIndicator(
@@ -648,7 +783,7 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'حسب الخطوات التي حدّدتها ك مكتملة.',
+            'حسب الخطوات التي تم تحديدها كمكتملة.',
             style: TextStyle(
               fontSize: 12,
               color: Colors.white70,
@@ -659,20 +794,30 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
     );
   }
 
-  Widget _buildStep(Map<String, dynamic> item, int number) {
+  Widget _buildStep(
+    Map<String, dynamic> item,
+    int number,
+  ) {
     final status = item['status'] as String;
-    final description = item['description'] as String? ?? '';
+    final description =
+        item['description'] as String? ?? '';
     final hours = item['estimatedHours'];
     final resources = (item['resources'] as List)
         .cast<Map<String, dynamic>>();
-    final selectedInProfile = item['selectedInProfile'] == true;
+    final selectedInProfile =
+        item['selectedInProfile'] == true;
+
+    final color = _statusColor(status);
+    final background = _statusBackground(status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(
+          color: color.withOpacity(0.30),
+        ),
       ),
       child: ExpansionTile(
         key: ValueKey('roadmap-${item['id']}'),
@@ -680,11 +825,10 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
           horizontal: 16,
           vertical: 6,
         ),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        childrenPadding:
+            const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: CircleAvatar(
-          backgroundColor: status == 'COMPLETED'
-              ? MasarColors.primaryGreen
-              : MasarColors.primaryBlue,
+          backgroundColor: color,
           foregroundColor: Colors.white,
           child: status == 'COMPLETED'
               ? const Icon(Icons.check)
@@ -699,13 +843,25 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            _statusLabels[status]!,
-            style: TextStyle(
-              fontSize: 12,
-              color: status == 'COMPLETED'
-                  ? MasarColors.primaryGreen
-                  : MasarColors.textSecondary,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _statusLabels[status]!,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
             ),
           ),
         ),
@@ -775,11 +931,14 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
                   style: const TextStyle(fontSize: 13),
                 ),
                 subtitle:
-                    (resource['description'] as String? ?? '').isEmpty
+                    (resource['description'] as String? ?? '')
+                            .isEmpty
                         ? null
                         : Text(
                             resource['description'] as String,
-                            style: const TextStyle(fontSize: 12),
+                            style: const TextStyle(
+                              fontSize: 12,
+                            ),
                           ),
                 enabled: resource['url'] is String,
                 onTap: () {
@@ -792,9 +951,16 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
             child: OutlinedButton.icon(
               onPressed: _saving
                   ? null
-                  : () => _changeStatus(item, personal: false),
+                  : () => _changeStatus(
+                        item,
+                        personal: false,
+                      ),
               icon: const Icon(Icons.edit_outlined),
               label: const Text('تحديث حالة الخطوة'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: color,
+                side: BorderSide(color: color),
+              ),
             ),
           ),
         ],
@@ -802,26 +968,27 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
     );
   }
 
-  Widget _buildPersonalTask(Map<String, dynamic> task) {
-    final completed = task['status'] == 'COMPLETED';
+  Widget _buildPersonalTask(
+    Map<String, dynamic> task,
+  ) {
+    final status = task['status'] as String;
+    final color = _statusColor(status);
+    final background = _statusBackground(status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(
+          color: color.withOpacity(0.30),
+        ),
       ),
       child: ListTile(
         leading: Icon(
-          completed
-              ? Icons.check_circle
-              : task['status'] == 'IN_PROGRESS'
-                  ? Icons.timelapse
-                  : Icons.radio_button_unchecked,
-          color: completed
-              ? MasarColors.primaryGreen
-              : MasarColors.primaryBlue,
+          _statusIcon(status),
+          color: color,
+          size: 26,
         ),
         title: Text(
           task['title'] as String,
@@ -830,14 +997,41 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text(
-          _statusLabels[task['status']]!,
-          style: const TextStyle(fontSize: 12),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _statusLabels[status]!,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ),
+          ),
         ),
-        trailing: const Icon(Icons.edit_outlined, size: 20),
+        trailing: Icon(
+          Icons.edit_outlined,
+          size: 20,
+          color: color,
+        ),
         enabled: !_saving,
         onTap: () {
-          _changeStatus(task, personal: true);
+          _changeStatus(
+            task,
+            personal: true,
+          );
         },
       ),
     );
@@ -850,7 +1044,9 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(
+          color: MasarColors.border,
+        ),
       ),
       child: Text(
         message,

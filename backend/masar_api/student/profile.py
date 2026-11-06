@@ -100,6 +100,19 @@ def _english_name(value):
     return " ".join(value.split())
 
 
+
+def _arabic_name(value):
+    value = _text(value, "????? ???????", 200)
+
+    if not re.fullmatch(r"[\u0621-\u064A\u0671-\u06D3\s]+", value):
+        raise ProfileError("????? ??? ?? ???? ????? ?????.")
+
+    if sum(c.isalpha() for c in value) < 2:
+        raise ProfileError("????? ?????? ??? ????.")
+
+    return " ".join(value.split())
+
+
 def _id(value, label, optional=False):
     if optional and (value is None or value == ""):
         return None
@@ -336,6 +349,11 @@ def _payload():
 
     return {
         "version": version,
+        "name_ar": (
+            _arabic_name(payload["name"])
+            if "name" in payload
+            else None
+        ),
         "name_en": (
             _english_name(payload["nameEn"])
             if "nameEn" in payload
@@ -981,6 +999,17 @@ def save_my_profile():
                 academic_year=data["academic_year"],
                 student_id=student_id,
             )
+
+            if data["name_ar"] is not None:
+                cursor.execute("""
+                    UPDATE users
+                    SET full_name = :name_ar,
+                        updated_at = LOCALTIMESTAMP
+                    WHERE user_id = :user_id
+                """,
+                    name_ar=data["name_ar"],
+                    user_id=user_id,
+                )
 
             if data["name_en"] is not None:
                 cursor.execute("""

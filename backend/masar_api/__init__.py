@@ -1,3 +1,4 @@
+
 import logging
 import os
 from pathlib import Path
@@ -12,6 +13,7 @@ from .database import (
     get_connection,
 )
 from .features import register_feature_blueprints
+from .password_reset import password_reset_bp
 from .registration import registration_bp
 
 
@@ -46,11 +48,17 @@ def create_app():
 
     app.logger.setLevel(logging.INFO)
 
+    # Database configuration
     configure_database(app)
 
+    # Register authentication and registration
     app.register_blueprint(registration_bp)
     app.register_blueprint(authentication_bp)
 
+    # Register password reset
+    app.register_blueprint(password_reset_bp)
+
+    # Register other MASAR features
     register_feature_blueprints(app)
 
     allowed_origins = {
@@ -110,7 +118,6 @@ def create_app():
 
         if not error_code:
             number = getattr(details, "code", None)
-
             error_code = (
                 f"ORA-{number:05d}"
                 if isinstance(number, int)
@@ -152,13 +159,17 @@ def create_app():
     def database_health():
         with get_connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT COUNT(*)
                     FROM universities
                     WHERE is_active = 1
-                """)
+                    """
+                )
 
-                universities_count = int(cursor.fetchone()[0])
+                universities_count = int(
+                    cursor.fetchone()[0]
+                )
 
         return jsonify({
             "status": "ok",
@@ -170,7 +181,8 @@ def create_app():
     def universities():
         with get_connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT
                         university_id,
                         university_name,
@@ -179,7 +191,9 @@ def create_app():
                     WHERE is_active = 1
                       AND university_id = :university_id
                     ORDER BY university_name
-                """, university_id=12)
+                    """,
+                    university_id=12,
+                )
 
                 rows = cursor.fetchall()
 
@@ -191,7 +205,7 @@ def create_app():
                     "type": row[2],
                 }
                 for row in rows
-            ],
+            ]
         })
 
     app.logger.info(

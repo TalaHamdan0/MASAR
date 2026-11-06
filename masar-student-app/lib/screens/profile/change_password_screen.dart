@@ -1,7 +1,13 @@
+
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 import '../../theme/masar_theme.dart';
+import '../../core/services/auth_session.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   final bool isResetPassword;
@@ -32,6 +38,12 @@ class _ChangePasswordScreenState
   bool _showCurrentPassword = false;
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
+  bool _isSaving = false;
+
+  static const String _apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:5010',
+  );
 
   @override
   void dispose() {
@@ -39,6 +51,193 @@ class _ChangePasswordScreenState
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+        ),
+      );
+  }
+
+  String _errorMessage(
+    int statusCode,
+    String responseBody,
+  ) {
+    try {
+      final decoded = jsonDecode(responseBody);
+
+      if (decoded is Map<String, dynamic>) {
+        final error = decoded['error'];
+
+        if (error is Map) {
+          final message = error['message'];
+
+          if (message is String && message.isNotEmpty) {
+            return message;
+          }
+        }
+
+        final message = decoded['message'];
+
+        if (message is String && message.isNotEmpty) {
+          return message;
+        }
+      }
+    } catch (_) {
+      // Use the fallback message.
+    }
+
+    if (statusCode == 401) {
+      return 'انتهت الجلسة، سجّل الدخول مجددًا.';
+    }
+
+    if (statusCode >= 500) {
+      return 'حدث خطأ في الخادم. حاول مرة أخرى.';
+    }
+
+    return 'تعذّر تغيير كلمة المرور. حاول مرة أخرى.';
+  }
+
+  Future<void> _changePassword() async {
+    if (_isSaving) return;
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    if (widget.isResetPassword) {
+      _showMessage(
+        'إعادة تعيين كلمة المرور تحتاج التحقق برمز الاستعادة أولًا.',
+      );
+      return;
+    }
+
+    final token = AuthSession.accessToken;
+
+    if (token == null || token.trim().isEmpty) {
+      _showMessage(
+        'انتهت الجلسة، سجّل الدخول مجددًا.',
+      );
+      return;
+    }
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse(
+              '$_apiBaseUrl/api/v1/auth/change-password',
+            ),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({
+              'currentPassword':
+                  _currentPasswordController.text,
+              'newPassword':
+                  _newPasswordController.text,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      if (!mounted) return;
+debugPrint('MASAR CHANGE PASSWORD STATUS: ${response.statusCode}');
+debugPrint('MASAR CHANGE PASSWORD RESPONSE: ${response.body}');
+      if (response.statusCode == 200) {
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+
+        _showMessage(
+          'تم تغيير كلمة المرور بنجاح.',
+        );
+
+        return;
+      }
+
+      _showMessage(
+        _errorMessage(
+          response.statusCode,
+          response.body,
+        ),
+      );
+    } on TimeoutException {
+      _showMessage(
+        'انتهت مهلة الاتصال بالخادم. حاول مرة أخرى.',
+      );
+    } on http.ClientException {
+      _showMessage(
+        'تعذّر الاتصال بالخادم. تأكد من تشغيل الـ Backend.',
+      );
+    } catch (_) {
+      _showMessage(
+        'حدث خطأ أثناء تغيير كلمة المرور.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
+
+  InputDecoration _passwordDecoration({
+    required String label,
+    required bool visible,
+    required VoidCallback onToggle,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(
+        fontFamily: 'Cairo',
+      ),
+      prefixIcon: const Icon(
+        Icons.lock_outline,
+      ),
+      suffixIcon: IconButton(
+        onPressed: onToggle,
+        icon: Icon(
+          visible
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+        ),
+      ),
+      filled: true,
+      fillColor: MasarColors.lightBlue,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: MasarColors.primaryBlue,
+          width: 1.2,
+        ),
+      ),
+    );
   }
 
   @override
@@ -49,10 +248,6 @@ class _ChangePasswordScreenState
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.grey.shade200,
-
-        // =========================
-        // App Bar
-        // =========================
         appBar: AppBar(
           leading: IconButton(
             onPressed: () {
@@ -75,10 +270,6 @@ class _ChangePasswordScreenState
             ),
           ),
         ),
-
-        // =========================
-        // Body
-        // =========================
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
@@ -95,9 +286,6 @@ class _ChangePasswordScreenState
                     children: [
                       const SizedBox(height: 25),
 
-                      // =========================
-                      // Icon
-                      // =========================
                       Container(
                         width: 90,
                         height: 90,
@@ -115,9 +303,6 @@ class _ChangePasswordScreenState
 
                       const SizedBox(height: 25),
 
-                      // =========================
-                      // Title
-                      // =========================
                       Text(
                         isReset
                             ? 'إنشاء كلمة مرور جديدة'
@@ -133,9 +318,6 @@ class _ChangePasswordScreenState
 
                       const SizedBox(height: 10),
 
-                      // =========================
-                      // Description
-                      // =========================
                       Text(
                         isReset
                             ? 'أدخل كلمة المرور الجديدة لحسابك'
@@ -151,10 +333,6 @@ class _ChangePasswordScreenState
 
                       const SizedBox(height: 30),
 
-                      // ==================================================
-                      // Current Password
-                      // يظهر فقط عند تغيير كلمة المرور من الإعدادات
-                      // ==================================================
                       if (!isReset) ...[
                         TextFormField(
                           controller:
@@ -166,69 +344,21 @@ class _ChangePasswordScreenState
                           inputFormatters: [
                             LengthLimitingTextInputFormatter(10),
                           ],
-                          decoration: InputDecoration(
-                            labelText:
-                                'كلمة المرور الحالية',
-                            labelStyle: const TextStyle(
-                              fontFamily: 'Cairo',
-                            ),
-
-                            prefixIcon: const Icon(
-                              Icons.lock_outline,
-                            ),
-
-                            // 👁️ العين
-                            // مفتوحة = الباسورد ظاهر
-                            // مغلقة = الباسورد نقاط
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _showCurrentPassword =
-                                      !_showCurrentPassword;
-                                });
-                              },
-                              icon: Icon(
-                                _showCurrentPassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                            ),
-
-                            filled: true,
-                            fillColor:
-                                MasarColors.lightBlue,
-
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-
-                            enabledBorder:
-                                OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-
-                            focusedBorder:
-                                OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color:
-                                    MasarColors.primaryBlue,
-                                width: 1.2,
-                              ),
-                            ),
+                          decoration: _passwordDecoration(
+                            label: 'كلمة المرور الحالية',
+                            visible: _showCurrentPassword,
+                            onToggle: () {
+                              setState(() {
+                                _showCurrentPassword =
+                                    !_showCurrentPassword;
+                              });
+                            },
                           ),
-
                           validator: (value) {
                             if (value == null ||
-                                value.trim().isEmpty) {
+                                value.isEmpty) {
                               return 'أدخل كلمة المرور الحالية';
                             }
-
                             return null;
                           },
                         ),
@@ -236,85 +366,40 @@ class _ChangePasswordScreenState
                         const SizedBox(height: 18),
                       ],
 
-                      // ==================================================
-                      // New Password
-                      // ==================================================
                       TextFormField(
-                        controller:
-                            _newPasswordController,
+                        controller: _newPasswordController,
                         obscureText: !_showNewPassword,
                         autocorrect: false,
                         enableSuggestions: false,
                         inputFormatters: [
                           LengthLimitingTextInputFormatter(10),
                         ],
-
-                        decoration: InputDecoration(
-                          labelText:
-                              'كلمة المرور الجديدة',
-                          labelStyle: const TextStyle(
-                            fontFamily: 'Cairo',
-                          ),
-
-                          prefixIcon: const Icon(
-                            Icons.lock_outline,
-                          ),
-
-                          // 👁️ العين
-                          // مفتوحة = الباسورد ظاهر
-                          // مغلقة = الباسورد نقاط
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showNewPassword =
-                                    !_showNewPassword;
-                              });
-                            },
-                            icon: Icon(
-                              _showNewPassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                          ),
-
-                          filled: true,
-                          fillColor:
-                              MasarColors.lightBlue,
-
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-
-                          enabledBorder:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-
-                          focusedBorder:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color:
-                                  MasarColors.primaryBlue,
-                              width: 1.2,
-                            ),
-                          ),
+                        decoration: _passwordDecoration(
+                          label: 'كلمة المرور الجديدة',
+                          visible: _showNewPassword,
+                          onToggle: () {
+                            setState(() {
+                              _showNewPassword =
+                                  !_showNewPassword;
+                            });
+                          },
                         ),
-
                         validator: (value) {
                           if (value == null ||
-                              value.trim().isEmpty) {
+                              value.isEmpty) {
                             return 'أدخل كلمة المرور الجديدة';
                           }
 
-                          if (value.characters.length < 8 ||
-                              value.characters.length > 10) {
+                          if (value.length < 8 ||
+                              value.length > 10) {
                             return 'كلمة المرور من 8 إلى 10 خانات';
+                          }
+
+                          if (!isReset &&
+                              value ==
+                                  _currentPasswordController
+                                      .text) {
+                            return 'كلمة المرور الجديدة يجب أن تختلف عن الحالية';
                           }
 
                           return null;
@@ -323,9 +408,6 @@ class _ChangePasswordScreenState
 
                       const SizedBox(height: 18),
 
-                      // ==================================================
-                      // Confirm Password
-                      // ==================================================
                       TextFormField(
                         controller:
                             _confirmPasswordController,
@@ -336,67 +418,19 @@ class _ChangePasswordScreenState
                         inputFormatters: [
                           LengthLimitingTextInputFormatter(10),
                         ],
-
-                        decoration: InputDecoration(
-                          labelText:
-                              'تأكيد كلمة المرور الجديدة',
-                          labelStyle: const TextStyle(
-                            fontFamily: 'Cairo',
-                          ),
-
-                          prefixIcon: const Icon(
-                            Icons.lock_outline,
-                          ),
-
-                          // 👁️ العين
-                          // مفتوحة = الباسورد ظاهر
-                          // مغلقة = الباسورد نقاط
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showConfirmPassword =
-                                    !_showConfirmPassword;
-                              });
-                            },
-                            icon: Icon(
-                              _showConfirmPassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                          ),
-
-                          filled: true,
-                          fillColor:
-                              MasarColors.lightBlue,
-
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-
-                          enabledBorder:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-
-                          focusedBorder:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color:
-                                  MasarColors.primaryBlue,
-                              width: 1.2,
-                            ),
-                          ),
+                        decoration: _passwordDecoration(
+                          label: 'تأكيد كلمة المرور الجديدة',
+                          visible: _showConfirmPassword,
+                          onToggle: () {
+                            setState(() {
+                              _showConfirmPassword =
+                                  !_showConfirmPassword;
+                            });
+                          },
                         ),
-
                         validator: (value) {
                           if (value == null ||
-                              value.trim().isEmpty) {
+                              value.isEmpty) {
                             return 'أكد كلمة المرور الجديدة';
                           }
 
@@ -411,51 +445,57 @@ class _ChangePasswordScreenState
 
                       const SizedBox(height: 30),
 
-                      // =========================
-                      // Save Button
-                      // =========================
                       SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: _changePassword,
+                          onPressed: _isSaving
+                              ? null
+                              : _changePassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 MasarColors.primaryBlue,
                             foregroundColor: Colors.white,
                             elevation: 0,
-                            shape:
-                                RoundedRectangleBorder(
+                            shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.circular(30),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                isReset
-                                    ? 'حفظ كلمة المرور'
-                                    : 'تغيير كلمة المرور',
-                                style: const TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 16,
-                                  fontWeight:
-                                      FontWeight.bold,
-                                  color: Colors.white,
+                          child: _isSaving
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      isReset
+                                          ? 'حفظ كلمة المرور'
+                                          : 'تغيير كلمة المرور',
+                                      style: const TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 16,
+                                        fontWeight:
+                                            FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ],
                                 ),
-                              ),
-
-                              const SizedBox(width: 8),
-
-                              const Icon(
-                                Icons.arrow_forward,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ],
-                          ),
                         ),
                       ),
 
@@ -469,37 +509,5 @@ class _ChangePasswordScreenState
         ),
       ),
     );
-  }
-
-  // ==================================================
-  // Change / Reset Password
-  // ==================================================
-  void _changePassword() {
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
-    }
-
-    FocusScope.of(context).unfocus();
-
-    // لا نعرض نجاحًا أو ننتقل للدخول قبل رد الباكند.
-    // التغيير من الإعدادات يحتاج جلسة وتحققًا من كلمة المرور الحالية.
-    // الاستعادة تحتاج إذن إعادة تعيين صادرًا بعد التحقق من الرمز.
-    final message = widget.isResetPassword
-        ? 'خدمة إعادة تعيين كلمة المرور غير جاهزة بعد؛ بانتظار ربط الباكند.'
-        : 'خدمة تغيير كلمة المرور غير جاهزة بعد؛ بانتظار ربط الباكند.';
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-            ),
-          ),
-        ),
-      );
   }
 }

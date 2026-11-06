@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import '../../theme/masar_theme.dart';
@@ -73,101 +74,152 @@ class AppBottomNavBar extends StatelessWidget {
     ];
 
     const selectedIcons = [
-      Icons.home,
-      Icons.map,
-      Icons.business_center,
-      Icons.badge,
-      Icons.person,
+      Icons.home_rounded,
+      Icons.map_rounded,
+      Icons.business_center_rounded,
+      Icons.badge_rounded,
+      Icons.person_rounded,
     ];
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Material(
         color: Colors.white,
-        child: DecoratedBox(
+        child: Container(
+          width: double.infinity,
           decoration: const BoxDecoration(
+            color: Colors.white,
             border: Border(
-              top: BorderSide(color: MasarColors.border),
+              top: BorderSide(
+                color: MasarColors.border,
+                width: 1,
+              ),
             ),
           ),
           child: SafeArea(
             top: false,
+            minimum: const EdgeInsets.only(bottom: 4),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final fontSize =
-                    constraints.maxWidth < 360 ? 10.5 : 11.5;
+                final width = constraints.maxWidth;
+                final itemWidth = width / labels.length;
+
+                final fontSize = itemWidth < 65
+                    ? 9.0
+                    : itemWidth < 76
+                        ? 10.0
+                        : 11.0;
+
+                final iconSize = itemWidth < 65
+                    ? 20.0
+                    : 23.0;
 
                 return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(labels.length, (index) {
-                    final selected = index == selectedIndex;
-                    final color = selected
-                        ? MasarColors.primaryBlue
-                        : MasarColors.textSecondary;
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center,
+                  children: List.generate(
+                    labels.length,
+                    (index) {
+                      final selected =
+                          index == selectedIndex;
 
-                    return Expanded(
-                      child: Semantics(
-                        selected: selected,
-                        button: true,
-                        label: semanticLabels[index],
-                        excludeSemantics: true,
-                        child: Tooltip(
-                          message: semanticLabels[index],
-                          child: InkWell(
-                            onTap: () => _onItemTapped(context, index),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                                vertical: 10,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 180),
-                                    width: 48,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: selected
-                                          ? MasarColors.lightBlue
-                                          : Colors.transparent,
-                                      borderRadius:
-                                          BorderRadius.circular(16),
-                                    ),
-                                    child: Icon(
-                                      selected
-                                          ? selectedIcons[index]
-                                          : icons[index],
-                                      color: color,
-                                      size: 23,
-                                    ),
+                      final color = selected
+                          ? MasarColors.primaryBlue
+                          : MasarColors.textSecondary;
+
+                      return Expanded(
+                        child: Semantics(
+                          selected: selected,
+                          button: true,
+                          label: semanticLabels[index],
+                          excludeSemantics: true,
+                          child: Tooltip(
+                            message: semanticLabels[index],
+                            child: InkWell(
+                              onTap: () =>
+                                  _onItemTapped(context, index),
+                              child: SizedBox(
+                                height: 72,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                    horizontal: 1,
+                                    vertical: 5,
                                   ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    index == 0
-                                        ? '${labels[index]}\n'
-                                        : labels[index],
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: fontSize,
-                                      height: 1.35,
-                                      color: color,
-                                      fontWeight: selected
-                                          ? FontWeight.bold
-                                          : FontWeight.w500,
-                                    ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    mainAxisSize:
+                                        MainAxisSize.min,
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
+                                        width: itemWidth < 65
+                                            ? 38
+                                            : 44,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: selected
+                                              ? MasarColors.lightBlue
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                        ),
+                                        child: Icon(
+                                          selected
+                                              ? selectedIcons[index]
+                                              : icons[index],
+                                          color: color,
+                                          size: iconSize,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 5),
+
+                                      Expanded(
+                                        child: Center(
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment:
+                                                Alignment.topCenter,
+                                            child: Text(
+                                              labels[index],
+                                              textAlign:
+                                                  TextAlign.center,
+                                              textDirection:
+                                                  TextDirection.rtl,
+                                              maxLines: 2,
+                                              softWrap: true,
+                                              overflow:
+                                                  TextOverflow.visible,
+                                              textScaler:
+                                                  TextScaler.noScaling,
+                                              style: TextStyle(
+                                                fontSize: fontSize,
+                                                height: 1.25,
+                                                color: color,
+                                                fontWeight: selected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
                 );
               },
             ),

@@ -152,7 +152,7 @@ class _MyCvScreenState extends State<MyCvScreen> {
       if (!_isEnglishText(text)) {
         throw FormatException(
           '$label يحتاج بيانات إنجليزية. '
-          'عدّليه من بيانات الملف قبل التنزيل.',
+          'يرجى تعديله من بيانات الملف قبل إنشاء السيرة الذاتية.',
         );
       }
 
@@ -163,8 +163,8 @@ class _MyCvScreenState extends State<MyCvScreen> {
 
     if (name.isEmpty) {
       throw const FormatException(
-        'أضيفي اسمك بالإنجليزي من تعديل بيانات الملف '
-        'واحفظيه مرة واحدة.',
+        'يرجى إضافة الاسم باللغة الإنجليزية من تعديل بيانات الملف '
+        'وحفظه مرة واحدة.',
       );
     }
 
@@ -172,7 +172,7 @@ class _MyCvScreenState extends State<MyCvScreen> {
         RegExp(r'[A-Za-z]').allMatches(name).length < 2 ||
         name.length > 200) {
       throw const FormatException(
-        'صحّحي الاسم الإنجليزي من بيانات الملف.',
+        'يرجى تصحيح الاسم الإنجليزي من بيانات الملف.',
       );
     }
 
@@ -636,8 +636,8 @@ class _MyCvScreenState extends State<MyCvScreen> {
       if (mounted) {
         _showMessage(
           'تعذر تجهيز ملف PDF. '
-          'تأكدي من اتصال الإنترنت لتحميل الخط '
-          'ثم حاولي مجددًا.',
+          'يرجى التحقق من اتصال الإنترنت لتحميل الخط '
+          'ثم إعادة المحاولة.',
         );
       }
     } finally {
@@ -998,7 +998,7 @@ class _MyCvScreenState extends State<MyCvScreen> {
                 label: Text(
                   _savingPdf
                       ? 'جارٍ تجهيز الملف...'
-                      : 'تنزيل CV',
+                      : 'إنشاء السيرة الذاتية',
                 ),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(

@@ -1,3 +1,4 @@
+
 import re
 import secrets
 
@@ -235,5 +236,129 @@ def logout():
     return jsonify({
         "data": {
             "message": "تم تسجيل الخروج.",
+        }
+    })
+
+
+@authentication_bp.post("/api/v1/auth/change-password")
+def change_password():
+    token = bearer_token()
+
+    if token is None:
+        return error_response(
+            "invalid_session",
+            "سجّل الدخول أولًا.",
+            401,
+        )
+
+    payload = request.get_json(silent=True)
+
+    if not isinstance(payload, dict):
+        return error_response(
+            "invalid_json",
+            "بيانات الطلب غير صالحة.",
+            400,
+        )
+
+    current_password = payload.get("currentPassword")
+    new_password = payload.get("newPassword")
+
+    if not isinstance(current_password, str):
+        return error_response(
+            "invalid_current_password",
+            "أدخل كلمة المرور الحالية.",
+            422,
+        )
+
+    if not isinstance(new_password, str):
+        return error_response(
+            "invalid_new_password",
+            "أدخل كلمة المرور الجديدة.",
+            422,
+        )
+
+    if not 8 <= len(new_password) <= 10:
+        return error_response(
+            "invalid_new_password",
+            "كلمة المرور الجديدة يجب أن تكون من 8 إلى 10 خانات.",
+            422,
+        )
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            user_id = session_user(cursor, token)
+
+            if user_id is None:
+                return error_response(
+                    "invalid_session",
+                    "انتهت الجلسة، سجّل الدخول مجددًا.",
+                    401,
+                )
+
+            cursor.execute("""
+                SELECT password_hash
+                FROM users
+                WHERE user_id = :user_id
+                FOR UPDATE
+            """, user_id=user_id)
+
+            row = cursor.fetchone()
+
+            if row is None:
+                return error_response(
+                    "account_not_found",
+                    "الحساب غير موجود.",
+                    404,
+                )
+
+            old_hash = row[0]
+
+            if not check_password_hash(
+                old_hash,
+                current_password,
+            ):
+                return error_response(
+                    "incorrect_current_password",
+                    "كلمة المرور الحالية غير صحيحة.",
+                    422,
+                )
+
+            if check_password_hash(
+                old_hash,
+                new_password,
+            ):
+                return error_response(
+                    "same_password",
+                    "كلمة المرور الجديدة يجب أن تختلف عن الحالية.",
+                    422,
+                )
+
+            new_hash = generate_password_hash(new_password)
+
+            cursor.execute("""
+                UPDATE users
+                SET password_hash = :password_hash
+                WHERE user_id = :user_id
+            """,
+                password_hash=new_hash,
+                user_id=user_id,
+            )
+
+            cursor.execute("""
+                UPDATE auth_sessions
+                SET revoked_at = LOCALTIMESTAMP
+                WHERE user_id = :user_id
+                  AND revoked_at IS NULL
+                  AND token_hash <> :current_token_hash
+            """,
+                user_id=user_id,
+                current_token_hash=token_digest(token),
+            )
+
+        connection.commit()
+
+    return jsonify({
+        "data": {
+            "message": "تم تغيير كلمة المرور بنجاح.",
         }
     })

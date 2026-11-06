@@ -1,3 +1,4 @@
+
 from flask import Blueprint
 
 
@@ -10,3 +11,4 @@ student_bp = Blueprint(
 
 from . import profile
 from . import roadmap
+from . import training
