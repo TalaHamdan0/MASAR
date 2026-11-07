@@ -1,26 +1,186 @@
-
 import 'package:flutter/material.dart';
-import '../../theme/masar_theme.dart';
+
+import '../../core/theme/uni_dashboard_theme.dart';
+import '../../core/localization/uni_text.dart';
+import '../../core/services/university_home_service.dart';
+import '../../core/services/university_auth_service.dart';
 
 class UniversityHomeScreen extends StatefulWidget {
   const UniversityHomeScreen({super.key});
 
   @override
-  State<UniversityHomeScreen> createState() =>
-      _UniversityHomeScreenState();
+  State<UniversityHomeScreen> createState() => _UniversityHomeScreenState();
 }
 
-class _UniversityHomeScreenState
-    extends State<UniversityHomeScreen> {
+class _UniversityHomeScreenState extends State<UniversityHomeScreen> {
+  final UniversityHomeService _homeService = UniversityHomeService();
+
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  Map<String, dynamic>? _homeData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHomeData();
+  }
+
+  Future<void> _loadHomeData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final data = await _homeService.fetchHome();
+
+      if (!mounted) return;
+
+      setState(() {
+        _homeData = data;
+        _isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = error is UniversityAuthException
+            ? error.message
+            : 'حدث خطأ أثناء تحميل البيانات.';
+
+        _isLoading = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _mapOrEmpty(dynamic value) {
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+
+    return {};
+  }
+
+  List<Map<String, dynamic>> _listOfMaps(dynamic value) {
+    if (value is! List) return [];
+
+    return value
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+  }
+
+  int _intValue(dynamic value) {
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value.toString()) ?? 0;
+  }
+
+  double _doubleValue(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString()) ?? 0;
+  }
+
+  Map<String, dynamic> get _statistics => _mapOrEmpty(_homeData?['statistics']);
+
+  Map<String, dynamic> get _alerts => _mapOrEmpty(_homeData?['alerts']);
+
+  int _statusCount(String status) {
+    final statuses = _listOfMaps(_homeData?['internshipStatusCounts']);
+
+    for (final item in statuses) {
+      if (item['status'] == status) {
+        return _intValue(item['count']);
+      }
+    }
+
+    return 0;
+  }
+
+  String _formatDate(dynamic value) {
+    if (value == null || value.toString().isEmpty) {
+      return '-';
+    }
+
+    try {
+      final date = DateTime.parse(value.toString());
+
+      final day = date.day.toString().padLeft(2, '0');
+      final month = date.month.toString().padLeft(2, '0');
+
+      return '$day/$month/${date.year}';
+    } catch (_) {
+      return value.toString();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: Directionality.of(context),
       child: Container(
-        color: MasarColors.background,
+        color: UniColors.background,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(28),
-          child: _buildDashboardContent(),
+          child: _isLoading
+              ? _buildLoadingState()
+              : _errorMessage != null
+              ? _buildErrorState()
+              : _buildDashboardContent(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(50),
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 45,
+              color: UniColors.textSecondary,
+            ),
+            const SizedBox(height: 14),
+            UniText(
+              'تعذر تحميل بيانات الصفحة',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: UniColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            UniText(
+              _errorMessage ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: UniColors.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 18),
+            ElevatedButton.icon(
+              onPressed: _loadHomeData,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const UniText('إعادة المحاولة'),
+            ),
+          ],
         ),
       ),
     );
@@ -37,15 +197,9 @@ class _UniversityHomeScreenState
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 3,
-              child: _buildStudentsByMajor(),
-            ),
+            Expanded(flex: 3, child: _buildStudentsByMajor()),
             const SizedBox(width: 20),
-            Expanded(
-              flex: 2,
-              child: _buildTrainingStatus(),
-            ),
+            Expanded(flex: 2, child: _buildTrainingStatus()),
           ],
         ),
         const SizedBox(height: 24),
@@ -57,15 +211,20 @@ class _UniversityHomeScreenState
   }
 
   Widget _buildWelcomeBanner() {
+    final staff = _mapOrEmpty(_homeData?['staff']);
+
+    final staffName = staff['name']?.toString() ?? '';
+
+    final termLabel =
+        _homeData?['trainingTermLabel']?.toString() ??
+        'الفصل التدريبي 2026 / 2027';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(26),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            MasarColors.primaryBlue,
-            MasarColors.darkBlue,
-          ],
+          colors: [UniColors.primaryBlue, UniColors.darkBlue],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
@@ -77,8 +236,8 @@ class _UniversityHomeScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'مرحباً د. محمد العبدالله 👋',
+                UniText(
+                  'مرحباً ${staffName.isEmpty ? 'بك' : staffName} 👋',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 23,
@@ -86,12 +245,9 @@ class _UniversityHomeScreenState
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                UniText(
                   'تابع أداء الطلبة وإدارة برامج التدريب من مكان واحد.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
                 const SizedBox(height: 18),
                 Container(
@@ -103,17 +259,17 @@ class _UniversityHomeScreenState
                     color: Colors.white.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.calendar_month_rounded,
                         color: Colors.white,
                         size: 17,
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        'الفصل التدريبي 2026 / 2027',
+                      const SizedBox(width: 8),
+                      UniText(
+                        termLabel,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -149,8 +305,7 @@ class _UniversityHomeScreenState
   Widget _buildStatistics() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double cardWidth =
-            (constraints.maxWidth - 36) / 4;
+        final double cardWidth = (constraints.maxWidth - 36) / 4;
 
         return Wrap(
           spacing: 12,
@@ -160,44 +315,47 @@ class _UniversityHomeScreenState
               width: cardWidth,
               child: _statCard(
                 title: 'إجمالي الطلاب',
-                value: '1,248',
+                value: _intValue(_statistics['totalStudents']).toString(),
                 subtitle: 'طالب مسجل',
                 icon: Icons.people_alt_rounded,
-                color: MasarColors.primaryBlue,
-                background: MasarColors.lightBlue,
+                color: UniColors.primaryBlue,
+                background: UniColors.lightBlue,
               ),
             ),
+
             SizedBox(
               width: cardWidth,
               child: _statCard(
                 title: 'الشركات المسجلة',
-                value: '86',
+                value: _intValue(_statistics['registeredCompanies']).toString(),
                 subtitle: 'شركة',
                 icon: Icons.business_rounded,
-                color: MasarColors.primaryGreen,
-                background: MasarColors.lightGreen,
+                color: UniColors.primaryGreen,
+                background: UniColors.lightGreen,
               ),
             ),
+
             SizedBox(
               width: cardWidth,
               child: _statCard(
                 title: 'الطلاب بالتدريب',
-                value: '142',
+                value: _intValue(_statistics['studentsInTraining']).toString(),
                 subtitle: 'طالب يتدرب حالياً',
                 icon: Icons.school_rounded,
-                color: MasarColors.primaryBlue,
-                background: MasarColors.lightBlue,
+                color: UniColors.primaryBlue,
+                background: UniColors.lightBlue,
               ),
             ),
+
             SizedBox(
               width: cardWidth,
               child: _statCard(
                 title: 'طلبات جديدة',
-                value: '18',
+                value: _intValue(_statistics['newApplications']).toString(),
                 subtitle: 'تحتاج مراجعة',
                 icon: Icons.assignment_rounded,
-                color: MasarColors.error,
-                background: const Color(0xFFFFEEEE),
+                color: UniColors.error,
+                background: UniColors.lightError,
               ),
             ),
           ],
@@ -217,9 +375,9 @@ class _UniversityHomeScreenState
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: MasarColors.white,
+        color: UniColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(color: UniColors.border),
       ),
       child: Row(
         children: [
@@ -237,24 +395,24 @@ class _UniversityHomeScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                UniText(
                   title,
                   style: TextStyle(
                     fontSize: 10.5,
-                    color: MasarColors.textSecondary,
+                    color: UniColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                UniText(
                   value,
                   style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
-                    color: MasarColors.textPrimary,
+                    color: UniColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                UniText(
                   subtitle,
                   style: TextStyle(
                     fontSize: 9.5,
@@ -271,60 +429,73 @@ class _UniversityHomeScreenState
   }
 
   Widget _buildStudentsByMajor() {
-    final majors = [
-      {'name': 'هندسة البرمجيات', 'value': 72},
-      {'name': 'علوم الحاسوب', 'value': 58},
-      {'name': 'نظم المعلومات', 'value': 46},
-      {'name': 'الذكاء الاصطناعي', 'value': 38},
-      {'name': 'الأمن السيبراني', 'value': 31},
-    ];
-
+    final majors = _listOfMaps(_homeData?['studentsByMajor']);
+    if (majors.isEmpty) {
+      return _dashboardCard(
+        title: 'الطلاب حسب التخصص',
+        icon: Icons.bar_chart_rounded,
+        child: Padding(
+          padding: EdgeInsets.all(25),
+          child: Center(
+            child: UniText(
+              'لا توجد بيانات طلاب لعرضها حالياً.',
+              style: TextStyle(color: UniColors.textSecondary, fontSize: 13),
+            ),
+          ),
+        ),
+      );
+    }
+    final maxValue = majors
+        .map((item) => _intValue(item['count']))
+        .reduce((a, b) => a > b ? a : b);
     return _dashboardCard(
       title: 'الطلاب حسب التخصص',
       icon: Icons.bar_chart_rounded,
       child: Column(
         children: majors.map((major) {
-          final int value = major['value'] as int;
-
+          final name = major['major']?.toString() ?? '';
+          final value = _intValue(major['count']);
           return Padding(
             padding: const EdgeInsets.only(bottom: 17),
             child: Row(
               children: [
                 SizedBox(
                   width: 115,
-                  child: Text(
-                    major['name'] as String,
+                  child: UniText(
+                    name,
                     style: TextStyle(
                       fontSize: 11.5,
-                      color: MasarColors.textPrimary,
+                      color: UniColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: LinearProgressIndicator(
-                      value: value / 100,
+                      value: maxValue > 0 ? value / maxValue : 0,
                       minHeight: 9,
-                      backgroundColor: MasarColors.lightBlue,
+                      backgroundColor: UniColors.lightBlue,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        MasarColors.primaryBlue,
+                        UniColors.primaryBlue,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
+
                 SizedBox(
                   width: 35,
-                  child: Text(
+                  child: UniText(
                     '$value',
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: MasarColors.textPrimary,
+                      color: UniColors.textPrimary,
                     ),
                   ),
                 ),
@@ -337,6 +508,8 @@ class _UniversityHomeScreenState
   }
 
   Widget _buildTrainingStatus() {
+    final percentage = _doubleValue(_homeData?['completionPercentage']);
+    final progressValue = (percentage / 100).clamp(0.0, 1.0);
     return _dashboardCard(
       title: 'حالة التدريب',
       icon: Icons.pie_chart_rounded,
@@ -353,30 +526,31 @@ class _UniversityHomeScreenState
                   width: 150,
                   height: 150,
                   child: CircularProgressIndicator(
-                    value: 0.68,
+                    value: progressValue,
                     strokeWidth: 16,
-                    backgroundColor: MasarColors.lightBlue,
+                    backgroundColor: UniColors.lightBlue,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      MasarColors.primaryGreen,
+                      UniColors.primaryGreen,
                     ),
                   ),
                 ),
+
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      '68%',
+                    UniText(
+                      '${percentage.toStringAsFixed(percentage % 1 == 0 ? 0 : 1)}%',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: MasarColors.textPrimary,
+                        color: UniColors.textPrimary,
                       ),
                     ),
-                    Text(
+                    UniText(
                       'مكتمل',
                       style: TextStyle(
                         fontSize: 11,
-                        color: MasarColors.textSecondary,
+                        color: UniColors.textSecondary,
                       ),
                     ),
                   ],
@@ -387,20 +561,20 @@ class _UniversityHomeScreenState
           const SizedBox(height: 22),
           _statusRow(
             'قيد التدريب',
-            '142',
-            MasarColors.primaryBlue,
+            '${_statusCount('ACTIVE')}',
+            UniColors.primaryBlue,
           ),
           const SizedBox(height: 10),
           _statusRow(
             'مكتمل',
-            '86',
-            MasarColors.primaryGreen,
+            '${_statusCount('COMPLETED')}',
+            UniColors.primaryGreen,
           ),
           const SizedBox(height: 10),
           _statusRow(
             'لم يبدأ',
-            '34',
-            MasarColors.warning,
+            '${_statusCount('SELECTED')}',
+            UniColors.warning,
           ),
         ],
       ),
@@ -413,27 +587,21 @@ class _UniversityHomeScreenState
         Container(
           width: 9,
           height: 9,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 9),
         Expanded(
-          child: Text(
+          child: UniText(
             title,
-            style: TextStyle(
-              fontSize: 11.5,
-              color: MasarColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 11.5, color: UniColors.textSecondary),
           ),
         ),
-        Text(
+        UniText(
           value,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: MasarColors.textPrimary,
+            color: UniColors.textPrimary,
           ),
         ),
       ],
@@ -441,116 +609,108 @@ class _UniversityHomeScreenState
   }
 
   Widget _buildApplicationsTable() {
-    final applications = [
-      {
-        'student': 'سارة أحمد',
-        'company': 'شركة التقنية',
-        'training': 'تطوير البرمجيات',
-        'date': '25/09/2026',
-        'status': 'جديد',
-      },
-      {
-        'student': 'محمد خالد',
-        'company': 'شركة الاتصالات',
-        'training': 'نظم المعلومات',
-        'date': '24/09/2026',
-        'status': 'قيد المراجعة',
-      },
-      {
-        'student': 'ليان محمود',
-        'company': 'الحلول الرقمية',
-        'training': 'تحليل البيانات',
-        'date': '23/09/2026',
-        'status': 'مقبول',
-      },
-      {
-        'student': 'عمر سامي',
-        'company': 'شركة البرمجيات',
-        'training': 'تطوير التطبيقات',
-        'date': '22/09/2026',
-        'status': 'قيد المراجعة',
-      },
-    ];
-
+    final applications = _listOfMaps(_homeData?['latestApplications']);
     return _dashboardCard(
       title: 'أحدث طلبات التدريب',
       icon: Icons.assignment_rounded,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: 850,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 13,
+      child: applications.isEmpty
+          ? Padding(
+              padding: EdgeInsets.all(25),
+              child: Center(
+                child: UniText(
+                  'لا توجد طلبات تدريب حالياً.',
+                  style: TextStyle(
+                    color: UniColors.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: MasarColors.background,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Row(
+              ),
+            )
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: 850,
+                child: Column(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'الطالب',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 13,
+                      ),
+                      decoration: BoxDecoration(
+                        color: UniColors.background,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: UniText(
+                              'الطالب',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: UniText(
+                              'الشركة',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: UniText(
+                              'التدريب المتوفر',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: UniText(
+                              'التاريخ',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: UniText(
+                              'الحالة',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'الشركة',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'التدريب المتوفر',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'التاريخ',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'الحالة',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 6),
+                    ...applications.map((application) {
+                      return _applicationRow({
+                        'student':
+                            application['studentName']?.toString() ?? '-',
+                        'company':
+                            application['companyName']?.toString() ?? '-',
+                        'training':
+                            application['trainingTitle']?.toString() ?? '-',
+                        'date': _formatDate(application['submittedAt']),
+                        'status': application['status']?.toString() ?? '-',
+                      });
+                    }),
                   ],
                 ),
               ),
-              const SizedBox(height: 6),
-              ...applications.map(
-                (application) => _applicationRow(application),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -558,76 +718,59 @@ class _UniversityHomeScreenState
     final String status = application['status']!;
 
     final Color statusColor = status == 'مقبول'
-        ? MasarColors.success
+        ? UniColors.success
         : status == 'جديد'
-            ? MasarColors.primaryBlue
-            : MasarColors.warning;
+        ? UniColors.primaryBlue
+        : UniColors.warning;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 15,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: MasarColors.border),
-        ),
+        border: Border(bottom: BorderSide(color: UniColors.border)),
       ),
       child: Row(
         children: [
           Expanded(
             flex: 2,
-            child: Text(
+            child: UniText(
               application['student']!,
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
-                color: MasarColors.textPrimary,
+                color: UniColors.textPrimary,
               ),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
+            child: UniText(
               application['company']!,
-              style: TextStyle(
-                fontSize: 11,
-                color: MasarColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 11, color: UniColors.textSecondary),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
+            child: UniText(
               application['training']!,
-              style: TextStyle(
-                fontSize: 11,
-                color: MasarColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 11, color: UniColors.textSecondary),
             ),
           ),
           Expanded(
-            child: Text(
+            child: UniText(
               application['date']!,
-              style: TextStyle(
-                fontSize: 10.5,
-                color: MasarColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 10.5, color: UniColors.textSecondary),
             ),
           ),
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 9,
-                  vertical: 5,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
+                child: UniText(
                   status,
                   style: TextStyle(
                     fontSize: 9.5,
@@ -644,6 +787,10 @@ class _UniversityHomeScreenState
   }
 
   Widget _buildAlertsSection() {
+    final newApplications = _intValue(_alerts['newApplications']);
+    final reportsToReview = _intValue(_alerts['reportsToReview']);
+    final studentsNearCompletion = _intValue(_alerts['studentsNearCompletion']);
+    final completedThisWeek = _intValue(_alerts['completedThisWeek']);
     return _dashboardCard(
       title: 'التنبيهات المهمة',
       icon: Icons.notifications_active_rounded,
@@ -652,26 +799,29 @@ class _UniversityHomeScreenState
           _alertItem(
             icon: Icons.assignment_rounded,
             title: 'طلبات تدريب جديدة',
-            description: 'يوجد 18 طلب تدريب جديد بحاجة إلى مراجعة.',
-            color: MasarColors.primaryBlue,
+            description:
+                'يوجد $newApplications طلب تدريب جديد بحاجة إلى مراجعة.',
+            color: UniColors.primaryBlue,
           ),
           _alertItem(
             icon: Icons.description_rounded,
             title: 'تقارير بحاجة للمراجعة',
-            description: 'يوجد 5 تقارير تدريبية بانتظار المراجعة.',
-            color: MasarColors.warning,
+            description: 'يوجد $reportsToReview تقرير تدريبي بانتظار المراجعة.',
+            color: UniColors.warning,
           ),
           _alertItem(
             icon: Icons.access_time_filled_rounded,
             title: 'طلاب قريبون من إكمال التدريب',
-            description: '12 طالباً اقتربوا من إكمال 280 ساعة تدريبية.',
-            color: MasarColors.primaryGreen,
+            description:
+                '$studentsNearCompletion طالب وصل إلى 80% أو أكثر من ساعات التدريب المطلوبة.',
+            color: UniColors.primaryGreen,
           ),
           _alertItem(
             icon: Icons.check_circle_rounded,
             title: 'تدريبات مكتملة',
-            description: 'تم إكمال 8 تدريبات خلال هذا الأسبوع.',
-            color: MasarColors.success,
+            description:
+                'تم إكمال $completedThisWeek تدريبات خلال هذا الأسبوع.',
+            color: UniColors.success,
             showBorder: false,
           ),
         ],
@@ -690,9 +840,7 @@ class _UniversityHomeScreenState
       padding: const EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
         border: showBorder
-            ? Border(
-                bottom: BorderSide(color: MasarColors.border),
-              )
+            ? Border(bottom: BorderSide(color: UniColors.border))
             : null,
       ),
       child: Row(
@@ -711,20 +859,20 @@ class _UniversityHomeScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                UniText(
                   title,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: MasarColors.textPrimary,
+                    color: UniColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                UniText(
                   description,
                   style: TextStyle(
                     fontSize: 10.5,
-                    color: MasarColors.textSecondary,
+                    color: UniColors.textSecondary,
                   ),
                 ),
               ],
@@ -732,7 +880,7 @@ class _UniversityHomeScreenState
           ),
           Icon(
             Icons.chevron_left_rounded,
-            color: MasarColors.textSecondary,
+            color: UniColors.textSecondary,
             size: 21,
           ),
         ],
@@ -749,9 +897,9 @@ class _UniversityHomeScreenState
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: MasarColors.white,
+        color: UniColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(color: UniColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -762,22 +910,18 @@ class _UniversityHomeScreenState
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: MasarColors.lightBlue,
+                  color: UniColors.lightBlue,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  color: MasarColors.primaryBlue,
-                  size: 19,
-                ),
+                child: Icon(icon, color: UniColors.primaryBlue, size: 19),
               ),
               const SizedBox(width: 10),
-              Text(
+              UniText(
                 title,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: MasarColors.textPrimary,
+                  color: UniColors.textPrimary,
                 ),
               ),
             ],

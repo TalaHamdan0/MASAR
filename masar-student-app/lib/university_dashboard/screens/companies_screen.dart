@@ -1,6 +1,8 @@
-
 import 'package:flutter/material.dart';
-import '../../theme/masar_theme.dart';
+
+import '../../core/theme/uni_dashboard_theme.dart';
+import '../../core/localization/uni_text.dart';
+import '../../core/services/university_companies_service.dart';
 
 class CompaniesScreen extends StatefulWidget {
   const CompaniesScreen({super.key});
@@ -15,111 +17,63 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   String selectedField = 'الكل';
   String selectedStatus = 'الكل';
 
-  final List<Map<String, dynamic>> companies = [
-    {
-      'name': 'Data Solutions',
-      'field': 'تحليل البيانات',
-      'location': 'عمّان',
-      'opportunities': 6,
-      'trainees': 18,
-      'status': 'نشطة',
-      'email': 'info@datasolutions.com',
-      'phone': '06 555 1234',
-      'description':
-          'شركة متخصصة في تحليل البيانات وحلول ذكاء الأعمال وتطوير التقارير الرقمية.',
-      'opportunityList': [
-        'Data Analyst Intern',
-        'Business Intelligence Intern',
-        'Power BI Intern',
-      ],
-      'traineeList': ['تالا حمدان', 'محمد يوسف', 'سارة خالد'],
-    },
-    {
-      'name': 'Creative Hub',
-      'field': 'التصميم',
-      'location': 'عمّان',
-      'opportunities': 4,
-      'trainees': 12,
-      'status': 'نشطة',
-      'email': 'info@creativehub.com',
-      'phone': '06 565 2345',
-      'description':
-          'شركة تعمل في مجال التصميم وتجربة المستخدم والهوية البصرية.',
-      'opportunityList': [
-        'UI/UX Design Intern',
-        'Graphic Design Intern',
-      ],
-      'traineeList': ['ليان أحمد', 'نور علي'],
-    },
-    {
-      'name': 'شركة التقنية المتقدمة',
-      'field': 'تطوير البرمجيات',
-      'location': 'الزرقاء',
-      'opportunities': 5,
-      'trainees': 15,
-      'status': 'نشطة',
-      'email': 'info@advancedtech.com',
-      'phone': '05 333 7788',
-      'description':
-          'شركة متخصصة في تطوير تطبيقات الويب والموبايل والحلول البرمجية.',
-      'opportunityList': [
-        'Flutter Developer Intern',
-        'Web Developer Intern',
-        'Software Engineer Intern',
-      ],
-      'traineeList': ['رنا سمير', 'أحمد محمد', 'عمر فهد'],
-    },
-    {
-      'name': 'SecureNet',
-      'field': 'الأمن السيبراني',
-      'location': 'عمّان',
-      'opportunities': 3,
-      'trainees': 9,
-      'status': 'نشطة',
-      'email': 'info@securenet.com',
-      'phone': '06 577 8899',
-      'description':
-          'شركة متخصصة في الأمن السيبراني وحماية الأنظمة والشبكات.',
-      'opportunityList': [
-        'Cybersecurity Intern',
-        'SOC Analyst Intern',
-      ],
-      'traineeList': ['محمد يوسف', 'خالد أحمد'],
-    },
-    {
-      'name': 'Quality First',
-      'field': 'ضمان الجودة',
-      'location': 'إربد',
-      'opportunities': 2,
-      'trainees': 7,
-      'status': 'نشطة',
-      'email': 'info@qualityfirst.com',
-      'phone': '02 721 4567',
-      'description':
-          'شركة متخصصة في اختبار البرمجيات وضمان جودة الأنظمة والتطبيقات.',
-      'opportunityList': [
-        'QA Intern',
-        'Software Testing Intern',
-      ],
-      'traineeList': ['نور علي', 'سارة خالد'],
-    },
-    {
-      'name': 'Jordan Tech',
-      'field': 'تطوير الويب',
-      'location': 'عمّان',
-      'opportunities': 3,
-      'trainees': 8,
-      'status': 'متوقفة مؤقتًا',
-      'email': 'info@jordantech.com',
-      'phone': '06 544 2211',
-      'description': 'شركة تعمل في تطوير مواقع الويب والمنصات الرقمية.',
-      'opportunityList': [
-        'Frontend Developer Intern',
-        'Backend Developer Intern',
-      ],
-      'traineeList': ['أحمد محمد'],
-    },
-  ];
+  List<Map<String, dynamic>> companies = [];
+
+  Map<String, dynamic> statistics = {};
+
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanies();
+  }
+
+  Future<void> _loadCompanies() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final result = await UniversityCompaniesService.fetchCompanies();
+
+      final companiesData = result['companies'] as List? ?? [];
+      final statisticsData = result['statistics'];
+
+      if (!mounted) return;
+
+      setState(() {
+        companies = companiesData
+            .map((company) => Map<String, dynamic>.from(company as Map))
+            .toList();
+
+        statistics = statisticsData is Map
+            ? Map<String, dynamic>.from(statisticsData)
+            : {};
+
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  int _getNumber(String key) {
+    final value = statistics[key];
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
 
   @override
   void dispose() {
@@ -131,7 +85,8 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
     final query = searchController.text.trim().toLowerCase();
 
     return companies.where((company) {
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           company['name'].toString().toLowerCase().contains(query) ||
           company['field'].toString().toLowerCase().contains(query) ||
           company['location'].toString().toLowerCase().contains(query);
@@ -149,31 +104,37 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   @override
   Widget build(BuildContext context) {
     final displayedCompanies = filteredCompanies;
+    final fieldOptions =
+        companies
+            .map((company) => (company['field'] ?? 'غير محدد').toString())
+            .where((field) => field.trim().isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+    fieldOptions.insert(0, 'الكل');
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: Directionality.of(context),
       child: Container(
-        color: MasarColors.background,
+        color: UniColors.background,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              UniText(
                 'إدارة الشركات',
                 style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w800,
-                  color: MasarColors.textPrimary,
+                  color: UniColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 5),
-              Text(
+              UniText(
                 'إدارة الجهات التدريبية ومتابعة الشركات المسجلة في المنصة',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: MasarColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: UniColors.textSecondary),
               ),
               const SizedBox(height: 24),
 
@@ -193,44 +154,44 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                         width: cardWidth,
                         child: _statCard(
                           'الشركات المتاحة للتدريب',
-                          '72',
+                          _getNumber('availableCompanies').toString(),
                           'شركة',
                           Icons.business_center_rounded,
-                          MasarColors.primaryGreen,
-                          MasarColors.lightGreen,
+                          UniColors.primaryGreen,
+                          UniColors.lightGreen,
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _statCard(
                           'الشركات النشطة',
-                          '72',
+                          _getNumber('activeCompanies').toString(),
                           'شركة',
                           Icons.business_rounded,
-                          MasarColors.primaryBlue,
-                          MasarColors.lightBlue,
+                          UniColors.primaryBlue,
+                          UniColors.lightBlue,
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _statCard(
                           'إجمالي الفرص',
-                          '143',
+                          _getNumber('totalOffers').toString(),
                           'فرصة تدريب',
                           Icons.work_rounded,
-                          MasarColors.primaryBlue,
-                          MasarColors.lightBlue,
+                          UniColors.primaryBlue,
+                          UniColors.lightBlue,
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _statCard(
                           'الطلاب المتدربون',
-                          '386',
+                          _getNumber('trainees').toString(),
                           'طالب',
                           Icons.people_alt_rounded,
-                          MasarColors.primaryGreen,
-                          MasarColors.lightGreen,
+                          UniColors.primaryGreen,
+                          UniColors.lightGreen,
                         ),
                       ),
                     ],
@@ -244,9 +205,9 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: MasarColors.white,
+                  color: UniColors.white,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: MasarColors.border),
+                  border: Border.all(color: UniColors.border),
                 ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -256,10 +217,12 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       controller: searchController,
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
-                        hintText: 'ابحث باسم الشركة أو المجال أو الموقع...',
+                        hintText: UniLocalizations.translate(
+                          'ابحث باسم الشركة أو المجال أو الموقع...',
+                        ),
                         prefixIcon: const Icon(Icons.search_rounded),
                         filled: true,
-                        fillColor: MasarColors.background,
+                        fillColor: UniColors.background,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -271,44 +234,22 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       value: selectedField,
                       isExpanded: true,
                       decoration: InputDecoration(
-                        labelText: 'المجال',
+                        labelText: UniLocalizations.translate('المجال'),
                         filled: true,
-                        fillColor: MasarColors.background,
+                        fillColor: UniColors.background,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'الكل',
-                          child: Text('كل المجالات'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'تحليل البيانات',
-                          child: Text('تحليل البيانات'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'التصميم',
-                          child: Text('التصميم'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'تطوير البرمجيات',
-                          child: Text('تطوير البرمجيات'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'الأمن السيبراني',
-                          child: Text('الأمن السيبراني'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'ضمان الجودة',
-                          child: Text('ضمان الجودة'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'تطوير الويب',
-                          child: Text('تطوير الويب'),
-                        ),
-                      ],
+                      items: fieldOptions.map((field) {
+                        return DropdownMenuItem<String>(
+                          value: field,
+                          child: UniText(
+                            field == 'الكل' ? 'كل المجالات' : field,
+                          ),
+                        );
+                      }).toList(),
                       onChanged: (value) {
                         setState(() => selectedField = value ?? 'الكل');
                       },
@@ -318,9 +259,9 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       value: selectedStatus,
                       isExpanded: true,
                       decoration: InputDecoration(
-                        labelText: 'حالة الشركة',
+                        labelText: UniLocalizations.translate('حالة الشركة'),
                         filled: true,
-                        fillColor: MasarColors.background,
+                        fillColor: UniColors.background,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -329,15 +270,12 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       items: const [
                         DropdownMenuItem(
                           value: 'الكل',
-                          child: Text('كل الحالات'),
+                          child: UniText('كل الحالات'),
                         ),
-                        DropdownMenuItem(
-                          value: 'نشطة',
-                          child: Text('نشطة'),
-                        ),
+                        DropdownMenuItem(value: 'نشطة', child: UniText('نشطة')),
                         DropdownMenuItem(
                           value: 'متوقفة مؤقتًا',
-                          child: Text('متوقفة مؤقتًا'),
+                          child: UniText('متوقفة مؤقتًا'),
                         ),
                       ],
                       onChanged: (value) {
@@ -377,9 +315,9 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: MasarColors.white,
+                  color: UniColors.white,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: MasarColors.border),
+                  border: Border.all(color: UniColors.border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,12 +325,12 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: UniText(
                             'الشركات المتاحة للتدريب',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color: MasarColors.textPrimary,
+                              color: UniColors.textPrimary,
                             ),
                           ),
                         ),
@@ -402,22 +340,55 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: MasarColors.lightGreen,
+                            color: UniColors.lightGreen,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Text(
+                          child: UniText(
                             '${displayedCompanies.length}',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: MasarColors.primaryGreen,
+                              color: UniColors.primaryGreen,
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    if (displayedCompanies.isEmpty)
+                    if (isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(35),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.error_outline_rounded,
+                                size: 42,
+                                color: UniColors.warning,
+                              ),
+                              const SizedBox(height: 10),
+                              UniText(
+                                errorMessage!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: UniColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: _loadCompanies,
+                                child: const UniText('إعادة المحاولة'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else if (displayedCompanies.isEmpty)
                       Padding(
                         padding: const EdgeInsets.all(28),
                         child: Center(
@@ -426,13 +397,13 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                               Icon(
                                 Icons.search_off_rounded,
                                 size: 42,
-                                color: MasarColors.textSecondary,
+                                color: UniColors.textSecondary,
                               ),
                               const SizedBox(height: 10),
-                              Text(
+                              UniText(
                                 'لا توجد شركات مطابقة للبحث',
                                 style: TextStyle(
-                                  color: MasarColors.textSecondary,
+                                  color: UniColors.textSecondary,
                                 ),
                               ),
                               TextButton(
@@ -443,7 +414,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                     selectedStatus = 'الكل';
                                   });
                                 },
-                                child: const Text('إعادة ضبط الفلاتر'),
+                                child: const UniText('إعادة ضبط الفلاتر'),
                               ),
                             ],
                           ),
@@ -459,19 +430,18 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                 minWidth: constraints.maxWidth,
                               ),
                               child: DataTable(
-                                headingRowColor:
-                                    WidgetStateProperty.all(
-                                  MasarColors.background,
+                                headingRowColor: WidgetStateProperty.all(
+                                  UniColors.background,
                                 ),
                                 columnSpacing: 24,
                                 horizontalMargin: 12,
                                 columns: const [
-                                  DataColumn(label: Text('الشركة')),
-                                  DataColumn(label: Text('التدريب المتوفر')),
-                                  DataColumn(label: Text('الموقع')),
-                                  DataColumn(label: Text('المتدربون')),
-                                  DataColumn(label: Text('الحالة')),
-                                  DataColumn(label: Text('التفاصيل')),
+                                  DataColumn(label: UniText('الشركة')),
+                                  DataColumn(label: UniText('التدريب المتوفر')),
+                                  DataColumn(label: UniText('الموقع')),
+                                  DataColumn(label: UniText('المتدربون')),
+                                  DataColumn(label: UniText('الحالة')),
+                                  DataColumn(label: UniText('التفاصيل')),
                                 ],
                                 rows: displayedCompanies.map((company) {
                                   final opportunities =
@@ -487,21 +457,20 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                               width: 38,
                                               height: 38,
                                               decoration: BoxDecoration(
-                                                color: MasarColors.lightBlue,
+                                                color: UniColors.lightBlue,
                                                 borderRadius:
                                                     BorderRadius.circular(11),
                                               ),
                                               child: Icon(
                                                 Icons.business_rounded,
                                                 size: 19,
-                                                color:
-                                                    MasarColors.primaryBlue,
+                                                color: UniColors.primaryBlue,
                                               ),
                                             ),
                                             const SizedBox(width: 9),
-                                            Text(
+                                            UniText(
                                               company['name'].toString(),
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
@@ -511,13 +480,13 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                       DataCell(
                                         SizedBox(
                                           width: 250,
-                                          child: Text(
+                                          child: UniText(
                                             opportunities.join('، '),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontSize: 11.5,
-                                              color: MasarColors.textPrimary,
+                                              color: UniColors.textPrimary,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -530,18 +499,19 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                             Icon(
                                               Icons.location_on_outlined,
                                               size: 16,
-                                              color:
-                                                  MasarColors.textSecondary,
+                                              color: UniColors.textSecondary,
                                             ),
                                             const SizedBox(width: 4),
-                                            Text(company['location'].toString()),
+                                            UniText(
+                                              company['location'].toString(),
+                                            ),
                                           ],
                                         ),
                                       ),
                                       DataCell(
-                                        Text(
+                                        UniText(
                                           '${company['trainees']}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -553,13 +523,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                       ),
                                       DataCell(
                                         IconButton(
-                                          tooltip: 'عرض التفاصيل',
+                                          tooltip: UniLocalizations.translate(
+                                            'عرض التفاصيل',
+                                          ),
                                           onPressed: () =>
                                               showCompanyDetails(company),
                                           icon: Icon(
                                             Icons.arrow_forward_ios_rounded,
                                             size: 16,
-                                            color: MasarColors.primaryBlue,
+                                            color: UniColors.primaryBlue,
                                           ),
                                         ),
                                       ),
@@ -589,7 +561,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
         final trainees = company['traineeList'] as List;
 
         return Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: Directionality.of(context),
           child: AlertDialog(
             title: Row(
               children: [
@@ -597,23 +569,23 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: MasarColors.lightBlue,
+                    color: UniColors.lightBlue,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     Icons.business_rounded,
-                    color: MasarColors.primaryBlue,
+                    color: UniColors.primaryBlue,
                     size: 25,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
+                  child: UniText(
                     company['name'].toString(),
                     style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
-                      color: MasarColors.textPrimary,
+                      color: UniColors.textPrimary,
                     ),
                   ),
                 ),
@@ -656,30 +628,30 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       Icons.verified_outlined,
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    UniText(
                       'نبذة عن الشركة',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: MasarColors.textPrimary,
+                        color: UniColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 7),
-                    Text(
+                    UniText(
                       company['description'].toString(),
                       style: TextStyle(
                         fontSize: 12.5,
                         height: 1.6,
-                        color: MasarColors.textSecondary,
+                        color: UniColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 22),
-                    Text(
+                    UniText(
                       'التدريبات المتوفرة',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: MasarColors.textPrimary,
+                        color: UniColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -692,25 +664,25 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                           vertical: 11,
                         ),
                         decoration: BoxDecoration(
-                          color: MasarColors.background,
+                          color: UniColors.background,
                           borderRadius: BorderRadius.circular(11),
-                          border: Border.all(color: MasarColors.border),
+                          border: Border.all(color: UniColors.border),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.work_outline_rounded,
                               size: 19,
-                              color: MasarColors.primaryBlue,
+                              color: UniColors.primaryBlue,
                             ),
                             const SizedBox(width: 9),
                             Expanded(
-                              child: Text(
+                              child: UniText(
                                 opportunity.toString(),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: MasarColors.textPrimary,
+                                  color: UniColors.textPrimary,
                                 ),
                               ),
                             ),
@@ -726,8 +698,8 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                             'التدريبات المتوفرة',
                             '${opportunities.length}',
                             Icons.work_rounded,
-                            MasarColors.primaryBlue,
-                            MasarColors.lightBlue,
+                            UniColors.primaryBlue,
+                            UniColors.lightBlue,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -736,46 +708,55 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                             'المتدربون',
                             '${company['trainees']}',
                             Icons.people_alt_rounded,
-                            MasarColors.primaryGreen,
-                            MasarColors.lightGreen,
+                            UniColors.primaryGreen,
+                            UniColors.lightGreen,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Text(
+                    UniText(
                       'الطلاب المتدربون',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: MasarColors.textPrimary,
+                        color: UniColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: trainees.map((trainee) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 11,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: MasarColors.lightGreen,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            trainee.toString(),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: MasarColors.primaryGreen,
+                    if (trainees.isEmpty)
+                      UniText(
+                        'لا يوجد طلاب متدربون حاليًا',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: UniColors.textSecondary,
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: trainees.map((trainee) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 7,
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                            decoration: BoxDecoration(
+                              color: UniColors.lightGreen,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: UniText(
+                              trainee.toString(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: UniColors.primaryGreen,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                   ],
                 ),
               ),
@@ -783,7 +764,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('إغلاق'),
+                child: const UniText('إغلاق'),
               ),
             ],
           ),
@@ -802,34 +783,30 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
             width: 35,
             height: 35,
             decoration: BoxDecoration(
-              color: MasarColors.lightBlue,
+              color: UniColors.lightBlue,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: MasarColors.primaryBlue,
-            ),
+            child: Icon(icon, size: 18, color: UniColors.primaryBlue),
           ),
           const SizedBox(width: 10),
           SizedBox(
             width: 115,
-            child: Text(
+            child: UniText(
               '$title:',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: MasarColors.textSecondary,
+                color: UniColors.textSecondary,
               ),
             ),
           ),
           Expanded(
-            child: Text(
+            child: UniText(
               value,
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: MasarColors.textPrimary,
+                color: UniColors.textPrimary,
               ),
             ),
           ),
@@ -859,20 +836,20 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                UniText(
                   title,
                   style: TextStyle(
                     fontSize: 10,
-                    color: MasarColors.textSecondary,
+                    color: UniColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                UniText(
                   value,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: MasarColors.textPrimary,
+                    color: UniColors.textPrimary,
                   ),
                 ),
               ],
@@ -895,9 +872,9 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
       height: 110,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: MasarColors.white,
+        color: UniColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(color: UniColors.border),
       ),
       child: Row(
         children: [
@@ -916,27 +893,27 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                UniText(
                   title,
                   style: TextStyle(
                     fontSize: 10.5,
-                    color: MasarColors.textSecondary,
+                    color: UniColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(
+                UniText(
                   value,
                   style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
-                    color: MasarColors.textPrimary,
+                    color: UniColors.textPrimary,
                   ),
                 ),
-                Text(
+                UniText(
                   subtitle,
                   style: TextStyle(
                     fontSize: 9.5,
-                    color: MasarColors.textSecondary,
+                    color: UniColors.textSecondary,
                   ),
                 ),
               ],
@@ -954,16 +931,16 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: active
-            ? MasarColors.lightGreen
-            : MasarColors.warning.withOpacity(0.12),
+            ? UniColors.lightGreen
+            : UniColors.warning.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
+      child: UniText(
         status,
         style: TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
-          color: active ? MasarColors.primaryGreen : MasarColors.warning,
+          color: active ? UniColors.primaryGreen : UniColors.warning,
         ),
       ),
     );

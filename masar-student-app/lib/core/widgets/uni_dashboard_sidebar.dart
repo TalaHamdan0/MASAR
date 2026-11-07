@@ -1,17 +1,22 @@
-
 import 'package:flutter/material.dart';
-import '../../theme/masar_theme.dart';
+
+import '../theme/uni_dashboard_theme.dart';
+import '../localization/uni_text.dart';
 
 class UniDashboardSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
   final VoidCallback onLogout;
+  final int pendingApplicationsCount;
+  final int unreadNotificationsCount;
 
   const UniDashboardSidebar({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
     required this.onLogout,
+    required this.pendingApplicationsCount,
+    required this.unreadNotificationsCount,
   });
 
   static const List<String> menuItems = [
@@ -36,20 +41,38 @@ class UniDashboardSidebar extends StatelessWidget {
     Icons.settings_rounded,
   ];
 
+  Widget _buildBadge(int count, Color color) {
+    if (count <= 0) return const SizedBox.shrink();
+    return Container(
+      constraints: const BoxConstraints(minWidth: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 255,
       decoration: BoxDecoration(
-        color: MasarColors.white,
-        border: Border(
-          left: BorderSide(color: MasarColors.border),
-        ),
+        color: UniColors.white,
+        border: Border(left: BorderSide(color: UniColors.border)),
       ),
       child: Column(
         children: [
           const SizedBox(height: 28),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
@@ -58,7 +81,7 @@ class UniDashboardSidebar extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: MasarColors.lightBlue,
+                    color: UniColors.lightBlue,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: ClipRRect(
@@ -66,13 +89,11 @@ class UniDashboardSidebar extends StatelessWidget {
                     child: Image.asset(
                       'assets/images/masar_logo.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.route_rounded,
-                          color: MasarColors.primaryBlue,
-                          size: 26,
-                        );
-                      },
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.route_rounded,
+                        color: UniColors.primaryBlue,
+                        size: 26,
+                      ),
                     ),
                   ),
                 ),
@@ -80,19 +101,19 @@ class UniDashboardSidebar extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    UniText(
                       'MASAR',
                       style: TextStyle(
                         fontSize: 21,
                         fontWeight: FontWeight.w800,
-                        color: MasarColors.primaryBlue,
+                        color: UniColors.primaryBlue,
                       ),
                     ),
-                    Text(
+                    UniText(
                       'University Dashboard',
                       style: TextStyle(
                         fontSize: 10,
-                        color: MasarColors.textSecondary,
+                        color: UniColors.textSecondary,
                       ),
                     ),
                   ],
@@ -100,24 +121,19 @@ class UniDashboardSidebar extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 35),
-
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               itemCount: menuItems.length,
               separatorBuilder: (_, __) => const SizedBox(height: 6),
-              itemBuilder: (context, index) {
-                return _buildMenuItem(index);
-              },
+              itemBuilder: (context, index) => _buildMenuItem(index),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(14),
             child: Material(
-              color: MasarColors.lightGreen,
+              color: UniColors.lightGreen,
               borderRadius: BorderRadius.circular(12),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
@@ -133,14 +149,14 @@ class UniDashboardSidebar extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.logout_rounded,
-                          color: MasarColors.primaryGreen,
+                          color: UniColors.primaryGreen,
                           size: 21,
                         ),
                         const SizedBox(width: 12),
-                        Text(
+                        UniText(
                           'تسجيل الخروج',
                           style: TextStyle(
-                            color: MasarColors.primaryGreen,
+                            color: UniColors.primaryGreen,
                             fontWeight: FontWeight.w600,
                             fontSize: 13.5,
                           ),
@@ -158,12 +174,15 @@ class UniDashboardSidebar extends StatelessWidget {
   }
 
   Widget _buildMenuItem(int index) {
-    final bool isSelected = selectedIndex == index;
+    final isSelected = selectedIndex == index;
+    final badgeCount = index == 3
+        ? pendingApplicationsCount
+        : index == 6
+        ? unreadNotificationsCount
+        : 0;
 
     return Material(
-      color: isSelected
-          ? MasarColors.lightBlue
-          : Colors.transparent,
+      color: isSelected ? UniColors.lightBlue : Colors.transparent,
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -171,22 +190,19 @@ class UniDashboardSidebar extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 13,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
             child: Row(
               children: [
                 Icon(
                   menuIcons[index],
                   size: 21,
                   color: isSelected
-                      ? MasarColors.primaryBlue
-                      : MasarColors.textSecondary,
+                      ? UniColors.primaryBlue
+                      : UniColors.textSecondary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
+                  child: UniText(
                     menuItems[index],
                     style: TextStyle(
                       fontSize: 13.5,
@@ -194,39 +210,19 @@ class UniDashboardSidebar extends StatelessWidget {
                           ? FontWeight.w700
                           : FontWeight.w500,
                       color: isSelected
-                          ? MasarColors.primaryBlue
-                          : MasarColors.textPrimary,
+                          ? UniColors.primaryBlue
+                          : UniColors.textPrimary,
                     ),
                   ),
                 ),
-                if (index == 3)
-                  _buildBadge('18', MasarColors.primaryGreen),
-                if (index == 6)
-                  _buildBadge('5', MasarColors.error),
+                if (badgeCount > 0)
+                  _buildBadge(
+                    badgeCount,
+                    index == 3 ? UniColors.primaryGreen : UniColors.error,
+                  ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 7,
-        vertical: 3,
-      ),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

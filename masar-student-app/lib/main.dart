@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/services/api_service.dart';
 import 'core/services/auth_session.dart';
+import 'core/theme/uni_dashboard_theme.dart';
+import 'core/state/university_dashboard_preferences.dart';
 
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -45,32 +48,36 @@ class MasarStudentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      navigatorObservers: [
-        _MasarNavigationObserver(),
-      ],
-      title: 'MASAR',
-      theme: ThemeData(
-        fontFamily: 'Cairo',
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1565C0),
-        ),
-      ),
-      home: const DashboardSelectorScreen(),
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/create-account': (context) =>
-            const CreateAccountScreen(),
-        '/complete-profile': (context) =>
-            _studentPage(const CompleteProfileScreen()),
-        '/home': (context) =>
-            _studentPage(const HomeScreen()),
-        '/company-login': (context) =>
-            const CompanyLoginScreen(),
-        '/university-login': (context) =>
-            const UniversityLoginScreen(),
+    return AnimatedBuilder(
+      animation: UniversityDashboardPreferences.instance,
+      builder: (context, _) {
+        final preferences = UniversityDashboardPreferences.instance;
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          navigatorObservers: [
+            _MasarNavigationObserver(),
+          ],
+          title: 'MASAR',
+          locale: Locale(preferences.languageCode),
+          supportedLocales: const [
+            Locale('ar'),
+            Locale('en'),
+          ],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          theme: UniDashboardTheme.lightTheme,
+          darkTheme: UniDashboardTheme.darkTheme,
+          themeMode: preferences.materialThemeMode,
+          home: const DashboardSelectorScreen(),
+          routes: {
+            '/login': (context) => const LoginScreen(),
+            '/create-account': (context) => const CreateAccountScreen(),
+            '/complete-profile': (context) =>
+                _studentPage(const CompleteProfileScreen()),
+            '/home': (context) => _studentPage(const HomeScreen()),
+            '/company-login': (context) => const CompanyLoginScreen(),
+            '/university-login': (context) => const UniversityLoginScreen(),
+          },
+        );
       },
     );
   }

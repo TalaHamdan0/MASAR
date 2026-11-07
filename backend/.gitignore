@@ -12,3 +12,5 @@ __pycache__/
 *.py[cod]
 *.log
 masar_api.zip
+# Local VS Code settings
+.vscode/

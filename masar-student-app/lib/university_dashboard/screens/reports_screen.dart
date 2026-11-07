@@ -1,7 +1,8 @@
-
 import 'package:flutter/material.dart';
 
-import '../../theme/masar_theme.dart';
+import '../../core/theme/uni_dashboard_theme.dart';
+import '../../core/localization/uni_text.dart';
+import '../../core/services/university_reports_service.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -13,12 +14,79 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   String selectedPeriod = 'هذا الشهر';
 
+  Map<String, dynamic> _statistics = {};
+
+  List<Map<String, dynamic>> _hoursOverviewData = [];
+
+  List<Map<String, dynamic>> _companyReportData = [];
+
+  bool _isLoading = true;
+
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final result = await UniversityReportsService.fetchReports(
+        period: selectedPeriod,
+      );
+
+      final statisticsData = result['statistics'];
+      final hoursData = result['hoursOverview'] as List? ?? [];
+      final companiesData = result['companyReport'] as List? ?? [];
+
+      if (!mounted) return;
+
+      setState(() {
+        _statistics = statisticsData is Map
+            ? Map<String, dynamic>.from(statisticsData)
+            : {};
+
+        _hoursOverviewData = hoursData
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+
+        _companyReportData = companiesData
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  int _getNumber(String key) {
+    return int.tryParse(_statistics[key]?.toString() ?? '0') ?? 0;
+  }
+
+  double _getRatio(dynamic value) {
+    final ratio = double.tryParse(value?.toString() ?? '0') ?? 0;
+    return ratio.clamp(0.0, 1.0).toDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: Directionality.of(context),
       child: Container(
-        color: MasarColors.background,
+        color: UniColors.background,
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(28, 24, 28, 35),
           child: Column(
@@ -29,20 +97,20 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      UniText(
                         'التقارير والإحصائيات',
                         style: TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: MasarColors.textPrimary,
+                          color: UniColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
+                      UniText(
                         'نظرة شاملة على أداء التدريب والطلاب',
                         style: TextStyle(
                           fontSize: 13,
-                          color: MasarColors.textSecondary,
+                          color: UniColors.textSecondary,
                         ),
                       ),
                     ],
@@ -54,39 +122,39 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: MasarColors.white,
+                      color: UniColors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: MasarColors.border),
+                      border: Border.all(color: UniColors.border),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: selectedPeriod,
                         icon: Icon(
                           Icons.keyboard_arrow_down_rounded,
-                          color: MasarColors.textSecondary,
+                          color: UniColors.textSecondary,
                         ),
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: MasarColors.textPrimary,
+                          color: UniColors.textPrimary,
                         ),
                         items: const [
                           DropdownMenuItem(
                             value: 'هذا الأسبوع',
-                            child: Text('هذا الأسبوع'),
+                            child: UniText('هذا الأسبوع'),
                           ),
                           DropdownMenuItem(
                             value: 'هذا الشهر',
-                            child: Text('هذا الشهر'),
+                            child: UniText('هذا الشهر'),
                           ),
                           DropdownMenuItem(
                             value: 'هذا الفصل',
-                            child: Text('هذا الفصل'),
+                            child: UniText('هذا الفصل'),
                           ),
                           DropdownMenuItem(
                             value: 'هذا العام',
-                            child: Text('هذا العام'),
+                            child: UniText('هذا العام'),
                           ),
                         ],
                         onChanged: (value) {
@@ -94,6 +162,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             setState(() {
                               selectedPeriod = value;
                             });
+
+                            _loadReports();
                           }
                         },
                       ),
@@ -101,65 +171,86 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: _statCard(
-                      title: 'الطلاب المتدربون',
-                      value: '346',
-                      subtitle: 'طالب نشط في التدريب',
-                      icon: Icons.people_alt_rounded,
-                      iconColor: MasarColors.primaryBlue,
+
+              if (_isLoading) ...[
+                const SizedBox(height: 120),
+                const Center(child: CircularProgressIndicator()),
+              ] else if (_errorMessage != null) ...[
+                const SizedBox(height: 60),
+                Center(
+                  child: Column(
+                    children: [
+                      UniText(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: UniColors.error,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: _loadReports,
+                        child: const UniText('إعادة المحاولة'),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: 28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _statCard(
+                        title: 'الطلاب المتدربون',
+                        value: _getNumber('studentsInTraining').toString(),
+                        subtitle: 'طالب نشط في التدريب',
+                        icon: Icons.people_alt_rounded,
+                        iconColor: UniColors.primaryBlue,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _statCard(
-                      title: 'نسبة الإكمال',
-                      value: '74%',
-                      subtitle: 'من إجمالي التدريبات',
-                      icon: Icons.donut_large_rounded,
-                      iconColor: MasarColors.primaryGreen,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _statCard(
+                        title: 'نسبة الإكمال',
+                        value: '${_getNumber('completionRate')}%',
+                        subtitle: 'من إجمالي التدريبات',
+                        icon: Icons.donut_large_rounded,
+                        iconColor: UniColors.primaryGreen,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _statCard(
-                      title: 'أكملوا 280 ساعة',
-                      value: '254',
-                      subtitle: 'طالب أكمل الساعات',
-                      icon: Icons.check_circle_outline,
-                      iconColor: MasarColors.primaryGreen,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _statCard(
+                        title: 'أكملوا 280 ساعة',
+                        value: _getNumber('completed280Hours').toString(),
+                        subtitle: 'طالب أكمل الساعات',
+                        icon: Icons.check_circle_outline,
+                        iconColor: UniColors.primaryGreen,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _statCard(
-                      title: 'متوسط الساعات',
-                      value: '207',
-                      subtitle: 'ساعة لكل طالب',
-                      icon: Icons.access_time_rounded,
-                      iconColor: MasarColors.warning,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _statCard(
+                        title: 'متوسط الساعات',
+                        value: _getNumber('averageHours').toString(),
+                        subtitle: 'ساعة لكل طالب',
+                        icon: Icons.access_time_rounded,
+                        iconColor: UniColors.warning,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: _hoursOverview(),
-                  ),
-                  const SizedBox(width: 18),
-                  Expanded(
-                    flex: 2,
-                    child: _companyReport(),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 3, child: _hoursOverview()),
+                    const SizedBox(width: 18),
+                    Expanded(flex: 2, child: _companyReport()),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -177,9 +268,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: MasarColors.white,
+        color: UniColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(color: UniColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,45 +284,38 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   color: iconColor.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 22,
-                ),
+                child: Icon(icon, color: iconColor, size: 22),
               ),
               const Spacer(),
               Icon(
                 Icons.more_horiz_rounded,
                 size: 20,
-                color: MasarColors.textSecondary,
+                color: UniColors.textSecondary,
               ),
             ],
           ),
           const SizedBox(height: 18),
-          Text(
+          UniText(
             title,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: MasarColors.textSecondary,
+              color: UniColors.textSecondary,
             ),
           ),
           const SizedBox(height: 5),
-          Text(
+          UniText(
             value,
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
-              color: MasarColors.textPrimary,
+              color: UniColors.textPrimary,
             ),
           ),
           const SizedBox(height: 3),
-          Text(
+          UniText(
             subtitle,
-            style: TextStyle(
-              fontSize: 10.5,
-              color: MasarColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 10.5, color: UniColors.textSecondary),
           ),
         ],
       ),
@@ -242,9 +326,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: MasarColors.white,
+        color: UniColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(color: UniColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,12 +339,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: MasarColors.lightBlue,
+                  color: UniColors.lightBlue,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.bar_chart_rounded,
-                  color: MasarColors.primaryBlue,
+                  color: UniColors.primaryBlue,
                   size: 22,
                 ),
               ),
@@ -268,50 +352,47 @@ class _ReportsScreenState extends State<ReportsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  UniText(
                     'نظرة عامة على الساعات',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: MasarColors.textPrimary,
+                      color: UniColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 3),
-                  Text(
+                  UniText(
                     'توزيع الطلاب حسب الساعات المكتملة',
                     style: TextStyle(
                       fontSize: 11,
-                      color: MasarColors.textSecondary,
+                      color: UniColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 25),
-          _progressRow(
-            title: 'أقل من 100 ساعة',
-            value: 0.18,
-            count: '62 طالب',
-          ),
-          const SizedBox(height: 18),
-          _progressRow(
-            title: '100 - 200 ساعة',
-            value: 0.26,
-            count: '90 طالب',
-          ),
-          const SizedBox(height: 18),
-          _progressRow(
-            title: '200 - 279 ساعة',
-            value: 0.29,
-            count: '100 طالب',
-          ),
-          const SizedBox(height: 18),
-          _progressRow(
-            title: '280 ساعة أو أكثر',
-            value: 0.27,
-            count: '94 طالب',
-          ),
+          const SizedBox(height: 25), //
+          if (_hoursOverviewData.isEmpty)
+            UniText(
+              'لا توجد بيانات ساعات تدريب لهذه الفترة',
+              style: TextStyle(fontSize: 12, color: UniColors.textSecondary),
+            )
+          else
+            ..._hoursOverviewData.asMap().entries.map((entry) {
+              final item = entry.value;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: entry.key == _hoursOverviewData.length - 1 ? 0 : 18,
+                ),
+                child: _progressRow(
+                  title: item['title'].toString(),
+                  value: _getRatio(item['ratio']),
+                  count: '${item['count']} طالب',
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -328,21 +409,18 @@ class _ReportsScreenState extends State<ReportsScreen> {
         Row(
           children: [
             Expanded(
-              child: Text(
+              child: UniText(
                 title,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: MasarColors.textPrimary,
+                  color: UniColors.textPrimary,
                 ),
               ),
             ),
-            Text(
+            UniText(
               count,
-              style: TextStyle(
-                fontSize: 11,
-                color: MasarColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 11, color: UniColors.textSecondary),
             ),
           ],
         ),
@@ -352,10 +430,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
           child: LinearProgressIndicator(
             value: value,
             minHeight: 9,
-            backgroundColor: MasarColors.lightBlue,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              MasarColors.primaryBlue,
-            ),
+            backgroundColor: UniColors.lightBlue,
+            valueColor: AlwaysStoppedAnimation<Color>(UniColors.primaryBlue),
           ),
         ),
       ],
@@ -366,9 +442,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: MasarColors.white,
+        color: UniColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MasarColors.border),
+        border: Border.all(color: UniColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,66 +455,75 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: MasarColors.lightGreen,
+                  color: UniColors.lightGreen,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.business_rounded,
-                  color: MasarColors.primaryGreen,
+                  color: UniColors.primaryGreen,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
+                child: UniText(
                   'تقرير الشركات',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: MasarColors.textPrimary,
+                    color: UniColors.textPrimary,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          _companyRow('شركة التقنية', '42 طالب', 0.82),
-          const SizedBox(height: 18),
-          _companyRow('شركة البرمجيات', '36 طالب', 0.71),
-          const SizedBox(height: 18),
-          _companyRow('شركة الحلول الرقمية', '29 طالب', 0.64),
-          const SizedBox(height: 18),
-          _companyRow('شركة المستقبل', '24 طالب', 0.52),
+          const SizedBox(height: 24), //
+          if (_companyReportData.isEmpty)
+            UniText(
+              'لا توجد بيانات شركات لهذه الفترة',
+              style: TextStyle(fontSize: 12, color: UniColors.textSecondary),
+            )
+          else
+            ..._companyReportData.asMap().entries.map((entry) {
+              final item = entry.value;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: entry.key == _companyReportData.length - 1 ? 0 : 18,
+                ),
+                child: _companyRow(
+                  item['name'].toString(),
+                  '${item['students']} طالب',
+                  _getRatio(item['ratio']),
+                ),
+              );
+            }),
         ],
       ),
     );
   }
 
-  Widget _companyRow(
-    String name,
-    String students,
-    double value,
-  ) {
+  Widget _companyRow(String name, String students, double value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Expanded(
-              child: Text(
+              child: UniText(
                 name,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: MasarColors.textPrimary,
+                  color: UniColors.textPrimary,
                 ),
               ),
             ),
-            Text(
+            UniText(
               students,
               style: TextStyle(
                 fontSize: 10.5,
-                color: MasarColors.textSecondary,
+                color: UniColors.textSecondary,
               ),
             ),
           ],
@@ -449,10 +534,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
           child: LinearProgressIndicator(
             value: value,
             minHeight: 8,
-            backgroundColor: MasarColors.lightGreen,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              MasarColors.primaryGreen,
-            ),
+            backgroundColor: UniColors.lightGreen,
+            valueColor: AlwaysStoppedAnimation<Color>(UniColors.primaryGreen),
           ),
         ),
       ],
