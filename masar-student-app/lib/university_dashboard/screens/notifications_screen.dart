@@ -1,165 +1,259 @@
-
 import 'package:flutter/material.dart';
 
-import '../../theme/masar_theme.dart';
+
+import '../../core/theme/uni_dashboard_theme.dart';
+import '../../core/localization/uni_text.dart';
+import '../../core/services/university_notifications_service.dart';
+
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+  final VoidCallback? onCountsChanged;
+
+  const NotificationsScreen({super.key, this.onCountsChanged});
 
   @override
   State<NotificationsScreen> createState() =>
       _NotificationsScreenState();
 }
 
-class _NotificationsScreenState
-    extends State<NotificationsScreen> {
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
   String selectedFilter = 'الكل';
 
-  final List<Map<String, dynamic>> notifications = [
-    {
-      'title': 'طلب تدريب جديد',
-      'message':
-          'قام أحمد محمد علي بالتقديم على فرصة تدريب مطور Flutter.',
-      'time': 'منذ 15 دقيقة',
-      'type': 'application',
-      'read': false,
-    },
-    {
-      'title': 'تقرير يحتاج إلى مراجعة',
-      'message':
-          'تم رفع تقرير تدريبي جديد من الطالب محمد يوسف.',
-      'time': 'منذ 45 دقيقة',
-      'type': 'report',
-      'read': false,
-    },
-    {
-      'title': 'طالب قريب من إكمال التدريب',
-      'message':
-          'رنا سمير أكملت 245 ساعة من أصل 280 ساعة تدريبية.',
-      'time': 'منذ ساعتين',
-      'type': 'training',
-      'read': false,
-    },
-    {
-      'title': 'فرصة تدريب جديدة',
-      'message':
-          'تمت إضافة فرصة تدريب جديدة من شركة التقنية المتقدمة.',
-      'time': 'اليوم، 10:30 ص',
-      'type': 'opportunity',
-      'read': true,
-    },
-    {
-      'title': 'إكمال تدريب',
-      'message':
-          'أكمل الطالب نور علي جميع الساعات المطلوبة للتدريب.',
-      'time': 'أمس، 04:20 م',
-      'type': 'completed',
-      'read': true,
-    },
-    {
-      'title': 'طلب تدريب جديد',
-      'message':
-          'قامت ليان أحمد بالتقديم على فرصة UI/UX Designer.',
-      'time': 'أمس، 12:10 م',
-      'type': 'application',
-      'read': true,
-    },
-    {
-      'title': 'تقرير يحتاج إلى مراجعة',
-      'message':
-          'تم رفع تقرير أسبوعي جديد من الطالب تالا حمدان.',
-      'time': 'قبل يومين',
-      'type': 'report',
-      'read': true,
-    },
-    {
-      'title': 'تحديث حالة التدريب',
-      'message':
-          'تم تحديث حالة تدريب محمد يوسف إلى "متأخر".',
-      'time': 'قبل 3 أيام',
-      'type': 'training',
-      'read': true,
-    },
-  ];
+  List<Map<String, dynamic>> notifications = [];
+
+  bool isLoading = true;
+  String? errorMessage;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+
+  Future<void> _loadNotifications() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final result =
+          await UniversityNotificationsService.fetchNotifications();
+
+      final notificationsData =
+          result['notifications'] as List? ?? [];
+
+      final loadedNotifications = notificationsData.map((item) {
+        final notification =
+            Map<String, dynamic>.from(item as Map);
+
+        notification['time'] = _formatTime(
+          notification['createdAt']?.toString(),
+        );
+
+        return notification;
+      }).toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        notifications = loadedNotifications;
+        isLoading = false;
+      });
+      widget.onCountsChanged?.call();
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+
+  String _formatTime(String? value) {
+    if (value == null || value.isEmpty) {
+      return '—';
+    }
+
+    final createdAt = DateTime.tryParse(value);
+
+    if (createdAt == null) {
+      return '—';
+    }
+
+    final difference =
+        DateTime.now().difference(createdAt.toLocal());
+
+    if (difference.isNegative || difference.inMinutes < 1) {
+      return 'الآن';
+    }
+
+    if (difference.inMinutes < 60) {
+      return 'منذ ${difference.inMinutes} دقيقة';
+    }
+
+    if (difference.inHours < 24) {
+      return 'منذ ${difference.inHours} ساعة';
+    }
+
+    if (difference.inDays == 1) {
+      return 'أمس';
+    }
+
+    return 'قبل ${difference.inDays} أيام';
+  }
+
 
   int get unreadCount =>
-      notifications.where((item) => item['read'] == false).length;
+      notifications.where((item) => item['read'] != true).length;
+
 
   List<Map<String, dynamic>> get filteredNotifications {
     if (selectedFilter == 'غير مقروءة') {
       return notifications
-          .where((item) => item['read'] == false)
+          .where((item) => item['read'] != true)
           .toList();
     }
 
     return notifications;
   }
 
-  IconData _notificationIcon(String type) {
-    switch (type) {
-      case 'application':
-        return Icons.assignment_outlined;
-      case 'report':
-        return Icons.description_outlined;
-      case 'training':
-        return Icons.school_outlined;
-      case 'opportunity':
-        return Icons.work_outline_rounded;
-      case 'completed':
-        return Icons.check_circle_outline;
-      default:
-        return Icons.notifications_none_rounded;
-    }
-  }
 
-  Color _notificationColor(String type) {
-    switch (type) {
-      case 'application':
-      case 'opportunity':
-        return MasarColors.primaryBlue;
-      case 'report':
-        return MasarColors.warning;
-      case 'training':
-      case 'completed':
-        return MasarColors.primaryGreen;
-      default:
-        return MasarColors.textSecondary;
-    }
-  }
-
-  void markAsRead(Map<String, dynamic> notification) {
-    setState(() {
-      notification['read'] = true;
-    });
-  }
-
-  void markAllAsRead() {
-    setState(() {
-      for (final notification in notifications) {
-        notification['read'] = true;
-      }
-    });
-
+  void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم تحديد جميع الإشعارات كمقروءة'),
+      SnackBar(
+        content: UniText(message),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
+
+  IconData _notificationIcon(String type) {
+    switch (type) {
+      case 'application':
+        return Icons.assignment_outlined;
+
+      case 'report':
+        return Icons.description_outlined;
+
+      case 'training':
+        return Icons.school_outlined;
+
+      case 'opportunity':
+        return Icons.work_outline_rounded;
+
+      case 'completed':
+        return Icons.check_circle_outline;
+
+      default:
+        return Icons.notifications_none_rounded;
+    }
+  }
+
+
+  Color _notificationColor(String type) {
+    switch (type) {
+      case 'application':
+      case 'opportunity':
+        return UniColors.primaryBlue;
+
+      case 'report':
+        return UniColors.warning;
+
+      case 'training':
+      case 'completed':
+        return UniColors.primaryGreen;
+
+      default:
+        return UniColors.textSecondary;
+    }
+  }
+
+
+  Future<void> markAsRead(
+    Map<String, dynamic> notification,
+  ) async {
+    if (notification['read'] == true) {
+      return;
+    }
+
+    final notificationId =
+        notification['id']?.toString();
+
+    if (notificationId == null || notificationId.isEmpty) {
+      return;
+    }
+
+    try {
+      await UniversityNotificationsService.markAsRead(
+        notificationId,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        notification['read'] = true;
+      });
+      widget.onCountsChanged?.call();
+    } catch (e) {
+      if (!mounted) return;
+
+      _showMessage(
+        'تعذر تحديد الإشعار كمقروء: $e',
+      );
+    }
+  }
+
+
+  Future<void> markAllAsRead() async {
+    if (unreadCount == 0) {
+      return;
+    }
+
+    try {
+      await UniversityNotificationsService.markAllAsRead();
+
+      if (!mounted) return;
+
+      setState(() {
+        for (final notification in notifications) {
+          notification['read'] = true;
+        }
+      });
+      widget.onCountsChanged?.call();
+
+      _showMessage('تم تحديد جميع الإشعارات كمقروءة');
+    } catch (e) {
+      if (!mounted) return;
+
+      _showMessage(
+        'تعذر تحديث الإشعارات: $e',
+      );
+    }
+  }
+
+
   void showNotificationDetails(
     Map<String, dynamic> notification,
   ) {
+    // Mark the notification as read when it is opened.
     markAsRead(notification);
 
-    final color = _notificationColor(notification['type']);
+    final color = _notificationColor(
+      notification['type'].toString(),
+    );
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: Directionality.of(context),
           child: Dialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(22),
@@ -182,49 +276,57 @@ class _NotificationsScreenState
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(
-                            _notificationIcon(notification['type']),
+                            _notificationIcon(
+                              notification['type'].toString(),
+                            ),
                             color: color,
                             size: 27,
                           ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
-                          child: Text(
-                            notification['title'],
+                          child: UniText(
+                            notification['title'].toString(),
                             style: TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
-                              color: MasarColors.textPrimary,
+                              color: UniColors.textPrimary,
                             ),
                           ),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 22),
-                    Text(
-                      notification['message'],
+
+                    UniText(
+                      notification['message'].toString(),
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.8,
-                        color: MasarColors.textSecondary,
+                        color: UniColors.textSecondary,
                       ),
                     ),
+
                     const SizedBox(height: 15),
-                    Text(
-                      notification['time'],
+
+                    UniText(
+                      notification['time'].toString(),
                       style: TextStyle(
                         fontSize: 11,
-                        color: MasarColors.textSecondary,
+                        color: UniColors.textSecondary,
                       ),
                     ),
+
                     const SizedBox(height: 24),
+
                     Align(
                       alignment: Alignment.centerLeft,
                       child: ElevatedButton(
                         onPressed: () =>
                             Navigator.pop(dialogContext),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: MasarColors.primaryBlue,
+                          backgroundColor: UniColors.primaryBlue,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
@@ -235,7 +337,7 @@ class _NotificationsScreenState
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('إغلاق'),
+                        child: const UniText('إغلاق'),
                       ),
                     ),
                   ],
@@ -248,11 +350,15 @@ class _NotificationsScreenState
     );
   }
 
+
   Widget _notificationCard(
     Map<String, dynamic> notification,
   ) {
-    final bool isRead = notification['read'] as bool;
-    final color = _notificationColor(notification['type']);
+    final bool isRead = notification['read'] == true;
+
+    final color = _notificationColor(
+      notification['type'].toString(),
+    );
 
     return InkWell(
       borderRadius: BorderRadius.circular(18),
@@ -261,12 +367,14 @@ class _NotificationsScreenState
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: isRead ? MasarColors.white : MasarColors.lightBlue,
+          color: isRead
+              ? UniColors.white
+              : UniColors.lightBlue,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isRead
-                ? MasarColors.border
-                : MasarColors.primaryBlue.withOpacity(0.18),
+                ? UniColors.border
+                : UniColors.primaryBlue.withOpacity(0.18),
           ),
         ),
         child: Row(
@@ -280,12 +388,16 @@ class _NotificationsScreenState
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
-                _notificationIcon(notification['type']),
+                _notificationIcon(
+                  notification['type'].toString(),
+                ),
                 color: color,
                 size: 23,
               ),
             ),
+
             const SizedBox(width: 15),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,54 +405,61 @@ class _NotificationsScreenState
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          notification['title'],
+                        child: UniText(
+                          notification['title'].toString(),
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: isRead
                                 ? FontWeight.w600
                                 : FontWeight.w800,
-                            color: MasarColors.textPrimary,
+                            color: UniColors.textPrimary,
                           ),
                         ),
                       ),
+
                       if (!isRead)
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: MasarColors.primaryBlue,
+                            color: UniColors.primaryBlue,
                             shape: BoxShape.circle,
                           ),
                         ),
                     ],
                   ),
+
                   const SizedBox(height: 7),
-                  Text(
-                    notification['message'],
+
+                  UniText(
+                    notification['message'].toString(),
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.6,
-                      color: MasarColors.textSecondary,
+                      color: UniColors.textSecondary,
                     ),
                   ),
+
                   const SizedBox(height: 8),
-                  Text(
-                    notification['time'],
+
+                  UniText(
+                    notification['time'].toString(),
                     style: TextStyle(
                       fontSize: 10.5,
-                      color: MasarColors.textSecondary,
+                      color: UniColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
+
             const SizedBox(width: 8),
+
             PopupMenuButton<String>(
-              tooltip: 'خيارات',
+              tooltip: UniLocalizations.translate('خيارات'),
               icon: Icon(
                 Icons.more_vert_rounded,
-                color: MasarColors.textSecondary,
+                color: UniColors.textSecondary,
               ),
               onSelected: (value) {
                 if (value == 'read') {
@@ -351,7 +470,7 @@ class _NotificationsScreenState
                 if (!isRead)
                   const PopupMenuItem(
                     value: 'read',
-                    child: Text('تحديد كمقروء'),
+                    child: UniText('تحديد كمقروء'),
                   ),
               ],
             ),
@@ -360,6 +479,7 @@ class _NotificationsScreenState
       ),
     );
   }
+
 
   Widget _filterButton(String title) {
     final bool selected = selectedFilter == title;
@@ -378,86 +498,176 @@ class _NotificationsScreenState
         ),
         decoration: BoxDecoration(
           color: selected
-              ? MasarColors.primaryBlue
-              : MasarColors.white,
+              ? UniColors.primaryBlue
+              : UniColors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: selected
-                ? MasarColors.primaryBlue
-                : MasarColors.border,
+                ? UniColors.primaryBlue
+                : UniColors.border,
           ),
         ),
-        child: Text(
+        child: UniText(
           title,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             color: selected
                 ? Colors.white
-                : MasarColors.textSecondary,
+                : UniColors.textSecondary,
           ),
         ),
       ),
     );
   }
 
+
+  Widget _emptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 80),
+      decoration: BoxDecoration(
+        color: UniColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: UniColors.border),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.notifications_none_rounded,
+            size: 50,
+            color: UniColors.textSecondary,
+          ),
+          const SizedBox(height: 12),
+          UniText(
+            selectedFilter == 'غير مقروءة'
+                ? 'لا توجد إشعارات غير مقروءة'
+                : 'لا توجد إشعارات حاليًا',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: UniColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildNotificationsContent() {
+    if (isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(60),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(30),
+        decoration: BoxDecoration(
+          color: UniColors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: UniColors.border),
+        ),
+        child: Column(
+          children: [
+            UniText(
+              errorMessage!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: UniColors.error,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 14),
+            ElevatedButton(
+              onPressed: _loadNotifications,
+              child: const UniText('إعادة المحاولة'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (filteredNotifications.isEmpty) {
+      return _emptyState();
+    }
+
+    return Column(
+      children: filteredNotifications
+          .map(_notificationCard)
+          .toList(),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: Directionality.of(context),
       child: Container(
-        color: MasarColors.background,
+        color: UniColors.background,
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(28, 24, 28, 35),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Page title and mark-all action.
               Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        UniText(
                           'الإشعارات',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: MasarColors.textPrimary,
+                            color: UniColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
+                        UniText(
                           'تابع آخر المستجدات والإجراءات المطلوبة',
                           style: TextStyle(
                             fontSize: 13,
-                            color: MasarColors.textSecondary,
+                            color: UniColors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  if (unreadCount > 0)
+
+                  if (unreadCount > 0 && !isLoading)
                     TextButton.icon(
                       onPressed: markAllAsRead,
                       icon: const Icon(
                         Icons.done_all_rounded,
                         size: 18,
                       ),
-                      label: const Text('تحديد الكل كمقروء'),
+                      label: const UniText('تحديد الكل كمقروء'),
                       style: TextButton.styleFrom(
-                        foregroundColor: MasarColors.primaryBlue,
+                        foregroundColor: UniColors.primaryBlue,
                       ),
                     ),
                 ],
               ),
+
               const SizedBox(height: 24),
+
+              // Unread notifications summary.
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: MasarColors.white,
+                  color: UniColors.white,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: MasarColors.border),
+                  border: Border.all(color: UniColors.border),
                 ),
                 child: Row(
                   children: [
@@ -465,33 +675,35 @@ class _NotificationsScreenState
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: MasarColors.lightBlue,
+                        color: UniColors.lightBlue,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
                         Icons.notifications_active_outlined,
-                        color: MasarColors.primaryBlue,
+                        color: UniColors.primaryBlue,
                       ),
                     ),
+
                     const SizedBox(width: 14),
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          UniText(
                             '$unreadCount إشعارات غير مقروءة',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: MasarColors.textPrimary,
+                              color: UniColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 3),
-                          Text(
+                          UniText(
                             'تحتاج بعض الإشعارات إلى مراجعة أو إجراء',
                             style: TextStyle(
                               fontSize: 11,
-                              color: MasarColors.textSecondary,
+                              color: UniColors.textSecondary,
                             ),
                           ),
                         ],
@@ -500,7 +712,10 @@ class _NotificationsScreenState
                   ],
                 ),
               ),
+
               const SizedBox(height: 18),
+
+              // Notification filters.
               Row(
                 children: [
                   _filterButton('الكل'),
@@ -508,41 +723,11 @@ class _NotificationsScreenState
                   _filterButton('غير مقروءة'),
                 ],
               ),
+
               const SizedBox(height: 18),
-              if (filteredNotifications.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 80),
-                  decoration: BoxDecoration(
-                    color: MasarColors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: MasarColors.border),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.notifications_none_rounded,
-                        size: 50,
-                        color: MasarColors.textSecondary,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'لا توجد إشعارات غير مقروءة',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: MasarColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Column(
-                  children: filteredNotifications
-                      .map(_notificationCard)
-                      .toList(),
-                ),
+
+              // Loading, error, empty state, or notifications.
+              _buildNotificationsContent(),
             ],
           ),
         ),
