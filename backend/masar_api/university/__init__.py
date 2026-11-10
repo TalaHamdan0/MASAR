@@ -5,6 +5,9 @@ university_bp = Blueprint(
     "university",
     __name__,
     url_prefix="/api/v1/university",
+<<<<<<< HEAD
+)
+=======
 )
 
 
@@ -18,3 +21,4 @@ from . import current_trainings
 from . import reports
 from . import notifications
 from . import settings
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96

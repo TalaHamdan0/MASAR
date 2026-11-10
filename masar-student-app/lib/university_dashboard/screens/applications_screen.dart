@@ -1,8 +1,14 @@
+<<<<<<< HEAD
+
+import 'package:flutter/material.dart';
+import '../../theme/masar_theme.dart';
+=======
 import 'package:flutter/material.dart';
 
 import '../../core/theme/uni_dashboard_theme.dart';
 import '../../core/localization/uni_text.dart';
 import '../../core/services/university_applications_service.dart';
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
 class ApplicationsScreen extends StatefulWidget {
   const ApplicationsScreen({super.key});
@@ -16,6 +22,87 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
   String selectedStatus = 'الكل';
 
+<<<<<<< HEAD
+  final List<Map<String, dynamic>> applications = [
+    {
+      'name': 'تالا حمدان',
+      'id': '20231001',
+      'major': 'هندسة البرمجيات',
+      'company': 'Data Solutions',
+      'training': 'تحليل البيانات',
+      'date': '24/09/2026',
+      'status': 'قيد المراجعة',
+      'documents': 'السيرة الذاتية + كشف العلامات',
+      'gpa': '3.65',
+    },
+    {
+      'name': 'ليان أحمد',
+      'id': '20231002',
+      'major': 'علم الحاسوب',
+      'company': 'Creative Hub',
+      'training': 'تصميم UI/UX',
+      'date': '23/09/2026',
+      'status': 'مقبول',
+      'documents': 'السيرة الذاتية + ملف الأعمال',
+      'gpa': '3.82',
+    },
+    {
+      'name': 'رنا سمير',
+      'id': '20231003',
+      'major': 'هندسة البرمجيات',
+      'company': 'Advanced Tech',
+      'training': 'تطوير Flutter',
+      'date': '22/09/2026',
+      'status': 'قيد المراجعة',
+      'documents': 'السيرة الذاتية + ملف الأعمال',
+      'gpa': '3.54',
+    },
+    {
+      'name': 'محمد يوسف',
+      'id': '20231004',
+      'major': 'الأمن السيبراني',
+      'company': 'SecureNet',
+      'training': 'الأمن السيبراني',
+      'date': '21/09/2026',
+      'status': 'مقبول',
+      'documents': 'السيرة الذاتية + الشهادات',
+      'gpa': '3.71',
+    },
+    {
+      'name': 'نور علي',
+      'id': '20231005',
+      'major': 'هندسة البرمجيات',
+      'company': 'Quality First',
+      'training': 'ضمان الجودة والاختبار',
+      'date': '20/09/2026',
+      'status': 'مرفوض',
+      'documents': 'السيرة الذاتية فقط',
+      'gpa': '2.95',
+    },
+    {
+      'name': 'سارة خالد',
+      'id': '20231007',
+      'major': 'هندسة البرمجيات',
+      'company': 'Jordan Tech',
+      'training': 'تطوير الواجهات الأمامية',
+      'date': '19/09/2026',
+      'status': 'قيد المراجعة',
+      'documents': 'السيرة الذاتية + ملف الأعمال',
+      'gpa': '3.48',
+    },
+    {
+      'name': 'أحمد محمد',
+      'id': '20231006',
+      'major': 'علم الحاسوب',
+      'company': 'Data Solutions',
+      'training': 'تحليل البيانات',
+      'date': '18/09/2026',
+      'status': 'قيد المراجعة',
+      'documents': 'السيرة الذاتية فقط',
+      'gpa': '3.32',
+    },
+  ];
+=======
   List<Map<String, dynamic>> applications = [];
 
   Map<String, dynamic> statistics = {};
@@ -73,6 +160,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
     return int.tryParse(value?.toString() ?? '') ?? 0;
   }
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
   @override
   void dispose() {
@@ -90,8 +178,13 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           application['training'].toString().toLowerCase().contains(query) ||
           application['company'].toString().toLowerCase().contains(query);
 
+<<<<<<< HEAD
+      final matchesStatus = selectedStatus == 'الكل' ||
+          application['status'] == selectedStatus;
+=======
       final matchesStatus =
           selectedStatus == 'الكل' || application['status'] == selectedStatus;
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
       return matchesSearch && matchesStatus;
     }).toList();
@@ -100,9 +193,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
+<<<<<<< HEAD
+      textDirection: TextDirection.rtl,
+      child: Container(
+        color: MasarColors.background,
+=======
       textDirection: Directionality.of(context),
       child: Container(
         color: UniColors.background,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -126,11 +225,27 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+<<<<<<< HEAD
+        Text(
+=======
         UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           'طلبات التدريب',
           style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
+<<<<<<< HEAD
+            color: MasarColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'متابعة طلبات الطلاب والاطلاع على تفاصيل كل طلب وحالته.',
+          style: TextStyle(
+            fontSize: 14,
+            color: MasarColors.textSecondary,
+          ),
+=======
             color: UniColors.textPrimary,
           ),
         ),
@@ -138,6 +253,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
         UniText(
           'متابعة طلبات الطلاب والاطلاع على تفاصيل كل طلب وحالته.',
           style: TextStyle(fontSize: 14, color: UniColors.textSecondary),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         ),
       ],
     );
@@ -149,10 +265,18 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
         final columns = constraints.maxWidth >= 1000
             ? 4
             : constraints.maxWidth >= 600
+<<<<<<< HEAD
+                ? 2
+                : 1;
+
+        final cardWidth =
+            (constraints.maxWidth - (columns - 1) * 12) / columns;
+=======
             ? 2
             : 1;
 
         final cardWidth = (constraints.maxWidth - (columns - 1) * 12) / columns;
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
         return Wrap(
           spacing: 12,
@@ -162,16 +286,26 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               width: cardWidth,
               child: _statCard(
                 title: 'إجمالي الطلبات',
+<<<<<<< HEAD
+                value: '127',
+                icon: Icons.assignment_outlined,
+                color: MasarColors.primaryBlue,
+=======
                 value: _getNumber('totalApplications').toString(),
                 icon: Icons.assignment_outlined,
                 color: UniColors.primaryBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ),
             SizedBox(
               width: cardWidth,
               child: _statCard(
                 title: 'قيد المراجعة',
+<<<<<<< HEAD
+                value: '18',
+=======
                 value: _getNumber('pendingApplications').toString(),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 icon: Icons.pending_actions,
                 color: Colors.orange,
               ),
@@ -180,18 +314,30 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               width: cardWidth,
               child: _statCard(
                 title: 'الطلبات المقبولة',
+<<<<<<< HEAD
+                value: '84',
+                icon: Icons.check_circle_outline,
+                color: MasarColors.primaryGreen,
+=======
                 value: _getNumber('acceptedApplications').toString(),
                 icon: Icons.check_circle_outline,
                 color: UniColors.primaryGreen,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ),
             SizedBox(
               width: cardWidth,
               child: _statCard(
                 title: 'الطلبات المرفوضة',
+<<<<<<< HEAD
+                value: '25',
+                icon: Icons.cancel_outlined,
+                color: MasarColors.error,
+=======
                 value: _getNumber('rejectedApplications').toString(),
                 icon: Icons.cancel_outlined,
                 color: UniColors.error,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ),
           ],
@@ -209,9 +355,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
+<<<<<<< HEAD
+        color: MasarColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: MasarColors.border),
+=======
         color: UniColors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: UniColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ),
       child: Row(
         children: [
@@ -229,6 +381,17 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+<<<<<<< HEAD
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: MasarColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+=======
                 UniText(
                   title,
                   style: TextStyle(
@@ -238,11 +401,16 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                 ),
                 const SizedBox(height: 7),
                 UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   value,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+<<<<<<< HEAD
+                    color: MasarColors.textPrimary,
+=======
                     color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   ),
                 ),
               ],
@@ -262,18 +430,36 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           controller: searchController,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
+<<<<<<< HEAD
+            hintText: 'ابحث باسم الطالب أو رقمه أو الشركة أو التدريب',
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: MasarColors.white,
+=======
             hintText: UniLocalizations.translate(
               'ابحث باسم الطالب أو رقمه أو الشركة أو التدريب',
             ),
             prefixIcon: const Icon(Icons.search),
             filled: true,
             fillColor: UniColors.white,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
+<<<<<<< HEAD
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.primaryBlue),
+=======
               borderSide: BorderSide(color: UniColors.border),
             ),
             enabledBorder: OutlineInputBorder(
@@ -283,6 +469,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: UniColors.primaryBlue),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
             ),
           ),
         );
@@ -291,15 +478,38 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           value: selectedStatus,
           isExpanded: true,
           decoration: InputDecoration(
+<<<<<<< HEAD
+            labelText: 'حالة الطلب',
+            filled: true,
+            fillColor: MasarColors.white,
+=======
             labelText: UniLocalizations.translate('حالة الطلب'),
             filled: true,
             fillColor: UniColors.white,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
+<<<<<<< HEAD
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: MasarColors.border),
+            ),
+          ),
+          items: const [
+            DropdownMenuItem(value: 'الكل', child: Text('كل الحالات')),
+            DropdownMenuItem(
+              value: 'قيد المراجعة',
+              child: Text('قيد المراجعة'),
+            ),
+            DropdownMenuItem(value: 'مقبول', child: Text('مقبول')),
+            DropdownMenuItem(value: 'مرفوض', child: Text('مرفوض')),
+=======
               borderSide: BorderSide(color: UniColors.border),
             ),
             enabledBorder: OutlineInputBorder(
@@ -315,6 +525,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             ),
             DropdownMenuItem(value: 'مقبول', child: UniText('مقبول')),
             DropdownMenuItem(value: 'مرفوض', child: UniText('مرفوض')),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           ],
           onChanged: (value) {
             if (value != null) {
@@ -325,7 +536,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
         if (isNarrow) {
           return Column(
+<<<<<<< HEAD
+            children: [
+              searchField,
+              const SizedBox(height: 12),
+              filter,
+            ],
+=======
             children: [searchField, const SizedBox(height: 12), filter],
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           );
         }
 
@@ -346,9 +565,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
+<<<<<<< HEAD
+        color: MasarColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: MasarColors.border),
+=======
         color: UniColors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: UniColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,11 +583,26 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             child: Row(
               children: [
                 Expanded(
+<<<<<<< HEAD
+                  child: Text(
+=======
                   child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     'قائمة طلبات التدريب',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
+<<<<<<< HEAD
+                      color: MasarColors.textPrimary,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${items.length} طلب',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: MasarColors.textSecondary,
+=======
                       color: UniColors.textPrimary,
                     ),
                   ),
@@ -372,11 +612,16 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     color: UniColors.textSecondary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   ),
                 ),
               ],
             ),
           ),
+<<<<<<< HEAD
+          Divider(height: 1, color: MasarColors.border),
+          if (items.isEmpty)
+=======
           Divider(height: 1, color: UniColors.border),
           if (isLoading)
             const Padding(
@@ -410,6 +655,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               ),
             )
           else if (items.isEmpty)
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
             Padding(
               padding: const EdgeInsets.all(35),
               child: Center(
@@ -418,6 +664,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                     Icon(
                       Icons.search_off,
                       size: 42,
+<<<<<<< HEAD
+                      color: MasarColors.textSecondary,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'لا توجد طلبات مطابقة للبحث',
+                      style: TextStyle(
+                        color: MasarColors.textSecondary,
+=======
                       color: UniColors.textSecondary,
                     ),
                     const SizedBox(height: 10),
@@ -425,6 +680,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                       'لا توجد طلبات مطابقة للبحث',
                       style: TextStyle(
                         color: UniColors.textSecondary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         fontSize: 14,
                       ),
                     ),
@@ -436,19 +692,40 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
+<<<<<<< HEAD
+                headingRowColor: WidgetStateProperty.all(
+                  MasarColors.lightBlue,
+                ),
+                headingTextStyle: TextStyle(
+                  color: MasarColors.textPrimary,
+=======
                 headingRowColor: WidgetStateProperty.all(UniColors.lightBlue),
                 headingTextStyle: TextStyle(
                   color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
                 dataTextStyle: TextStyle(
+<<<<<<< HEAD
+                  color: MasarColors.textPrimary,
+=======
                   color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   fontSize: 13,
                 ),
                 columnSpacing: 28,
                 horizontalMargin: 20,
                 columns: const [
+<<<<<<< HEAD
+                  DataColumn(label: Text('الطالب')),
+                  DataColumn(label: Text('الرقم الجامعي')),
+                  DataColumn(label: Text('الشركة')),
+                  DataColumn(label: Text('التدريب')),
+                  DataColumn(label: Text('تاريخ الطلب')),
+                  DataColumn(label: Text('الحالة')),
+                  DataColumn(label: Text('التفاصيل')),
+=======
                   DataColumn(label: UniText('الطالب')),
                   DataColumn(label: UniText('الرقم الجامعي')),
                   DataColumn(label: UniText('الشركة')),
@@ -456,10 +733,30 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                   DataColumn(label: UniText('تاريخ الطلب')),
                   DataColumn(label: UniText('الحالة')),
                   DataColumn(label: UniText('التفاصيل')),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 ],
                 rows: items.map((application) {
                   return DataRow(
                     cells: [
+<<<<<<< HEAD
+                      DataCell(Text(application['name'])),
+                      DataCell(Text(application['id'])),
+                      DataCell(Text(application['company'])),
+                      DataCell(Text(application['training'])),
+                      DataCell(Text(application['date'])),
+                      DataCell(_statusBadge(application['status'])),
+                      DataCell(
+                        TextButton.icon(
+                          onPressed: () =>
+                              _showApplicationDetails(application),
+                          icon: const Icon(
+                            Icons.visibility_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('عرض'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: MasarColors.primaryBlue,
+=======
                       DataCell(UniText(application['name'].toString())),
                       DataCell(UniText(application['id'].toString())),
                       DataCell(UniText(application['company'].toString())),
@@ -473,6 +770,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                           label: const UniText('عرض'),
                           style: TextButton.styleFrom(
                             foregroundColor: UniColors.primaryBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                           ),
                         ),
                       ),
@@ -492,12 +790,21 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
     switch (status) {
       case 'مقبول':
+<<<<<<< HEAD
+        color = MasarColors.primaryGreen;
+        background = MasarColors.lightGreen;
+        break;
+      case 'مرفوض':
+        color = MasarColors.error;
+        background = MasarColors.error.withValues(alpha: 0.10);
+=======
         color = UniColors.primaryGreen;
         background = UniColors.lightGreen;
         break;
       case 'مرفوض':
         color = UniColors.error;
         background = UniColors.error.withValues(alpha: 0.10);
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         break;
       default:
         color = Colors.orange.shade800;
@@ -510,7 +817,11 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
         color: background,
         borderRadius: BorderRadius.circular(20),
       ),
+<<<<<<< HEAD
+      child: Text(
+=======
       child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         status,
         style: TextStyle(
           color: color,
@@ -526,9 +837,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       context: context,
       builder: (dialogContext) {
         return Directionality(
+<<<<<<< HEAD
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: MasarColors.white,
+=======
           textDirection: Directionality.of(context),
           child: AlertDialog(
             backgroundColor: UniColors.white,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),
@@ -536,11 +853,19 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               children: [
                 Icon(
                   Icons.assignment_ind_outlined,
+<<<<<<< HEAD
+                  color: MasarColors.primaryBlue,
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+=======
                   color: UniColors.primaryBlue,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     'تفاصيل طلب التدريب',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -553,6 +878,40 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+<<<<<<< HEAD
+                    _detailSection(
+                      'معلومات الطالب',
+                      Icons.person_outline,
+                      [
+                        _detailItem('اسم الطالب', application['name']),
+                        _detailItem('الرقم الجامعي', application['id']),
+                        _detailItem('التخصص', application['major']),
+                        _detailItem('المعدل التراكمي', application['gpa']),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _detailSection(
+                      'معلومات الطلب',
+                      Icons.business_outlined,
+                      [
+                        _detailItem('الشركة', application['company']),
+                        _detailItem('التدريب المطلوب', application['training']),
+                        _detailItem('تاريخ التقديم', application['date']),
+                        _detailItem('حالة الطلب', application['status']),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _detailSection(
+                      'الوثائق المرفقة',
+                      Icons.attach_file,
+                      [
+                        _detailItem(
+                          'الوثائق',
+                          application['documents'],
+                        ),
+                      ],
+                    ),
+=======
                     _detailSection('معلومات الطالب', Icons.person_outline, [
                       _detailItem('اسم الطالب', application['name']),
                       _detailItem('الرقم الجامعي', application['id']),
@@ -570,11 +929,16 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                     _detailSection('الوثائق المرفقة', Icons.attach_file, [
                       _detailItem('الوثائق', application['documents']),
                     ]),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
+<<<<<<< HEAD
+                        color: MasarColors.lightBlue,
+=======
                         color: UniColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -582,6 +946,16 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                         children: [
                           Icon(
                             Icons.info_outline,
+<<<<<<< HEAD
+                            color: MasarColors.primaryBlue,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'تعرض هذه الصفحة تفاصيل الطلب وحالته الحالية.',
+                              style: TextStyle(
+                                color: MasarColors.textPrimary,
+=======
                             color: UniColors.primaryBlue,
                           ),
                           const SizedBox(width: 8),
@@ -590,6 +964,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                               'تعرض هذه الصفحة تفاصيل الطلب وحالته الحالية.',
                               style: TextStyle(
                                 color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                 fontSize: 13,
                               ),
                             ),
@@ -604,9 +979,15 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
+<<<<<<< HEAD
+                child: Text(
+                  'إغلاق',
+                  style: TextStyle(color: MasarColors.primaryBlue),
+=======
                 child: UniText(
                   'إغلاق',
                   style: TextStyle(color: UniColors.primaryBlue),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 ),
               ),
             ],
@@ -616,18 +997,35 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     );
   }
 
+<<<<<<< HEAD
+  Widget _detailSection(
+    String title,
+    IconData icon,
+    List<Widget> children,
+  ) {
+=======
   Widget _detailSection(String title, IconData icon, List<Widget> children) {
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
+<<<<<<< HEAD
+            Icon(icon, color: MasarColors.primaryBlue, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: MasarColors.textPrimary,
+=======
             Icon(icon, color: UniColors.primaryBlue, size: 20),
             const SizedBox(width: 8),
             UniText(
               title,
               style: TextStyle(
                 color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
@@ -639,10 +1037,19 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
+<<<<<<< HEAD
+            color: MasarColors.background,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: children,
+          ),
+=======
             color: UniColors.background,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(children: children),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         ),
       ],
     );
@@ -656,19 +1063,36 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
         children: [
           Expanded(
             flex: 2,
+<<<<<<< HEAD
+            child: Text(
+              label,
+              style: TextStyle(
+                color: MasarColors.textSecondary,
+                fontSize: 13,
+              ),
+=======
             child: UniText(
               label,
               style: TextStyle(color: UniColors.textSecondary, fontSize: 13),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             flex: 3,
+<<<<<<< HEAD
+            child: Text(
+              value,
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                color: MasarColors.textPrimary,
+=======
             child: UniText(
               value,
               textAlign: TextAlign.start,
               style: TextStyle(
                 color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),

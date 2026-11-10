@@ -1,6 +1,10 @@
 name: masar_student_app
 description: "A new Flutter project."
+<<<<<<< HEAD
+publish_to: 'none'
+=======
 publish_to: "none"
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
 version: 1.0.0+1
 
@@ -11,9 +15,12 @@ dependencies:
   flutter:
     sdk: flutter
 
+<<<<<<< HEAD
+=======
   flutter_localizations:
     sdk: flutter
 
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
   pdf: ^3.11.3
   printing: ^5.13.4
   file_picker: ^10.3.7

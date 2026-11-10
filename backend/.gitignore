@@ -11,6 +11,10 @@ uploads/
 __pycache__/
 *.py[cod]
 *.log
+<<<<<<< HEAD
+masar_api.zip
+=======
 masar_api.zip
 # Local VS Code settings
 .vscode/
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96

@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+
+import 'package:flutter/material.dart';
+
+import '../../theme/masar_theme.dart';
+import '../../core/widgets/uni_dashboard_header.dart';
+import '../../core/widgets/uni_dashboard_sidebar.dart';
+=======
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,6 +18,7 @@ import '../../core/widgets/uni_dashboard_sidebar.dart';
 import '../../core/services/university_auth_service.dart';
 import '../../core/services/university_settings_service.dart';
 import '../../core/services/university_dashboard_service.dart';
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
 import 'university_home_screen.dart';
 import 'students_screen.dart';
@@ -25,6 +34,15 @@ class UniversityMainLayout extends StatefulWidget {
   const UniversityMainLayout({super.key});
 
   @override
+<<<<<<< HEAD
+  State<UniversityMainLayout> createState() =>
+      _UniversityMainLayoutState();
+}
+
+class _UniversityMainLayoutState
+    extends State<UniversityMainLayout> {
+  int selectedIndex = 0;
+=======
   State<UniversityMainLayout> createState() => _UniversityMainLayoutState();
 }
 
@@ -34,6 +52,7 @@ class _UniversityMainLayoutState extends State<UniversityMainLayout> {
   int unreadNotificationsCount = 0;
   bool _isRefreshingBadges = false;
   Timer? _badgeRefreshTimer;
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
   static const List<String> pageTitles = [
     'الرئيسية',
@@ -46,6 +65,28 @@ class _UniversityMainLayoutState extends State<UniversityMainLayout> {
     'الإعدادات',
   ];
 
+<<<<<<< HEAD
+  // الصفحات تُبنى مرة واحدة للحفاظ على حالتها عند التنقل.
+  late final List<Widget> pages = [
+    const UniversityHomeScreen(),
+    const StudentsScreen(),
+    const CompaniesScreen(),
+    const ApplicationsScreen(),
+    const CurrentTrainingsScreen(),
+    const ReportsScreen(),
+    const NotificationsScreen(),
+    const SettingsScreen(),
+  ];
+
+void _selectPage(int index) {
+  if (index < 0 || index >= pages.length) return;
+
+  setState(() {
+    selectedIndex = index;
+  });
+}
+
+=======
   // These page widgets are intentionally created as fresh (non-const)
   // instances. When language/theme preferences change, the surrounding
   // AnimatedBuilder rebuilds this list. Fresh widget instances make Flutter
@@ -129,20 +170,44 @@ class _UniversityMainLayoutState extends State<UniversityMainLayout> {
       _refreshDashboardBadges();
     }
   }
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
   void _showLogoutDialog() {
     showDialog<void>(
       context: context,
       builder: (dialogContext) {
         return Directionality(
+<<<<<<< HEAD
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('تسجيل الخروج'),
+            content: const Text(
+=======
           textDirection: UniversityDashboardPreferences.instance.textDirection,
           child: AlertDialog(
             title: const UniText('تسجيل الخروج'),
             content: const UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               'هل أنت متأكد أنك تريد تسجيل الخروج من لوحة التحكم؟',
             ),
             actions: [
               TextButton(
+<<<<<<< HEAD
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('إلغاء'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          const UniversityLoginScreen(),
+=======
                 onPressed: () => Navigator.pop(dialogContext),
                 child: const UniText('إلغاء'),
               ),
@@ -159,11 +224,16 @@ class _UniversityMainLayoutState extends State<UniversityMainLayout> {
                     context,
                     MaterialPageRoute<void>(
                       builder: (_) => const UniversityLoginScreen(),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     ),
                     (route) => false,
                   );
                 },
+<<<<<<< HEAD
+                child: const Text('تسجيل الخروج'),
+=======
                 child: const UniText('تسجيل الخروج'),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ],
           ),
@@ -174,6 +244,53 @@ class _UniversityMainLayoutState extends State<UniversityMainLayout> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: MasarColors.background,
+        body: Row(
+          textDirection: TextDirection.ltr,
+          children: [
+            // منطقة المحتوى: الهيدر ثابت والمحتوى يتبدل.
+            Expanded(
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Column(
+                  children: [
+                    UniDashboardHeader(
+                      title: pageTitles[selectedIndex],
+                    ),
+                    
+                    Expanded(
+  child: IndexedStack(
+    index: selectedIndex,
+    children: pages.map((page) {
+      return Container(
+        color: MasarColors.background,
+        child: page,
+      );
+    }).toList(),
+  ),
+),
+                  ],
+                ),
+              ),
+            ),
+
+            // السايد بار يبقى موجودًا أثناء التنقل.
+            UniDashboardSidebar(
+              selectedIndex: selectedIndex,
+              onItemSelected: _selectPage,
+              onLogout: _showLogoutDialog,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+=======
     return AnimatedBuilder(
       animation: UniversityDashboardPreferences.instance,
       builder: (context, _) {
@@ -227,3 +344,4 @@ class _UniversityMainLayoutState extends State<UniversityMainLayout> {
     );
   }
 }
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96

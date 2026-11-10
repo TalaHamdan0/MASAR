@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../core/models/student_model.dart';
 import '../../../theme/masar_theme.dart';
+<<<<<<< HEAD
+import '../../core/services/training_service.dart';
+=======
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
 class ApplyTrainingApplicationScreen extends StatefulWidget {
   final Map<String, dynamic> company;
@@ -22,16 +26,92 @@ class ApplyTrainingApplicationScreen extends StatefulWidget {
 
 class _ApplyTrainingApplicationScreenState
     extends State<ApplyTrainingApplicationScreen> {
+<<<<<<< HEAD
+  bool _isLoading = false;
+
+=======
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
   String _displayValue(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'غير متوفر حاليًا';
     }
+<<<<<<< HEAD
+=======
 
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
     return value.trim();
   }
 
   String _companyValue(String key) {
     final value = widget.company[key];
+<<<<<<< HEAD
+    if (value == null || value.toString().trim().isEmpty) {
+      return 'غير متوفر حاليًا';
+    }
+    return value.toString().trim();
+  }
+
+  // دالة إرسال الطلب الآمنة (تعتمد على opportunityId فقط)
+  Future<void> _submitApplication() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // استخراج رقم الفرصة التدريبية مع التحويل الآمن
+      final rawOfferId =
+          widget.company['offer_id'] ??
+          widget.company['opportunity_id'] ??
+          widget.company['id'];
+
+      final int opportunityId = rawOfferId is int
+          ? rawOfferId
+          : int.tryParse(rawOfferId?.toString() ?? '0') ?? 0;
+
+      if (opportunityId <= 0) {
+        throw Exception('معلومات فرصة التدريب غير صالحة.');
+      }
+
+      // استدعاء خدمة التقديم بالشكل الجديد المتوافق مع الـ Token
+      await TrainingService.applyForTraining(opportunityId: opportunityId);
+
+      if (!mounted) return;
+
+      // إظهار رسالة نجاح وإغلاق الشاشة بسلاسة
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم تقديم طلب التدريب بنجاح!'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+
+      final errorMessage = e
+          .toString()
+          .replaceFirst('Exception: ', '')
+          .replaceAll('ApiException: ', '');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+=======
 
     if (value == null || value.toString().trim().isEmpty) {
       return 'غير متوفر حاليًا';
@@ -40,6 +120,7 @@ class _ApplyTrainingApplicationScreenState
     return value.toString().trim();
   }
 
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -49,9 +130,13 @@ class _ApplyTrainingApplicationScreenState
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
+<<<<<<< HEAD
+              constraints: const BoxConstraints(maxWidth: 390),
+=======
               constraints: const BoxConstraints(
                 maxWidth: 390,
               ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               child: Column(
                 children: [
                   _buildHeader(),
@@ -92,6 +177,12 @@ class _ApplyTrainingApplicationScreenState
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
+<<<<<<< HEAD
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: MasarColors.border)),
+=======
       padding: const EdgeInsets.symmetric(
         horizontal: 24,
         vertical: 20,
@@ -103,6 +194,7 @@ class _ApplyTrainingApplicationScreenState
             color: MasarColors.border,
           ),
         ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ),
       child: Row(
         children: [
@@ -142,6 +234,13 @@ class _ApplyTrainingApplicationScreenState
   Widget _buildSteps() {
     return Row(
       children: [
+<<<<<<< HEAD
+        _buildStep(number: '1', title: 'تقديم الطلب', active: true),
+        Expanded(child: Container(height: 2, color: MasarColors.border)),
+        _buildStep(number: '2', title: 'المراجعة', active: false),
+        Expanded(child: Container(height: 2, color: MasarColors.border)),
+        _buildStep(number: '3', title: 'تم الإرسال', active: false),
+=======
         _buildStep(
           number: '1',
           title: 'تقديم الطلب',
@@ -169,6 +268,7 @@ class _ApplyTrainingApplicationScreenState
           title: 'تم الإرسال',
           active: false,
         ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ],
     );
   }
@@ -186,16 +286,24 @@ class _ApplyTrainingApplicationScreenState
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+<<<<<<< HEAD
+            color: active ? MasarColors.primaryBlue : MasarColors.lightBlue,
+=======
             color: active
                 ? MasarColors.primaryBlue
                 : MasarColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           ),
           child: Text(
             number,
             style: TextStyle(
+<<<<<<< HEAD
+              color: active ? Colors.white : MasarColors.primaryBlue,
+=======
               color: active
                   ? Colors.white
                   : MasarColors.primaryBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -205,11 +313,16 @@ class _ApplyTrainingApplicationScreenState
           title,
           style: TextStyle(
             fontSize: 11,
+<<<<<<< HEAD
+            fontWeight: active ? FontWeight.bold : FontWeight.normal,
+            color: active ? MasarColors.primaryBlue : Colors.grey.shade600,
+=======
             fontWeight:
                 active ? FontWeight.bold : FontWeight.normal,
             color: active
                 ? MasarColors.primaryBlue
                 : Colors.grey.shade600,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           ),
         ),
       ],
@@ -223,9 +336,13 @@ class _ApplyTrainingApplicationScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+<<<<<<< HEAD
+        border: Border.all(color: MasarColors.border),
+=======
         border: Border.all(
           color: MasarColors.border,
         ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ),
       child: Row(
         children: [
@@ -258,10 +375,14 @@ class _ApplyTrainingApplicationScreenState
                 const SizedBox(height: 5),
                 Text(
                   _companyValue('slogan'),
+<<<<<<< HEAD
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+=======
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade600,
                   ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 ),
               ],
             ),
@@ -288,10 +409,14 @@ class _ApplyTrainingApplicationScreenState
         const SizedBox(height: 8),
         Text(
           'تظهر هنا المعلومات المرتبطة بحسابك.',
+<<<<<<< HEAD
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+=======
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey.shade600,
           ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         ),
         const SizedBox(height: 18),
         _buildInfoField(
@@ -338,6 +463,12 @@ class _ApplyTrainingApplicationScreenState
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
+<<<<<<< HEAD
+        color: highlighted ? MasarColors.lightGreen : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: highlighted ? MasarColors.primaryGreen : MasarColors.border,
+=======
         color: highlighted
             ? MasarColors.lightGreen
             : Colors.white,
@@ -346,6 +477,7 @@ class _ApplyTrainingApplicationScreenState
           color: highlighted
               ? MasarColors.primaryGreen
               : MasarColors.border,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         ),
       ),
       child: Row(
@@ -364,10 +496,14 @@ class _ApplyTrainingApplicationScreenState
               children: [
                 Text(
                   label,
+<<<<<<< HEAD
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+=======
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.grey.shade600,
                   ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -403,10 +539,14 @@ class _ApplyTrainingApplicationScreenState
         const SizedBox(height: 8),
         Text(
           'تحدد الشركة المستندات المطلوبة لكل فرصة تدريب.',
+<<<<<<< HEAD
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+=======
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey.shade600,
           ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         ),
         const SizedBox(height: 18),
         if (documents == null)
@@ -447,9 +587,13 @@ class _ApplyTrainingApplicationScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+<<<<<<< HEAD
+        border: Border.all(color: MasarColors.border),
+=======
         border: Border.all(
           color: MasarColors.border,
         ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,10 +605,14 @@ class _ApplyTrainingApplicationScreenState
               color: MasarColors.lightBlue,
               borderRadius: BorderRadius.circular(12),
             ),
+<<<<<<< HEAD
+            child: Icon(icon, color: MasarColors.primaryBlue),
+=======
             child: Icon(
               icon,
               color: MasarColors.primaryBlue,
             ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -533,7 +681,11 @@ class _ApplyTrainingApplicationScreenState
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
+<<<<<<< HEAD
+        onPressed: _isLoading ? null : _submitApplication,
+=======
         onPressed: null,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         style: ElevatedButton.styleFrom(
           backgroundColor: MasarColors.primaryBlue,
           foregroundColor: Colors.white,
@@ -544,6 +696,25 @@ class _ApplyTrainingApplicationScreenState
             borderRadius: BorderRadius.circular(16),
           ),
         ),
+<<<<<<< HEAD
+        child: _isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : const Text(
+                'إرسال طلب التدريب',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+      ),
+    );
+  }
+}
+=======
         child: const Text(
           'إرسال طلب التدريب',
           style: TextStyle(
@@ -555,3 +726,4 @@ class _ApplyTrainingApplicationScreenState
     );
   }
 }
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
