@@ -1,0 +1,14 @@
+
+from flask import Blueprint
+
+
+student_bp = Blueprint(
+    "student",
+    __name__,
+    url_prefix="/api/v1/students",
+)
+
+
+from . import profile
+from . import roadmap
+from . import training
