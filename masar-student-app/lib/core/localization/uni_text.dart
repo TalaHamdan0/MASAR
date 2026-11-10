@@ -252,6 +252,23 @@ class UniLocalizations {
     'أكملوا 280 ساعة': 'Completed 280 hours',
     'طالب نشط في التدريب': 'active student in training',
     'لا توجد وثائق مرفقة': 'No documents attached',
+    'الإجراء': 'Action',
+    'قبول': 'Accept',
+    'رفض': 'Reject',
+    'تأكيد قبول الطلب': 'Confirm Application Acceptance',
+    'تأكيد رفض الطلب': 'Confirm Application Rejection',
+    'هل أنت متأكدة من قبول طلب التدريب لهذا الطالب؟':
+        "Are you sure you want to accept this student's training application?",
+    'هل أنت متأكدة من رفض طلب التدريب لهذا الطالب؟':
+        "Are you sure you want to reject this student's training application?",
+    'تأكيد القبول': 'Confirm Acceptance',
+    'تأكيد الرفض': 'Confirm Rejection',
+    'تم قبول طلب التدريب بنجاح':
+        'The training application was accepted successfully',
+    'تم رفض طلب التدريب بنجاح':
+        'The training application was rejected successfully',
+    'بانتظار مراجعة الشركة': 'Waiting for company review',
+    'لا يتطلب إجراءً من الجامعة': 'No university action is required',
   };
 
   static String translate(String value) {
@@ -322,6 +339,9 @@ class UniLocalizations {
     }
     if (value.startsWith('تعذر تحديد الإشعار كمقروء:')) {
       return 'Unable to mark notification as read: ${value.substring('تعذر تحديد الإشعار كمقروء:'.length).trim()}';
+    }
+    if (value.startsWith('تعذر تحديث حالة الطلب:')) {
+      return 'Unable to update application status: ${value.substring('تعذر تحديث حالة الطلب:'.length).trim()}';
     }
     return value;
   }
