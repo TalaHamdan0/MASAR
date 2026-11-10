@@ -1,13 +1,21 @@
+<<<<<<< HEAD
 
 import 'package:flutter/material.dart';
 import 'university_main_layout.dart';
 import '../../theme/masar_theme.dart';
 import '../../data/university_mock_data.dart';
+=======
+import 'package:flutter/material.dart';
+import 'university_main_layout.dart';
+import '../../theme/masar_theme.dart';
+import '../../core/services/university_auth_service.dart';
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
 class UniversityLoginScreen extends StatefulWidget {
   const UniversityLoginScreen({super.key});
 
   @override
+<<<<<<< HEAD
   State<UniversityLoginScreen> createState() =>
       _UniversityLoginScreenState();
 }
@@ -16,6 +24,13 @@ class _UniversityLoginScreenState
     extends State<UniversityLoginScreen> {
   final TextEditingController universityIdController =
       TextEditingController();
+=======
+  State<UniversityLoginScreen> createState() => _UniversityLoginScreenState();
+}
+
+class _UniversityLoginScreenState extends State<UniversityLoginScreen> {
+  final TextEditingController universityIdController = TextEditingController();
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
   String? errorMessage;
   bool isLoading = false;
@@ -26,7 +41,11 @@ class _UniversityLoginScreenState
     super.dispose();
   }
 
+<<<<<<< HEAD
   void _login() {
+=======
+  Future<void> _login() async {
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
     FocusScope.of(context).unfocus();
 
     final id = universityIdController.text.trim();
@@ -35,6 +54,7 @@ class _UniversityLoginScreenState
       setState(() {
         errorMessage = 'يرجى إدخال الرقم الجامعي / الوظيفي';
       });
+<<<<<<< HEAD
       return;
     }
 
@@ -42,24 +62,70 @@ class _UniversityLoginScreenState
       setState(() {
         errorMessage = 'الرقم الجامعي / الوظيفي غير صحيح';
       });
+=======
+
+      return;
+    }
+
+    if (!RegExp(r'^[0-9]{1,160}$').hasMatch(id)) {
+      setState(() {
+        errorMessage = 'يرجى إدخال رقم وظيفي صحيح';
+      });
+
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       return;
     }
 
     setState(() {
       errorMessage = null;
+<<<<<<< HEAD
       isLoading = true;
     });
 
     Future.delayed(const Duration(milliseconds: 500), () {
+=======
+
+      isLoading = true;
+    });
+
+    try {
+      await UniversityAuthService().login(id);
+
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
+<<<<<<< HEAD
         MaterialPageRoute(
           builder: (context) => const UniversityMainLayout(),
         ),
       );
     });
+=======
+
+        MaterialPageRoute(builder: (context) => const UniversityMainLayout()),
+      );
+    } on UniversityAuthException catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = error.message;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = 'حدث خطأ غير متوقع أثناء تسجيل الدخول.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
   }
 
   @override
@@ -77,9 +143,13 @@ class _UniversityLoginScreenState
               decoration: BoxDecoration(
                 color: MasarColors.white,
                 borderRadius: BorderRadius.circular(24),
+<<<<<<< HEAD
                 border: Border.all(
                   color: MasarColors.border,
                 ),
+=======
+                border: Border.all(color: MasarColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -158,10 +228,16 @@ class _UniversityLoginScreenState
                     keyboardType: TextInputType.text,
                     onSubmitted: (_) => _login(),
                     decoration: InputDecoration(
+<<<<<<< HEAD
                       hintText: '1001',
                       hintStyle: TextStyle(
                         color: MasarColors.textSecondary
                             .withOpacity(0.65),
+=======
+                      hintText: 'أدخل الرقم الجامعي/الوظيفي',
+                      hintStyle: TextStyle(
+                        color: MasarColors.textSecondary.withOpacity(0.65),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         fontSize: 13,
                       ),
                       prefixIcon: Icon(
@@ -172,6 +248,7 @@ class _UniversityLoginScreenState
                       fillColor: MasarColors.background,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
+<<<<<<< HEAD
                         borderSide: BorderSide(
                           color: MasarColors.border,
                         ),
@@ -181,6 +258,13 @@ class _UniversityLoginScreenState
                         borderSide: BorderSide(
                           color: MasarColors.border,
                         ),
+=======
+                        borderSide: BorderSide(color: MasarColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
+                        borderSide: BorderSide(color: MasarColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
@@ -228,8 +312,13 @@ class _UniversityLoginScreenState
                       style: ElevatedButton.styleFrom(
                         backgroundColor: MasarColors.primaryBlue,
                         foregroundColor: Colors.white,
+<<<<<<< HEAD
                         disabledBackgroundColor:
                             MasarColors.primaryBlue.withOpacity(0.6),
+=======
+                        disabledBackgroundColor: MasarColors.primaryBlue
+                            .withOpacity(0.6),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(13),
@@ -241,8 +330,12 @@ class _UniversityLoginScreenState
                               height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
+<<<<<<< HEAD
                                 valueColor:
                                     AlwaysStoppedAnimation<Color>(
+=======
+                                valueColor: AlwaysStoppedAnimation<Color>(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                   Colors.white,
                                 ),
                               ),

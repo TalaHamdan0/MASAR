@@ -158,6 +158,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+<<<<<<< HEAD
+=======
+  flutter_localizations:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -200,6 +208,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.10.1"
+<<<<<<< HEAD
+=======
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.2"
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
   leak_tracker:
     dependency: transitive
     description:

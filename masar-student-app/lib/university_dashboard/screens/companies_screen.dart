@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 
 import 'package:flutter/material.dart';
 import '../../theme/masar_theme.dart';
+=======
+import 'package:flutter/material.dart';
+
+import '../../core/theme/uni_dashboard_theme.dart';
+import '../../core/localization/uni_text.dart';
+import '../../core/services/university_companies_service.dart';
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
 class CompaniesScreen extends StatefulWidget {
   const CompaniesScreen({super.key});
@@ -15,6 +23,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   String selectedField = 'الكل';
   String selectedStatus = 'الكل';
 
+<<<<<<< HEAD
   final List<Map<String, dynamic>> companies = [
     {
       'name': 'Data Solutions',
@@ -120,6 +129,65 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
       'traineeList': ['أحمد محمد'],
     },
   ];
+=======
+  List<Map<String, dynamic>> companies = [];
+
+  Map<String, dynamic> statistics = {};
+
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanies();
+  }
+
+  Future<void> _loadCompanies() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final result = await UniversityCompaniesService.fetchCompanies();
+
+      final companiesData = result['companies'] as List? ?? [];
+      final statisticsData = result['statistics'];
+
+      if (!mounted) return;
+
+      setState(() {
+        companies = companiesData
+            .map((company) => Map<String, dynamic>.from(company as Map))
+            .toList();
+
+        statistics = statisticsData is Map
+            ? Map<String, dynamic>.from(statisticsData)
+            : {};
+
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  int _getNumber(String key) {
+    final value = statistics[key];
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
 
   @override
   void dispose() {
@@ -131,7 +199,12 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
     final query = searchController.text.trim().toLowerCase();
 
     return companies.where((company) {
+<<<<<<< HEAD
       final matchesSearch = query.isEmpty ||
+=======
+      final matchesSearch =
+          query.isEmpty ||
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           company['name'].toString().toLowerCase().contains(query) ||
           company['field'].toString().toLowerCase().contains(query) ||
           company['location'].toString().toLowerCase().contains(query);
@@ -149,21 +222,43 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   @override
   Widget build(BuildContext context) {
     final displayedCompanies = filteredCompanies;
+<<<<<<< HEAD
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
         color: MasarColors.background,
+=======
+    final fieldOptions =
+        companies
+            .map((company) => (company['field'] ?? 'غير محدد').toString())
+            .where((field) => field.trim().isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+    fieldOptions.insert(0, 'الكل');
+
+    return Directionality(
+      textDirection: Directionality.of(context),
+      child: Container(
+        color: UniColors.background,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+<<<<<<< HEAD
               Text(
+=======
+              UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 'إدارة الشركات',
                 style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                   color: MasarColors.textPrimary,
                 ),
               ),
@@ -174,6 +269,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                   fontSize: 13,
                   color: MasarColors.textSecondary,
                 ),
+=======
+                  color: UniColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 5),
+              UniText(
+                'إدارة الجهات التدريبية ومتابعة الشركات المسجلة في المنصة',
+                style: TextStyle(fontSize: 13, color: UniColors.textSecondary),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
               const SizedBox(height: 24),
 
@@ -193,44 +297,76 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                         width: cardWidth,
                         child: _statCard(
                           'الشركات المتاحة للتدريب',
+<<<<<<< HEAD
                           '72',
                           'شركة',
                           Icons.business_center_rounded,
                           MasarColors.primaryGreen,
                           MasarColors.lightGreen,
+=======
+                          _getNumber('availableCompanies').toString(),
+                          'شركة',
+                          Icons.business_center_rounded,
+                          UniColors.primaryGreen,
+                          UniColors.lightGreen,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _statCard(
                           'الشركات النشطة',
+<<<<<<< HEAD
                           '72',
                           'شركة',
                           Icons.business_rounded,
                           MasarColors.primaryBlue,
                           MasarColors.lightBlue,
+=======
+                          _getNumber('activeCompanies').toString(),
+                          'شركة',
+                          Icons.business_rounded,
+                          UniColors.primaryBlue,
+                          UniColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _statCard(
                           'إجمالي الفرص',
+<<<<<<< HEAD
                           '143',
                           'فرصة تدريب',
                           Icons.work_rounded,
                           MasarColors.primaryBlue,
                           MasarColors.lightBlue,
+=======
+                          _getNumber('totalOffers').toString(),
+                          'فرصة تدريب',
+                          Icons.work_rounded,
+                          UniColors.primaryBlue,
+                          UniColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _statCard(
                           'الطلاب المتدربون',
+<<<<<<< HEAD
                           '386',
                           'طالب',
                           Icons.people_alt_rounded,
                           MasarColors.primaryGreen,
                           MasarColors.lightGreen,
+=======
+                          _getNumber('trainees').toString(),
+                          'طالب',
+                          Icons.people_alt_rounded,
+                          UniColors.primaryGreen,
+                          UniColors.lightGreen,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         ),
                       ),
                     ],
@@ -244,9 +380,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
+<<<<<<< HEAD
                   color: MasarColors.white,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: MasarColors.border),
+=======
+                  color: UniColors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: UniColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -256,10 +398,19 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       controller: searchController,
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
+<<<<<<< HEAD
                         hintText: 'ابحث باسم الشركة أو المجال أو الموقع...',
                         prefixIcon: const Icon(Icons.search_rounded),
                         filled: true,
                         fillColor: MasarColors.background,
+=======
+                        hintText: UniLocalizations.translate(
+                          'ابحث باسم الشركة أو المجال أو الموقع...',
+                        ),
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        filled: true,
+                        fillColor: UniColors.background,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -271,14 +422,21 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       value: selectedField,
                       isExpanded: true,
                       decoration: InputDecoration(
+<<<<<<< HEAD
                         labelText: 'المجال',
                         filled: true,
                         fillColor: MasarColors.background,
+=======
+                        labelText: UniLocalizations.translate('المجال'),
+                        filled: true,
+                        fillColor: UniColors.background,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
+<<<<<<< HEAD
                       items: const [
                         DropdownMenuItem(
                           value: 'الكل',
@@ -309,6 +467,16 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                           child: Text('تطوير الويب'),
                         ),
                       ],
+=======
+                      items: fieldOptions.map((field) {
+                        return DropdownMenuItem<String>(
+                          value: field,
+                          child: UniText(
+                            field == 'الكل' ? 'كل المجالات' : field,
+                          ),
+                        );
+                      }).toList(),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       onChanged: (value) {
                         setState(() => selectedField = value ?? 'الكل');
                       },
@@ -318,9 +486,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       value: selectedStatus,
                       isExpanded: true,
                       decoration: InputDecoration(
+<<<<<<< HEAD
                         labelText: 'حالة الشركة',
                         filled: true,
                         fillColor: MasarColors.background,
+=======
+                        labelText: UniLocalizations.translate('حالة الشركة'),
+                        filled: true,
+                        fillColor: UniColors.background,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -329,6 +503,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       items: const [
                         DropdownMenuItem(
                           value: 'الكل',
+<<<<<<< HEAD
                           child: Text('كل الحالات'),
                         ),
                         DropdownMenuItem(
@@ -338,6 +513,14 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                         DropdownMenuItem(
                           value: 'متوقفة مؤقتًا',
                           child: Text('متوقفة مؤقتًا'),
+=======
+                          child: UniText('كل الحالات'),
+                        ),
+                        DropdownMenuItem(value: 'نشطة', child: UniText('نشطة')),
+                        DropdownMenuItem(
+                          value: 'متوقفة مؤقتًا',
+                          child: UniText('متوقفة مؤقتًا'),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         ),
                       ],
                       onChanged: (value) {
@@ -377,9 +560,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
+<<<<<<< HEAD
                   color: MasarColors.white,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: MasarColors.border),
+=======
+                  color: UniColors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: UniColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,12 +576,20 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                     Row(
                       children: [
                         Expanded(
+<<<<<<< HEAD
                           child: Text(
+=======
+                          child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                             'الشركات المتاحة للتدريب',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                               color: MasarColors.textPrimary,
+=======
+                              color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                             ),
                           ),
                         ),
@@ -402,22 +599,70 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
+<<<<<<< HEAD
                             color: MasarColors.lightGreen,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
+=======
+                            color: UniColors.lightGreen,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                             '${displayedCompanies.length}',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
+<<<<<<< HEAD
                               color: MasarColors.primaryGreen,
+=======
+                              color: UniColors.primaryGreen,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
+<<<<<<< HEAD
                     if (displayedCompanies.isEmpty)
+=======
+                    if (isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(35),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.error_outline_rounded,
+                                size: 42,
+                                color: UniColors.warning,
+                              ),
+                              const SizedBox(height: 10),
+                              UniText(
+                                errorMessage!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: UniColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: _loadCompanies,
+                                child: const UniText('إعادة المحاولة'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else if (displayedCompanies.isEmpty)
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       Padding(
                         padding: const EdgeInsets.all(28),
                         child: Center(
@@ -426,6 +671,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                               Icon(
                                 Icons.search_off_rounded,
                                 size: 42,
+<<<<<<< HEAD
                                 color: MasarColors.textSecondary,
                               ),
                               const SizedBox(height: 10),
@@ -433,6 +679,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                 'لا توجد شركات مطابقة للبحث',
                                 style: TextStyle(
                                   color: MasarColors.textSecondary,
+=======
+                                color: UniColors.textSecondary,
+                              ),
+                              const SizedBox(height: 10),
+                              UniText(
+                                'لا توجد شركات مطابقة للبحث',
+                                style: TextStyle(
+                                  color: UniColors.textSecondary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                 ),
                               ),
                               TextButton(
@@ -443,7 +698,11 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                     selectedStatus = 'الكل';
                                   });
                                 },
+<<<<<<< HEAD
                                 child: const Text('إعادة ضبط الفلاتر'),
+=======
+                                child: const UniText('إعادة ضبط الفلاتر'),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                               ),
                             ],
                           ),
@@ -459,19 +718,33 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                 minWidth: constraints.maxWidth,
                               ),
                               child: DataTable(
+<<<<<<< HEAD
                                 headingRowColor:
                                     WidgetStateProperty.all(
                                   MasarColors.background,
+=======
+                                headingRowColor: WidgetStateProperty.all(
+                                  UniColors.background,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                 ),
                                 columnSpacing: 24,
                                 horizontalMargin: 12,
                                 columns: const [
+<<<<<<< HEAD
                                   DataColumn(label: Text('الشركة')),
                                   DataColumn(label: Text('التدريب المتوفر')),
                                   DataColumn(label: Text('الموقع')),
                                   DataColumn(label: Text('المتدربون')),
                                   DataColumn(label: Text('الحالة')),
                                   DataColumn(label: Text('التفاصيل')),
+=======
+                                  DataColumn(label: UniText('الشركة')),
+                                  DataColumn(label: UniText('التدريب المتوفر')),
+                                  DataColumn(label: UniText('الموقع')),
+                                  DataColumn(label: UniText('المتدربون')),
+                                  DataColumn(label: UniText('الحالة')),
+                                  DataColumn(label: UniText('التفاصيل')),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                 ],
                                 rows: displayedCompanies.map((company) {
                                   final opportunities =
@@ -487,13 +760,18 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                               width: 38,
                                               height: 38,
                                               decoration: BoxDecoration(
+<<<<<<< HEAD
                                                 color: MasarColors.lightBlue,
+=======
+                                                color: UniColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                                 borderRadius:
                                                     BorderRadius.circular(11),
                                               ),
                                               child: Icon(
                                                 Icons.business_rounded,
                                                 size: 19,
+<<<<<<< HEAD
                                                 color:
                                                     MasarColors.primaryBlue,
                                               ),
@@ -502,6 +780,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                             Text(
                                               company['name'].toString(),
                                               style: const TextStyle(
+=======
+                                                color: UniColors.primaryBlue,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 9),
+                                            UniText(
+                                              company['name'].toString(),
+                                              style: TextStyle(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
@@ -511,13 +798,21 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                       DataCell(
                                         SizedBox(
                                           width: 250,
+<<<<<<< HEAD
                                           child: Text(
+=======
+                                          child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                             opportunities.join('، '),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontSize: 11.5,
+<<<<<<< HEAD
                                               color: MasarColors.textPrimary,
+=======
+                                              color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -530,18 +825,33 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                             Icon(
                                               Icons.location_on_outlined,
                                               size: 16,
+<<<<<<< HEAD
                                               color:
                                                   MasarColors.textSecondary,
                                             ),
                                             const SizedBox(width: 4),
                                             Text(company['location'].toString()),
+=======
+                                              color: UniColors.textSecondary,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            UniText(
+                                              company['location'].toString(),
+                                            ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                           ],
                                         ),
                                       ),
                                       DataCell(
+<<<<<<< HEAD
                                         Text(
                                           '${company['trainees']}',
                                           style: const TextStyle(
+=======
+                                        UniText(
+                                          '${company['trainees']}',
+                                          style: TextStyle(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -553,13 +863,23 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                                       ),
                                       DataCell(
                                         IconButton(
+<<<<<<< HEAD
                                           tooltip: 'عرض التفاصيل',
+=======
+                                          tooltip: UniLocalizations.translate(
+                                            'عرض التفاصيل',
+                                          ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                           onPressed: () =>
                                               showCompanyDetails(company),
                                           icon: Icon(
                                             Icons.arrow_forward_ios_rounded,
                                             size: 16,
+<<<<<<< HEAD
                                             color: MasarColors.primaryBlue,
+=======
+                                            color: UniColors.primaryBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                           ),
                                         ),
                                       ),
@@ -589,7 +909,11 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
         final trainees = company['traineeList'] as List;
 
         return Directionality(
+<<<<<<< HEAD
           textDirection: TextDirection.rtl,
+=======
+          textDirection: Directionality.of(context),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           child: AlertDialog(
             title: Row(
               children: [
@@ -597,23 +921,39 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
+<<<<<<< HEAD
                     color: MasarColors.lightBlue,
+=======
+                    color: UniColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     Icons.business_rounded,
+<<<<<<< HEAD
                     color: MasarColors.primaryBlue,
+=======
+                    color: UniColors.primaryBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     size: 25,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
+<<<<<<< HEAD
                   child: Text(
+=======
+                  child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     company['name'].toString(),
                     style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                       color: MasarColors.textPrimary,
+=======
+                      color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                     ),
                   ),
                 ),
@@ -656,30 +996,54 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       Icons.verified_outlined,
                     ),
                     const SizedBox(height: 8),
+<<<<<<< HEAD
                     Text(
+=======
+                    UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       'نبذة عن الشركة',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                         color: MasarColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 7),
                     Text(
+=======
+                        color: UniColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       company['description'].toString(),
                       style: TextStyle(
                         fontSize: 12.5,
                         height: 1.6,
+<<<<<<< HEAD
                         color: MasarColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 22),
                     Text(
+=======
+                        color: UniColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       'التدريبات المتوفرة',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                         color: MasarColors.textPrimary,
+=======
+                        color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -692,25 +1056,43 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                           vertical: 11,
                         ),
                         decoration: BoxDecoration(
+<<<<<<< HEAD
                           color: MasarColors.background,
                           borderRadius: BorderRadius.circular(11),
                           border: Border.all(color: MasarColors.border),
+=======
+                          color: UniColors.background,
+                          borderRadius: BorderRadius.circular(11),
+                          border: Border.all(color: UniColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.work_outline_rounded,
                               size: 19,
+<<<<<<< HEAD
                               color: MasarColors.primaryBlue,
                             ),
                             const SizedBox(width: 9),
                             Expanded(
                               child: Text(
+=======
+                              color: UniColors.primaryBlue,
+                            ),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                 opportunity.toString(),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
+<<<<<<< HEAD
                                   color: MasarColors.textPrimary,
+=======
+                                  color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                                 ),
                               ),
                             ),
@@ -726,8 +1108,13 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                             'التدريبات المتوفرة',
                             '${opportunities.length}',
                             Icons.work_rounded,
+<<<<<<< HEAD
                             MasarColors.primaryBlue,
                             MasarColors.lightBlue,
+=======
+                            UniColors.primaryBlue,
+                            UniColors.lightBlue,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -736,18 +1123,28 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                             'المتدربون',
                             '${company['trainees']}',
                             Icons.people_alt_rounded,
+<<<<<<< HEAD
                             MasarColors.primaryGreen,
                             MasarColors.lightGreen,
+=======
+                            UniColors.primaryGreen,
+                            UniColors.lightGreen,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
+<<<<<<< HEAD
                     Text(
+=======
+                    UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                       'الطلاب المتدربون',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                         color: MasarColors.textPrimary,
                       ),
                     ),
@@ -776,6 +1173,45 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                         );
                       }).toList(),
                     ),
+=======
+                        color: UniColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (trainees.isEmpty)
+                      UniText(
+                        'لا يوجد طلاب متدربون حاليًا',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: UniColors.textSecondary,
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: trainees.map((trainee) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: UniColors.lightGreen,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: UniText(
+                              trainee.toString(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: UniColors.primaryGreen,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   ],
                 ),
               ),
@@ -783,7 +1219,11 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
+<<<<<<< HEAD
                 child: const Text('إغلاق'),
+=======
+                child: const UniText('إغلاق'),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ],
           ),
@@ -802,6 +1242,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
             width: 35,
             height: 35,
             decoration: BoxDecoration(
+<<<<<<< HEAD
               color: MasarColors.lightBlue,
               borderRadius: BorderRadius.circular(10),
             ),
@@ -810,26 +1251,48 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
               size: 18,
               color: MasarColors.primaryBlue,
             ),
+=======
+              color: UniColors.lightBlue,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: UniColors.primaryBlue),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
           ),
           const SizedBox(width: 10),
           SizedBox(
             width: 115,
+<<<<<<< HEAD
             child: Text(
+=======
+            child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               '$title:',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
+<<<<<<< HEAD
                 color: MasarColors.textSecondary,
+=======
+                color: UniColors.textSecondary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ),
           ),
           Expanded(
+<<<<<<< HEAD
             child: Text(
+=======
+            child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               value,
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
+<<<<<<< HEAD
                 color: MasarColors.textPrimary,
+=======
+                color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
               ),
             ),
           ),
@@ -859,6 +1322,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+<<<<<<< HEAD
                 Text(
                   title,
                   style: TextStyle(
@@ -868,11 +1332,26 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
+=======
+                UniText(
+                  title,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: UniColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   value,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                     color: MasarColors.textPrimary,
+=======
+                    color: UniColors.textPrimary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   ),
                 ),
               ],
@@ -895,9 +1374,15 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
       height: 110,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
+<<<<<<< HEAD
         color: MasarColors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: MasarColors.border),
+=======
+        color: UniColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: UniColors.border),
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
       ),
       child: Row(
         children: [
@@ -916,6 +1401,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+<<<<<<< HEAD
                 Text(
                   title,
                   style: TextStyle(
@@ -925,10 +1411,22 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                 ),
                 const SizedBox(height: 3),
                 Text(
+=======
+                UniText(
+                  title,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: UniColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   value,
                   style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
+<<<<<<< HEAD
                     color: MasarColors.textPrimary,
                   ),
                 ),
@@ -937,6 +1435,16 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                   style: TextStyle(
                     fontSize: 9.5,
                     color: MasarColors.textSecondary,
+=======
+                    color: UniColors.textPrimary,
+                  ),
+                ),
+                UniText(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    color: UniColors.textSecondary,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
                   ),
                 ),
               ],
@@ -954,16 +1462,28 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: active
+<<<<<<< HEAD
             ? MasarColors.lightGreen
             : MasarColors.warning.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
+=======
+            ? UniColors.lightGreen
+            : UniColors.warning.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: UniText(
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         status,
         style: TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
+<<<<<<< HEAD
           color: active ? MasarColors.primaryGreen : MasarColors.warning,
+=======
+          color: active ? UniColors.primaryGreen : UniColors.warning,
+>>>>>>> 38eb30f71e32f602569a8b62a5c766b4bd5d0b96
         ),
       ),
     );
